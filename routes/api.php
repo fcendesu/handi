@@ -13,6 +13,8 @@ Route::get('/test', function () {
 
 });
 
+Route::get('/posts', [PostController::class, 'index'])->middleware('auth:sanctum');
+
 Route::post('/register', [AuthenticationController::class, 'register']);
 Route::post('/login', [AuthenticationController::class, 'login']);
 Route::post('/logout', [AuthenticationController::class, 'logout'])->middleware('auth:sanctum');
