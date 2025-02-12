@@ -29,3 +29,4 @@ Route::get('/item/show/{item}', [ItemController::class, 'show'])->middleware('au
 Route::put('/item/update/{item}', [ItemController::class, 'update'])->middleware('auth:sanctum');
 Route::delete('/item/destroy/{item}', [ItemController::class, 'destroy'])->middleware('auth:sanctum');
 
+Route::get('/token/validate', [AuthenticationController::class, 'validateToken'])->middleware('auth:sanctum');

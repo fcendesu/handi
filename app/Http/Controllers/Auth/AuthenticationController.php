@@ -60,11 +60,18 @@ class AuthenticationController extends Controller
 
     public function logout(Request $request)
     {
-
         $request->user()->tokens()->delete();
 
         return response([
             'message' => 'Logged out successfully',
+        ], 200);
+    }
+
+    public function validateToken(Request $request)
+    {
+        return response()->json([
+            'message' => 'Token is valid',
+            'user' => $request->user(),
         ], 200);
     }
 }
