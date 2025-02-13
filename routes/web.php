@@ -5,6 +5,14 @@ use App\Http\Controllers\DiscoveryController;
 use App\Http\Controllers\ItemController;
 use Illuminate\Support\Facades\Route;
 
+// Redirect root to login or dashboard based on auth status
+Route::get('/', function () {
+    if (auth()->check()) {
+        return redirect()->route('dashboard');
+    }
+    return view('auth.login');
+})->name('home');
+
 Route::middleware('guest')->group(function () {
     // Show login/register forms
     Route::get('/login', [AuthenticationController::class, 'showLogin'])->name('login');
@@ -32,8 +40,4 @@ Route::middleware('auth')->group(function () {
     Route::delete('/items/{item}', [ItemController::class, 'webDestroy'])->name('items.destroy');
 
     Route::post('/logout', [AuthenticationController::class, 'logout'])->name('logout');
-});
-
-Route::get('/', function () {
-    return view('welcome');
 });
