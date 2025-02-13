@@ -147,4 +147,15 @@ class ItemController extends Controller
         return redirect()->route('items')->with('success', 'Item deleted successfully');
     }
 
+    public function webSearch(Request $request)
+    {
+        $query = $request->get('query');
+        $items = Item::where('item', 'like', "%{$query}%")
+            ->orWhere('brand', 'like', "%{$query}%")
+            ->orderBy('created_at', 'desc')
+            ->get();
+
+        return view('items.partials.items-table', compact('items'));
+    }
+
 }
