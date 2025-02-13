@@ -29,6 +29,7 @@
                     <form method="POST" action="{{ route('items.update', $item->id) }}" class="space-y-8">
                         @csrf
                         @method('PUT')
+                        <input type="hidden" name="search_query" value="{{ session('last_search_query') }}">
 
                         <div class="mb-6">
                             <label for="item" class="block text-sm font-medium text-gray-700 mb-2">Item Name</label>

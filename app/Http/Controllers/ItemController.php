@@ -101,9 +101,16 @@ class ItemController extends Controller
     }
 
     // Add new web-specific methods
-    public function webIndex()
+    public function webIndex(Request $request)
     {
-        $items = Item::latest()->get();
+        $query = $request->get('query');
+        $items = Item::when($query, function ($q) use ($query) {
+            return $q->where('item', 'like', "%{$query}%")
+                ->orWhere('brand', 'like', "%{$query}%");
+        })
+            ->orderBy('created_at', 'desc')
+            ->get();
+
         return view('items.index', compact('items'));
     }
 
@@ -138,7 +145,11 @@ class ItemController extends Controller
         ]);
 
         $item->update($validated);
-        return redirect()->route('items')->with('success', 'Item updated successfully');
+
+        // Redirect back with the search query if it exists
+        $query = session('last_search_query');
+        return redirect()->route('items', ['query' => $query])
+            ->with('success', 'Item updated successfully');
     }
 
     public function webDestroy(Item $item)
@@ -150,6 +161,9 @@ class ItemController extends Controller
     public function webSearch(Request $request)
     {
         $query = $request->get('query');
+        // Store the search query in session
+        session(['last_search_query' => $query]);
+
         $items = Item::where('item', 'like', "%{$query}%")
             ->orWhere('brand', 'like', "%{$query}%")
             ->orderBy('created_at', 'desc')

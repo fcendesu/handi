@@ -101,13 +101,19 @@
                                id="searchInput"
                                placeholder="Search items..."
                                class="w-full px-4 py-2 border rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
+                               value="{{ request()->query('query') }}"
                                x-data
                                @input.debounce.300ms="
-                                   fetch(`/items/search?query=${$event.target.value}`)
-                                   .then(res => res.text())
-                                   .then(html => {
-                                       document.querySelector('tbody').innerHTML = html;
-                                   })
+                                   const query = $event.target.value;
+                                   fetch(`/items/search?query=${query}`)
+                                       .then(res => res.text())
+                                       .then(html => {
+                                           document.querySelector('tbody').innerHTML = html;
+                                           // Update URL with search query
+                                           const url = new URL(window.location);
+                                           url.searchParams.set('query', query);
+                                           window.history.pushState({}, '', url);
+                                       })
                                ">
                     </div>
                     <div class="overflow-x-auto">
