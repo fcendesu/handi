@@ -100,4 +100,51 @@ class ItemController extends Controller
         ], 200);
     }
 
+    // Add new web-specific methods
+    public function webIndex()
+    {
+        $items = Item::latest()->get();
+        return view('items.index', compact('items'));
+    }
+
+    public function webCreate()
+    {
+        return view('items.create');
+    }
+
+    public function webStore(Request $request)
+    {
+        $validated = $request->validate([
+            "item" => "required",
+            "brand" => "required",
+            "price" => "required|numeric",
+        ]);
+
+        Item::create($validated);
+        return redirect()->route('items')->with('success', 'Item created successfully');
+    }
+
+    public function webEdit(Item $item)
+    {
+        return view('items.edit', compact('item'));
+    }
+
+    public function webUpdate(Request $request, Item $item)
+    {
+        $validated = $request->validate([
+            "item" => "required",
+            "brand" => "required",
+            "price" => "required|numeric",
+        ]);
+
+        $item->update($validated);
+        return redirect()->route('items')->with('success', 'Item updated successfully');
+    }
+
+    public function webDestroy(Item $item)
+    {
+        $item->delete();
+        return redirect()->route('items')->with('success', 'Item deleted successfully');
+    }
+
 }
