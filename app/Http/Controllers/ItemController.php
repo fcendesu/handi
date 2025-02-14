@@ -114,10 +114,7 @@ class ItemController extends Controller
         return view('items.index', compact('items'));
     }
 
-    public function webCreate()
-    {
-        return view('items.create');
-    }
+
 
     public function webStore(Request $request)
     {

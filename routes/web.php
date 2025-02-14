@@ -33,7 +33,6 @@ Route::middleware('auth')->group(function () {
 
     // Web-specific item routes
     Route::get('/items', [ItemController::class, 'webIndex'])->name('items');
-    Route::get('/items/create', [ItemController::class, 'webCreate'])->name('items.create');
     Route::post('/items/store', [ItemController::class, 'webStore'])->name('items.store');
     Route::get('/items/{item}/edit', [ItemController::class, 'webEdit'])->name('items.edit');
     Route::put('/items/{item}', [ItemController::class, 'webUpdate'])->name('items.update');
