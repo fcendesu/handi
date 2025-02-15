@@ -30,6 +30,12 @@ Route::middleware('auth')->group(function () {
 
     // Discovery routes
     Route::get('/discovery', [DiscoveryController::class, 'index'])->name('discovery');
+    Route::get('/discovery/create', [DiscoveryController::class, 'create'])->name('discovery.create');
+    Route::post('/discovery', [DiscoveryController::class, 'store'])->name('discovery.store');
+    Route::get('/discovery/{discovery}', [DiscoveryController::class, 'show'])->name('discovery.show');
+    Route::get('/discovery/{discovery}/edit', [DiscoveryController::class, 'edit'])->name('discovery.edit');
+    Route::put('/discovery/{discovery}', [DiscoveryController::class, 'update'])->name('discovery.update');
+    Route::delete('/discovery/{discovery}', [DiscoveryController::class, 'destroy'])->name('discovery.destroy');
 
     // Web-specific item routes
     Route::get('/items', [ItemController::class, 'webIndex'])->name('items');

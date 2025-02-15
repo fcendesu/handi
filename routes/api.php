@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Auth\AuthenticationController;
+use App\Http\Controllers\DiscoveryController;
 use App\Http\Controllers\ItemController;
 use App\Http\Controllers\PostController;
 use Illuminate\Http\Request;
@@ -30,3 +31,12 @@ Route::put('/item/update/{item}', [ItemController::class, 'update'])->middleware
 Route::delete('/item/destroy/{item}', [ItemController::class, 'destroy'])->middleware('auth:sanctum');
 
 Route::get('/token/validate', [AuthenticationController::class, 'validateToken'])->middleware('auth:sanctum');
+
+Route::middleware('auth:sanctum')->group(function () {
+    Route::get('/discoveries', [DiscoveryController::class, 'apiIndex']);
+    Route::post('/discoveries', [DiscoveryController::class, 'apiStore']);
+    Route::get('/discoveries/{discovery}', [DiscoveryController::class, 'apiShow']);
+    Route::put('/discoveries/{discovery}', [DiscoveryController::class, 'apiUpdate']);
+    Route::delete('/discoveries/{discovery}', [DiscoveryController::class, 'apiDestroy']);
+    Route::patch('/discoveries/{discovery}/items/{item}/quantity', [DiscoveryController::class, 'apiUpdateItemQuantity']);
+});
