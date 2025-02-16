@@ -21,7 +21,29 @@ class DiscoveryController extends Controller
 
     public function store(Request $request)
     {
-        // Implementation will be added later
+        $validated = $request->validate([
+            'customer_name' => 'required|string|max:255',
+            'customer_phone' => 'required|string|max:255',
+            'customer_email' => 'required|email|max:255',
+            'discovery' => 'required|string',
+            'todo_list' => 'nullable|string',
+            'note_to_customer' => 'nullable|string',
+            'note_to_handi' => 'nullable|string',
+            'payment_method' => 'nullable|string'
+        ]);
+
+        try {
+            $discovery = Discovery::create($validated);
+
+            return redirect()
+                ->route('discovery')
+                ->with('success', 'Discovery created successfully');
+
+        } catch (\Exception $e) {
+            return back()
+                ->withInput()
+                ->withErrors(['error' => 'Failed to create discovery: ' . $e->getMessage()]);
+        }
     }
 
     public function show(Discovery $discovery)
