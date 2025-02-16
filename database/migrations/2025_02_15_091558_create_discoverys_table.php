@@ -15,11 +15,11 @@ return new class extends Migration {
             $table->text('discovery');
             $table->text('todolist')->nullable();
             $table->json('images')->nullable(); // Store multiple image paths
-            $table->integer('priority')->default(0);
+            $table->boolean('priority')->default(false); // Change from integer to boolean
             $table->text('note_to_customer')->nullable();
             $table->text('note_to_handi')->nullable();
-            $table->enum('status', ['pending', 'in_progress', 'completed', 'cancelled'])->default('pending');
-            $table->timestamp('completion_time')->nullable();
+            $table->enum('status', ['awaiting_approval', 'pending', 'in_progress', 'completed', 'cancelled'])->default('pending');
+            $table->integer('completion_time')->nullable(); // Changed to integer for days
             $table->timestamp('offer_valid_until')->nullable();
 
             // Add cost-related columns
@@ -29,7 +29,7 @@ return new class extends Migration {
             $table->decimal('extra_fee', 10, 2)->default(0);
             $table->decimal('discount_rate', 5, 2)->default(0); // Percentage
             $table->decimal('discount_amount', 10, 2)->default(0);
-            $table->enum('payment_method', ['cash', 'card', 'transfer', 'multiple'])->nullable();
+            $table->string('payment_method')->nullable();  // Changed from enum to string
             $table->json('payment_details')->nullable(); // For storing multiple payment methods if needed
 
             $table->timestamps();

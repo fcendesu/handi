@@ -10,8 +10,14 @@ class DiscoveryController extends Controller
 {
     public function index()
     {
-        $discoveries = Discovery::with('items')->latest()->get();
-        return view('discovery.index', compact('discoveries'));
+        //$discoveries = Discovery::with('items')->latest()->get();
+        //return view('discovery.index', compact('discoveries'));
+        return view('discovery.index');
+    }
+
+    public function create()
+    {
+        return view('discovery.create');
     }
 
     public function store(Request $request)
@@ -27,19 +33,19 @@ class DiscoveryController extends Controller
             'items.*.id' => 'exists:items,id',
             'items.*.custom_price' => 'required|numeric|min:0',
             'items.*.quantity' => 'required|integer|min:1',
-            'priority' => 'integer|min:0|max:5',
+            'priority' => 'boolean',  // Change validation rule
             'note_to_customer' => 'nullable|string',
             'note_to_handi' => 'nullable|string',
             'status' => 'nullable|in:pending,in_progress,completed,cancelled',
-            'completion_time' => 'nullable|date',
-            'offer_valid_until' => 'nullable|date|after:now',
+            'completion_time' => 'nullable|integer|min:1',  // Changed to integer for days
+            'offer_valid_until' => 'nullable|date|after_or_equal:today',
             'service_cost' => 'nullable|numeric|min:0',
             'transportation_cost' => 'nullable|numeric|min:0',
             'labor_cost' => 'nullable|numeric|min:0',
             'extra_fee' => 'nullable|numeric|min:0',
             'discount_rate' => 'nullable|numeric|min:0|max:100',
             'discount_amount' => 'nullable|numeric|min:0',
-            'payment_method' => 'nullable|in:cash,card,transfer,multiple',
+            'payment_method' => 'nullable|string|max:255',  // Changed from enum validation to string
             'payment_details' => 'nullable|array'
         ]);
 

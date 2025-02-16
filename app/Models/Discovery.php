@@ -32,15 +32,16 @@ class Discovery extends Model
 
     protected $casts = [
         'images' => 'array',
-        'completion_time' => 'datetime',
-        'offer_valid_until' => 'datetime',
+        'completion_time' => 'integer',  // Changed to integer for days
+        'offer_valid_until' => 'date',
         'payment_details' => 'array',
         'service_cost' => 'decimal:2',
         'transportation_cost' => 'decimal:2',
         'labor_cost' => 'decimal:2',
         'extra_fee' => 'decimal:2',
         'discount_rate' => 'decimal:2',
-        'discount_amount' => 'decimal:2'
+        'discount_amount' => 'decimal:2',
+        'priority' => 'boolean'  // Add boolean cast
     ];
 
     /**
