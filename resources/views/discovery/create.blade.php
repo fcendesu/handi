@@ -95,6 +95,78 @@
                             </div>
                         </div>
 
+                        <!-- After todolist section and before costs section -->
+                        <div class="mb-6" x-data="itemSelector()">
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Select Items</label>
+
+                            <!-- Search Input -->
+                            <div class="mb-4">
+                                <input type="text"
+                                       x-model="searchQuery"
+                                       @input.debounce.300ms="searchItems"
+                                       placeholder="Search items..."
+                                       class="bg-gray-100 mt-1 block w-full rounded-md border-2 border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 px-4 py-2">
+                            </div>
+
+                            <!-- Search Results -->
+                            <div class="mb-4" x-show="searchResults.length > 0">
+                                <div class="bg-white border rounded-md shadow-sm max-h-60 overflow-y-auto">
+                                    <template x-for="item in searchResults" :key="item.id">
+                                        <div class="p-2 hover:bg-gray-50 cursor-pointer border-b"
+                                             @click="addItem(item)">
+                                            <div x-text="item.item + ' - ' + item.brand"></div>
+                                            <div class="text-sm text-gray-500" x-text="'Price: ' + item.price"></div>
+                                        </div>
+                                    </template>
+                                </div>
+                            </div>
+
+                            <!-- Selected Items -->
+                            <div class="border rounded-md p-4" x-show="selectedItems.length > 0">
+                                <h4 class="font-medium mb-2">Selected Items</h4>
+                                <div class="space-y-4">
+                                    <template x-for="(item, index) in selectedItems" :key="index">
+                                        <div class="flex items-center justify-between bg-gray-50 p-3 rounded">
+                                            <div class="flex-1">
+                                                <div x-text="item.item + ' - ' + item.brand"></div>
+                                                <div class="mt-2 flex items-center space-x-4">
+                                                    <div class="flex items-center">
+                                                        <label class="text-sm mr-2">Quantity:</label>
+                                                        <input type="number"
+                                                               x-model="item.quantity"
+                                                               min="1"
+                                                               class="w-20 bg-gray-100 rounded border-gray-300"
+                                                               @input="updateItem(index)">
+                                                    </div>
+                                                    <div class="flex items-center space-x-2">
+                                                        <span class="text-sm text-gray-500">Original Price:</span>
+                                                        <span class="text-sm text-gray-500" x-text="item.price"></span>
+                                                    </div>
+                                                    <div class="flex items-center">
+                                                        <label class="text-sm mr-2">Custom Price:</label>
+                                                        <input type="number"
+                                                               x-model="item.custom_price"
+                                                               class="w-24 bg-gray-100 rounded border-gray-300"
+                                                               @input="updateItem(index)">
+                                                    </div>
+                                                </div>
+                                                <input type="hidden" :name="'items['+index+'][id]'" :value="item.id">
+                                                <input type="hidden" :name="'items['+index+'][quantity]'" :value="item.quantity">
+                                                <input type="hidden" :name="'items['+index+'][custom_price]'" :value="item.custom_price">
+                                            </div>
+                                            <button type="button"
+                                                    @click="removeItem(index)"
+                                                    class="text-red-500 hover:text-red-700">
+                                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                                                </svg>
+                                            </button>
+                                        </div>
+                                    </template>
+                                </div>
+                            </div>
+                        </div>
+
                         <!-- Costs -->
                         <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
                             <div class="mb-6">
@@ -263,6 +335,54 @@
                     });
 
                     input.files = dt.files;
+                }
+            }
+        }
+
+        function itemSelector() {
+            return {
+                searchQuery: '',
+                searchResults: [],
+                selectedItems: [],
+
+                async searchItems() {
+                    if (this.searchQuery.length < 2) {
+                        this.searchResults = [];
+                        return;
+                    }
+
+                    try {
+                        const response = await fetch(`/items/search-for-discovery?query=${this.searchQuery}`);
+                        const data = await response.json();
+                        this.searchResults = data.items;
+                    } catch (error) {
+                        console.error('Error searching items:', error);
+                        this.searchResults = [];
+                    }
+                },
+
+                addItem(item) {
+                    if (!this.selectedItems.find(i => i.id === item.id)) {
+                        this.selectedItems.push({
+                            ...item,
+                            quantity: 1,
+                            custom_price: item.price // Initialize custom price with original price
+                        });
+                    }
+                    this.searchResults = [];
+                    this.searchQuery = '';
+                },
+
+                removeItem(index) {
+                    this.selectedItems.splice(index, 1);
+                },
+
+                updateItem(index) {
+                    // Ensure valid values
+                    this.selectedItems[index].quantity = Math.max(1, this.selectedItems[index].quantity);
+                    if (this.selectedItems[index].custom_price === '') {
+                        this.selectedItems[index].custom_price = this.selectedItems[index].price;
+                    }
                 }
             }
         }

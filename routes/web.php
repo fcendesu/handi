@@ -44,6 +44,7 @@ Route::middleware('auth')->group(function () {
     Route::put('/items/{item}', [ItemController::class, 'webUpdate'])->name('items.update');
     Route::delete('/items/{item}', [ItemController::class, 'webDestroy'])->name('items.destroy');
     Route::get('/items/search', [ItemController::class, 'webSearch'])->name('items.search');
+    Route::get('/items/search-for-discovery', [ItemController::class, 'webSearchForDiscovery'])->name('items.search-for-discovery');
 
     Route::post('/logout', [AuthenticationController::class, 'logout'])->name('logout');
 });
