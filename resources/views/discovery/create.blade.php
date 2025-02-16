@@ -151,19 +151,7 @@
                         </div>
 
                         <!-- Status and Dates -->
-                        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-                            <div class="mb-6">
-                                <label for="status" class="block text-sm font-medium text-gray-700 mb-2">Status</label>
-                                <select name="status" id="status"
-                                        class="bg-gray-100 mt-1 block w-full rounded-md border-2 border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 px-4 py-2">
-                                    <option value="awaiting_approval" {{ old('status') == 'awaiting_approval' ? 'selected' : '' }}>Awaiting Approval</option>
-                                    <option value="pending" {{ old('status') == 'pending' ? 'selected' : '' }}>Pending</option>
-                                    <option value="in_progress" {{ old('status') == 'in_progress' ? 'selected' : '' }}>In Progress</option>
-                                    <option value="completed" {{ old('status') == 'completed' ? 'selected' : '' }}>Completed</option>
-                                    <option value="cancelled" {{ old('status') == 'cancelled' ? 'selected' : '' }}>Cancelled</option>
-                                </select>
-                            </div>
-
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                             <div class="mb-6">
                                 <label for="completion_time" class="block text-sm font-medium text-gray-700 mb-2">Completion (Days)</label>
                                 <input type="number" name="completion_time" id="completion_time"
