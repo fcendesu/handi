@@ -15,10 +15,6 @@ class DiscoveryController extends Controller
         return view('discovery.index', compact('discoveries'));
     }
 
-    public function create()
-    {
-        return view('discovery.create');
-    }
 
     public function store(Request $request)
     {

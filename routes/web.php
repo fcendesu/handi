@@ -30,7 +30,6 @@ Route::middleware('auth')->group(function () {
 
     // Discovery routes
     Route::get('/discovery', [DiscoveryController::class, 'index'])->name('discovery');
-    Route::get('/discovery/create', [DiscoveryController::class, 'create'])->name('discovery.create');
     Route::post('/discovery', [DiscoveryController::class, 'store'])->name('discovery.store');
     Route::get('/discovery/{discovery}', [DiscoveryController::class, 'show'])->name('discovery.show');
     Route::get('/discovery/{discovery}/edit', [DiscoveryController::class, 'edit'])->name('discovery.edit');
