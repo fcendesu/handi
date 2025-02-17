@@ -19,8 +19,17 @@ return new class extends Migration {
             $table->text('todo_list');
             $table->text('note_to_customer')->nullable();
             $table->text('note_to_handi')->nullable();
+            $table->string('status')->default('pending');
+            $table->integer('completion_time')->nullable();
+            $table->date('offer_valid_until')->nullable();
+            $table->decimal('service_cost', 10, 2)->default(0);
+            $table->decimal('transportation_cost', 10, 2)->default(0);
+            $table->decimal('labor_cost', 10, 2)->default(0);
+            $table->decimal('extra_fee', 10, 2)->default(0);
+            $table->decimal('discount_rate', 5, 2)->default(0);
+            $table->decimal('discount_amount', 10, 2)->default(0);
             $table->text('payment_method')->nullable();
-            $table->json('images')->nullable(); // Add this line for storing image paths
+            $table->json('images')->nullable();
             $table->timestamps();
         });
 

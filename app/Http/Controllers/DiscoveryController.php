@@ -30,6 +30,13 @@ class DiscoveryController extends Controller
             'todo_list' => 'nullable|string',
             'note_to_customer' => 'nullable|string',
             'note_to_handi' => 'nullable|string',
+            'completion_time' => 'nullable|integer|min:1',
+            'offer_valid_until' => 'nullable|date',
+            'service_cost' => 'nullable|numeric|min:0',
+            'transportation_cost' => 'nullable|numeric|min:0',
+            'labor_cost' => 'nullable|numeric|min:0',
+            'extra_fee' => 'nullable|numeric|min:0',
+            'discount_rate' => 'nullable|numeric|min:0|max:100',
             'payment_method' => 'nullable|string',
             'images.*' => 'nullable|image|mimes:jpeg,png,jpg|max:2048', // Add image validation
             'items' => 'array',
