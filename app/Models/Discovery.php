@@ -27,7 +27,12 @@ class Discovery extends Model
         'todo_list',
         'note_to_customer',
         'note_to_handi',
-        'payment_method'
+        'payment_method',
+        'images'
+    ];
+
+    protected $casts = [
+        'images' => 'array'
     ];
 
     public function items(): BelongsToMany

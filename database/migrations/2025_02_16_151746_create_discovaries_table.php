@@ -20,6 +20,7 @@ return new class extends Migration {
             $table->text('note_to_customer')->nullable();
             $table->text('note_to_handi')->nullable();
             $table->text('payment_method')->nullable();
+            $table->json('images')->nullable(); // Add this line for storing image paths
             $table->timestamps();
         });
 
