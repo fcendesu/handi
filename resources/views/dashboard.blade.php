@@ -20,16 +20,102 @@
                 <div class="p-6">
                     <h2 class="text-2xl font-semibold text-gray-800 mb-6">Dashboard</h2>
 
-                    <div class="bg-blue-50 border-l-4 border-blue-500 p-4 mb-6">
-                        <p class="text-blue-700">Welcome to your dashboard!</p>
-                    </div>
+                    <!-- Discovery Lists -->
+                    <div class="space-y-8">
+                        <!-- In Progress -->
+                        <div>
+                            <h3 class="text-lg font-medium text-gray-900 mb-4 flex items-center">
+                                <span class="h-3 w-3 bg-yellow-400 rounded-full mr-2"></span>
+                                In Progress ({{ $discoveries['in_progress']->count() }})
+                            </h3>
+                            @if($discoveries['in_progress']->isNotEmpty())
+                                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                                    @foreach($discoveries['in_progress'] as $discovery)
+                                        <div class="border rounded-lg p-4 bg-yellow-50">
+                                            <div class="flex justify-between items-start mb-2">
+                                                <h4 class="font-medium">{{ $discovery->customer_name }}</h4>
+                                                <span class="text-sm text-gray-500">{{ $discovery->created_at->format('M d, Y') }}</span>
+                                            </div>
+                                            <p class="text-sm text-gray-600 mb-2">{{ Str::limit($discovery->discovery, 100) }}</p>
+                                            <a href="{{ route('discovery.show', $discovery) }}" class="text-blue-600 hover:text-blue-800 text-sm">View Details →</a>
+                                        </div>
+                                    @endforeach
+                                </div>
+                            @else
+                                <p class="text-gray-500 italic">No discoveries in progress</p>
+                            @endif
+                        </div>
 
-                    <!-- Add your dashboard content here -->
-                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                        <!-- Example Card -->
-                        <div class="bg-white p-6 rounded-lg shadow-md">
-                            <h3 class="text-lg font-semibold mb-2">Statistics</h3>
-                            <p class="text-gray-600">Your dashboard statistics and information will appear here.</p>
+                        <!-- Pending -->
+                        <div>
+                            <h3 class="text-lg font-medium text-gray-900 mb-4 flex items-center">
+                                <span class="h-3 w-3 bg-blue-400 rounded-full mr-2"></span>
+                                Pending ({{ $discoveries['pending']->count() }})
+                            </h3>
+                            @if($discoveries['pending']->isNotEmpty())
+                                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                                    @foreach($discoveries['pending'] as $discovery)
+                                        <div class="border rounded-lg p-4 bg-blue-50">
+                                            <div class="flex justify-between items-start mb-2">
+                                                <h4 class="font-medium">{{ $discovery->customer_name }}</h4>
+                                                <span class="text-sm text-gray-500">{{ $discovery->created_at->format('M d, Y') }}</span>
+                                            </div>
+                                            <p class="text-sm text-gray-600 mb-2">{{ Str::limit($discovery->discovery, 100) }}</p>
+                                            <a href="{{ route('discovery.show', $discovery) }}" class="text-blue-600 hover:text-blue-800 text-sm">View Details →</a>
+                                        </div>
+                                    @endforeach
+                                </div>
+                            @else
+                                <p class="text-gray-500 italic">No pending discoveries</p>
+                            @endif
+                        </div>
+
+                        <!-- Completed -->
+                        <div>
+                            <h3 class="text-lg font-medium text-gray-900 mb-4 flex items-center">
+                                <span class="h-3 w-3 bg-green-400 rounded-full mr-2"></span>
+                                Completed ({{ $discoveries['completed']->count() }})
+                            </h3>
+                            @if($discoveries['completed']->isNotEmpty())
+                                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                                    @foreach($discoveries['completed'] as $discovery)
+                                        <div class="border rounded-lg p-4 bg-green-50">
+                                            <div class="flex justify-between items-start mb-2">
+                                                <h4 class="font-medium">{{ $discovery->customer_name }}</h4>
+                                                <span class="text-sm text-gray-500">{{ $discovery->created_at->format('M d, Y') }}</span>
+                                            </div>
+                                            <p class="text-sm text-gray-600 mb-2">{{ Str::limit($discovery->discovery, 100) }}</p>
+                                            <a href="{{ route('discovery.show', $discovery) }}" class="text-blue-600 hover:text-blue-800 text-sm">View Details →</a>
+                                        </div>
+                                    @endforeach
+                                </div>
+                            @else
+                                <p class="text-gray-500 italic">No completed discoveries</p>
+                            @endif
+                        </div>
+
+                        <!-- Cancelled -->
+                        <div>
+                            <h3 class="text-lg font-medium text-gray-900 mb-4 flex items-center">
+                                <span class="h-3 w-3 bg-red-400 rounded-full mr-2"></span>
+                                Cancelled ({{ $discoveries['cancelled']->count() }})
+                            </h3>
+                            @if($discoveries['cancelled']->isNotEmpty())
+                                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                                    @foreach($discoveries['cancelled'] as $discovery)
+                                        <div class="border rounded-lg p-4 bg-red-50">
+                                            <div class="flex justify-between items-start mb-2">
+                                                <h4 class="font-medium">{{ $discovery->customer_name }}</h4>
+                                                <span class="text-sm text-gray-500">{{ $discovery->created_at->format('M d, Y') }}</span>
+                                            </div>
+                                            <p class="text-sm text-gray-600 mb-2">{{ Str::limit($discovery->discovery, 100) }}</p>
+                                            <a href="{{ route('discovery.show', $discovery) }}" class="text-blue-600 hover:text-blue-800 text-sm">View Details →</a>
+                                        </div>
+                                    @endforeach
+                                </div>
+                            @else
+                                <p class="text-gray-500 italic">No cancelled discoveries</p>
+                            @endif
                         </div>
                     </div>
                 </div>

@@ -4,6 +4,7 @@ use App\Http\Controllers\Auth\AuthenticationController;
 use App\Http\Controllers\DiscoveryController;
 use App\Http\Controllers\ItemController;
 use Illuminate\Support\Facades\Route;
+use App\Models\Discovery;
 
 // Redirect root to login or dashboard based on auth status
 Route::get('/', function () {
@@ -25,15 +26,21 @@ Route::middleware('guest')->group(function () {
 
 Route::middleware('auth')->group(function () {
     Route::get('/dashboard', function () {
-        return view('dashboard');
+        $discoveries = [
+            'in_progress' => Discovery::where('status', Discovery::STATUS_IN_PROGRESS)->latest()->get(),
+            'pending' => Discovery::where('status', Discovery::STATUS_PENDING)->latest()->get(),
+            'completed' => Discovery::where('status', Discovery::STATUS_COMPLETED)->latest()->get(),
+            'cancelled' => Discovery::where('status', Discovery::STATUS_CANCELLED)->latest()->get(),
+        ];
+        return view('dashboard', compact('discoveries'));
     })->name('dashboard');
 
     // Discovery routes
     Route::get('/discovery', [DiscoveryController::class, 'index'])->name('discovery');
-    Route::post('/discovery', [DiscoveryController::class, 'store'])->name('discovery.store');
     Route::get('/discovery/{discovery}', [DiscoveryController::class, 'show'])->name('discovery.show');
-    Route::get('/discovery/{discovery}/edit', [DiscoveryController::class, 'edit'])->name('discovery.edit');
-    Route::put('/discovery/{discovery}', [DiscoveryController::class, 'update'])->name('discovery.update');
+    Route::post('/discovery', [DiscoveryController::class, 'store'])->name('discovery.store');
+    Route::patch('/discovery/{discovery}', [DiscoveryController::class, 'update'])->name('discovery.update');
+    Route::patch('/discovery/{discovery}/status', [DiscoveryController::class, 'updateStatus'])->name('discovery.update-status');
     Route::delete('/discovery/{discovery}', [DiscoveryController::class, 'destroy'])->name('discovery.destroy');
 
     // Web-specific item routes

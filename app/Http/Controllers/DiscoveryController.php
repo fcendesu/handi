@@ -6,6 +6,8 @@ use App\Models\Discovery;
 use App\Models\Item;
 use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Validation\Rule;
+use Illuminate\Support\Facades\Storage;
 
 class DiscoveryController extends Controller
 {
@@ -90,6 +92,7 @@ class DiscoveryController extends Controller
 
     public function show(Discovery $discovery)
     {
+        $discovery->load('items');
         return view('discovery.show', compact('discovery'));
     }
 
@@ -100,7 +103,95 @@ class DiscoveryController extends Controller
 
     public function update(Request $request, Discovery $discovery)
     {
-        // Implementation will be added later
+        $validated = $request->validate([
+            'customer_name' => 'required|string|max:255',
+            'customer_phone' => 'required|string|max:255',
+            'customer_email' => 'required|email|max:255',
+            'address' => 'nullable|string|max:1000',
+            'discovery' => 'required|string',
+            'todo_list' => 'nullable|string',
+            'note_to_customer' => 'nullable|string',
+            'note_to_handi' => 'nullable|string',
+            'completion_time' => 'nullable|integer|min:1',
+            'offer_valid_until' => 'nullable|date',
+            'service_cost' => 'nullable|numeric|min:0',
+            'transportation_cost' => 'nullable|numeric|min:0',
+            'labor_cost' => 'nullable|numeric|min:0',
+            'extra_fee' => 'nullable|numeric|min:0',
+            'discount_rate' => 'nullable|numeric|min:0|max:100',
+            'discount_amount' => 'nullable|numeric|min:0',
+            'payment_method' => 'nullable|string',
+            'images.*' => 'nullable|image|mimes:jpeg,png,jpg|max:2048',
+            'remove_images' => 'nullable|array',
+            'remove_images.*' => 'string',
+            'items' => 'nullable|array',
+            'items.*.id' => 'required|exists:items,id',
+            'items.*.quantity' => 'required|integer|min:1',
+            'items.*.custom_price' => 'nullable|numeric|min:0'
+        ]);
+
+        try {
+            // Handle image removals
+            if (!empty($request->remove_images)) {
+                $currentImages = $discovery->images ?? [];
+                $remainingImages = array_diff($currentImages, $request->remove_images);
+
+                // Remove files from storage
+                foreach ($request->remove_images as $image) {
+                    if (Storage::disk('public')->exists($image)) {
+                        Storage::disk('public')->delete($image);
+                    }
+                }
+
+                $validated['images'] = array_values($remainingImages);
+            }
+
+            // Handle new image uploads
+            if ($request->hasFile('images')) {
+                $newImages = [];
+                foreach ($request->file('images') as $image) {
+                    $path = $image->store('discoveries', 'public');
+                    $newImages[] = $path;
+                }
+                $validated['images'] = array_merge($validated['images'] ?? [], $newImages);
+            }
+
+            // Set default values for numeric fields
+            $validated['service_cost'] = $validated['service_cost'] ?? 0;
+            $validated['transportation_cost'] = $validated['transportation_cost'] ?? 0;
+            $validated['labor_cost'] = $validated['labor_cost'] ?? 0;
+            $validated['extra_fee'] = $validated['extra_fee'] ?? 0;
+            $validated['discount_rate'] = $validated['discount_rate'] ?? 0;
+            $validated['discount_amount'] = $validated['discount_amount'] ?? 0;
+
+            // Update discovery record
+            $discovery->update($validated);
+
+            // Update items
+            if (isset($validated['items'])) {
+                // Remove existing items
+                $discovery->items()->detach();
+
+                // Attach new items
+                foreach ($validated['items'] as $item) {
+                    $basePrice = Item::find($item['id'])->price;
+                    $discovery->items()->attach($item['id'], [
+                        'quantity' => $item['quantity'],
+                        'custom_price' => $item['custom_price'] ?? $basePrice
+                    ]);
+                }
+            }
+
+            return redirect()
+                ->route('discovery.show', $discovery)
+                ->with('success', 'Discovery updated successfully');
+
+        } catch (\Exception $e) {
+            \Log::error('Discovery update failed: ' . $e->getMessage());
+            return back()
+                ->withInput()
+                ->withErrors(['error' => 'Failed to update discovery: ' . $e->getMessage()]);
+        }
     }
 
     public function destroy(Discovery $discovery)
@@ -200,5 +291,16 @@ class DiscoveryController extends Controller
                 'error' => $e->getMessage()
             ], 500);
         }
+    }
+
+    public function updateStatus(Request $request, Discovery $discovery)
+    {
+        $validated = $request->validate([
+            'status' => ['required', 'string', Rule::in(Discovery::getStatuses())]
+        ]);
+
+        $discovery->update($validated);
+
+        return back()->with('success', 'Discovery status updated successfully');
     }
 }
