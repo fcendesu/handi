@@ -119,6 +119,14 @@ class DiscoveryController extends Controller
                 'todo_list' => 'nullable|string',
                 'note_to_customer' => 'nullable|string',
                 'note_to_handi' => 'nullable|string',
+                'completion_time' => 'nullable|integer|min:1',
+                'offer_valid_until' => 'nullable|date',
+                'service_cost' => 'nullable|numeric|min:0',
+                'transportation_cost' => 'nullable|numeric|min:0',
+                'labor_cost' => 'nullable|numeric|min:0',
+                'extra_fee' => 'nullable|numeric|min:0',
+                'discount_rate' => 'nullable|numeric|min:0|max:100',
+                'discount_amount' => 'nullable|numeric|min:0',
                 'payment_method' => 'nullable|string',
                 'images' => 'nullable|array',
                 'images.*' => 'image|mimes:jpeg,png,jpg|max:2048',
@@ -138,15 +146,24 @@ class DiscoveryController extends Controller
             }
             $validated['images'] = $imagePaths;
 
+            // Set default values for numeric fields
+            $validated['service_cost'] = $validated['service_cost'] ?? 0;
+            $validated['transportation_cost'] = $validated['transportation_cost'] ?? 0;
+            $validated['labor_cost'] = $validated['labor_cost'] ?? 0;
+            $validated['extra_fee'] = $validated['extra_fee'] ?? 0;
+            $validated['discount_rate'] = $validated['discount_rate'] ?? 0;
+            $validated['discount_amount'] = $validated['discount_amount'] ?? 0;
+
             // Create discovery record
             $discovery = Discovery::create($validated);
 
             // Attach items if present
             if (!empty($request->items)) {
                 foreach ($request->items as $item) {
+                    $basePrice = Item::find($item['id'])->price;
                     $discovery->items()->attach($item['id'], [
                         'quantity' => $item['quantity'],
-                        'custom_price' => $item['custom_price'] ?? Item::find($item['id'])->price
+                        'custom_price' => $item['custom_price'] ?? $basePrice
                     ]);
                 }
             }
@@ -161,17 +178,20 @@ class DiscoveryController extends Controller
                     'discovery' => $discovery,
                     'image_urls' => array_map(function ($path) {
                         return asset('storage/' . $path);
-                    }, $imagePaths)
+                    }, $imagePaths),
+                    'total_cost' => $discovery->total_cost
                 ]
             ], 201);
 
         } catch (\Illuminate\Validation\ValidationException $e) {
+            \Log::error('API Discovery validation failed:', ['errors' => $e->errors()]);
             return response()->json([
                 'success' => false,
                 'message' => 'Validation failed',
                 'errors' => $e->errors()
             ], 422);
         } catch (\Exception $e) {
+            \Log::error('API Discovery creation failed: ' . $e->getMessage());
             return response()->json([
                 'success' => false,
                 'message' => 'Failed to create discovery',
