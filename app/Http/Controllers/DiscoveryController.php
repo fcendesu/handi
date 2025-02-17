@@ -37,15 +37,17 @@ class DiscoveryController extends Controller
             'labor_cost' => 'nullable|numeric|min:0',
             'extra_fee' => 'nullable|numeric|min:0',
             'discount_rate' => 'nullable|numeric|min:0|max:100',
+            'discount_amount' => 'nullable|numeric|min:0',
             'payment_method' => 'nullable|string',
-            'images.*' => 'nullable|image|mimes:jpeg,png,jpg|max:2048', // Add image validation
-            'items' => 'array',
+            'images.*' => 'nullable|image|mimes:jpeg,png,jpg|max:2048',
+            'items' => 'nullable|array',
             'items.*.id' => 'required|exists:items,id',
             'items.*.quantity' => 'required|integer|min:1',
             'items.*.custom_price' => 'nullable|numeric|min:0'
         ]);
 
         try {
+            // Handle image uploads
             $imagePaths = [];
             if ($request->hasFile('images')) {
                 foreach ($request->file('images') as $image) {
@@ -53,16 +55,28 @@ class DiscoveryController extends Controller
                     $imagePaths[] = $path;
                 }
             }
-
             $validated['images'] = $imagePaths;
+
+            // Set default values for numeric fields
+            $validated['service_cost'] = $validated['service_cost'] ?? 0;
+            $validated['transportation_cost'] = $validated['transportation_cost'] ?? 0;
+            $validated['labor_cost'] = $validated['labor_cost'] ?? 0;
+            $validated['extra_fee'] = $validated['extra_fee'] ?? 0;
+            $validated['discount_rate'] = $validated['discount_rate'] ?? 0;
+            $validated['discount_amount'] = $validated['discount_amount'] ?? 0;
+
+            // Status will be set to 'pending' by the model boot method
             $discovery = Discovery::create($validated);
 
-            // Attach items with their quantities and custom prices
-            foreach ($request->items ?? [] as $item) {
-                $discovery->items()->attach($item['id'], [
-                    'quantity' => $item['quantity'],
-                    'custom_price' => $item['custom_price'] ?? Item::find($item['id'])->price
-                ]);
+            // Attach items with their quantities and custom prices if present
+            if (!empty($request->items)) {
+                foreach ($request->items as $item) {
+                    $basePrice = Item::find($item['id'])->price;
+                    $discovery->items()->attach($item['id'], [
+                        'quantity' => $item['quantity'],
+                        'custom_price' => $item['custom_price'] ?? $basePrice
+                    ]);
+                }
             }
 
             return redirect()
@@ -70,6 +84,7 @@ class DiscoveryController extends Controller
                 ->with('success', 'Discovery created successfully');
 
         } catch (\Exception $e) {
+            \Log::error('Discovery creation failed: ' . $e->getMessage());
             return back()
                 ->withInput()
                 ->withErrors(['error' => 'Failed to create discovery: ' . $e->getMessage()]);
