@@ -13,7 +13,7 @@ class DiscoveryController extends Controller
 {
     public function index()
     {
-        $discoveries = Discovery::latest()->get();
+        $discoveries = Discovery::latest()->paginate(12);
         return view('discovery.index', compact('discoveries'));
     }
 
@@ -132,29 +132,25 @@ class DiscoveryController extends Controller
 
         try {
             // Handle image removals
-            if (!empty($request->remove_images)) {
-                $currentImages = $discovery->images ?? [];
-                $remainingImages = array_diff($currentImages, $request->remove_images);
-
-                // Remove files from storage
+            $currentImages = $discovery->images ?? [];
+            if ($request->has('remove_images')) {
                 foreach ($request->remove_images as $image) {
                     if (Storage::disk('public')->exists($image)) {
                         Storage::disk('public')->delete($image);
                     }
+                    $currentImages = array_diff($currentImages, [$image]);
                 }
-
-                $validated['images'] = array_values($remainingImages);
             }
 
             // Handle new image uploads
             if ($request->hasFile('images')) {
-                $newImages = [];
                 foreach ($request->file('images') as $image) {
                     $path = $image->store('discoveries', 'public');
-                    $newImages[] = $path;
+                    $currentImages[] = $path;
                 }
-                $validated['images'] = array_merge($validated['images'] ?? [], $newImages);
             }
+
+            $validated['images'] = array_values($currentImages);
 
             // Set default values for numeric fields
             $validated['service_cost'] = $validated['service_cost'] ?? 0;

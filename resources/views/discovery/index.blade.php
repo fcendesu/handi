@@ -42,6 +42,68 @@
             <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
                 <div class="p-6">
                     <div class="flex justify-between items-center mb-6">
+                        <h2 class="text-2xl font-semibold text-gray-800">Discoveries</h2>
+
+                    </div>
+
+                    <!-- Discoveries List -->
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                        @forelse($discoveries as $discovery)
+                            <div class="border rounded-lg p-4 {{
+                                $discovery->status === 'pending' ? 'bg-blue-50 border-blue-200' :
+                                ($discovery->status === 'in_progress' ? 'bg-yellow-50 border-yellow-200' :
+                                ($discovery->status === 'completed' ? 'bg-green-50 border-green-200' :
+                                'bg-red-50 border-red-200'))
+                            }}">
+                                <div class="flex justify-between items-start mb-4">
+                                    <div>
+                                        <h3 class="font-medium text-lg">{{ $discovery->customer_name }}</h3>
+                                        <p class="text-sm text-gray-600">{{ $discovery->customer_phone }}</p>
+                                        <p class="text-sm text-gray-600">{{ $discovery->customer_email }}</p>
+                                    </div>
+                                    <span class="px-2 py-1 rounded-full text-xs font-medium {{
+                                        $discovery->status === 'pending' ? 'bg-blue-100 text-blue-800' :
+                                        ($discovery->status === 'in_progress' ? 'bg-yellow-100 text-yellow-800' :
+                                        ($discovery->status === 'completed' ? 'bg-green-100 text-green-800' :
+                                        'bg-red-100 text-red-800'))
+                                    }}">
+                                        {{ ucfirst(str_replace('_', ' ', $discovery->status)) }}
+                                    </span>
+                                </div>
+
+                                <p class="text-sm text-gray-600 mb-4">{{ Str::limit($discovery->discovery, 100) }}</p>
+
+                                <div class="flex justify-between items-center">
+                                    <span class="text-sm font-medium">{{ number_format($discovery->total_cost, 2) }}</span>
+                                    <a href="{{ route('discovery.show', $discovery) }}"
+                                       class="text-blue-600 hover:text-blue-800 text-sm font-medium">
+                                        View Details →
+                                    </a>
+                                </div>
+                            </div>
+                        @empty
+                            <div class="col-span-full text-center py-12 text-gray-500">
+                                No discoveries found. Create your first discovery!
+                            </div>
+                        @endforelse
+                    </div>
+
+                    <!-- Pagination if needed -->
+                    @if($discoveries->hasPages())
+                        <div class="mt-6">
+                            {{ $discoveries->links() }}
+                        </div>
+                    @endif
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="py-12">
+        <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
+            <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
+                <div class="p-6">
+                    <div class="flex justify-between items-center mb-6">
                         <h2 class="text-2xl font-semibold text-gray-800">Create New Discovery</h2>
 
                     </div>

@@ -81,19 +81,39 @@ class Discovery extends Model
 
     public function getTotalCostAttribute()
     {
-        $subtotal = $this->service_cost +
+        // Calculate base costs
+        $baseCosts = $this->service_cost +
             $this->transportation_cost +
             $this->labor_cost +
             $this->extra_fee;
 
+        // Apply discount rate to base costs
+        if ($this->discount_rate > 0) {
+            $baseCosts = $baseCosts * (1 - ($this->discount_rate / 100));
+        }
+
+        // Calculate items total separately
         $itemsTotal = $this->items->sum(function ($item) {
-            return $item->pivot->custom_price * $item->pivot->quantity;
+            return ($item->pivot->custom_price ?? $item->price) * $item->pivot->quantity;
         });
 
-        $total = $subtotal + $itemsTotal;
+        // Sum discounted base costs with items total
+        $total = $baseCosts + $itemsTotal;
 
-        // Simply subtract the discount_amount, regardless of discount_rate
-        return $total - $this->discount_amount;
+        // Apply fixed discount amount last
+        $total = $total - $this->discount_amount;
+
+        return max(0, round($total, 2));
+    }
+
+    public function getDiscountRateAmountAttribute()
+    {
+        $baseCosts = $this->service_cost +
+            $this->transportation_cost +
+            $this->labor_cost +
+            $this->extra_fee;
+
+        return round($baseCosts * ($this->discount_rate / 100), 2);
     }
 
     public function items(): BelongsToMany
