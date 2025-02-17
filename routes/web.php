@@ -39,12 +39,12 @@ Route::middleware('auth')->group(function () {
 
     // Web-specific item routes
     Route::get('/items', [ItemController::class, 'webIndex'])->name('items');
+    Route::get('/items/search-for-discovery', [ItemController::class, 'webSearchForDiscovery'])->name('items.search-for-discovery');
+    Route::get('/items/search', [ItemController::class, 'webSearch'])->name('items.search');
     Route::post('/items/store', [ItemController::class, 'webStore'])->name('items.store');
     Route::get('/items/{item}/edit', [ItemController::class, 'webEdit'])->name('items.edit');
     Route::put('/items/{item}', [ItemController::class, 'webUpdate'])->name('items.update');
     Route::delete('/items/{item}', [ItemController::class, 'webDestroy'])->name('items.destroy');
-    Route::get('/items/search', [ItemController::class, 'webSearch'])->name('items.search');
-    Route::get('/items/search-for-discovery', [ItemController::class, 'webSearchForDiscovery'])->name('items.search-for-discovery');
 
     Route::post('/logout', [AuthenticationController::class, 'logout'])->name('logout');
 });

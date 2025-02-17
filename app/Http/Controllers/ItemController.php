@@ -176,18 +176,10 @@ class ItemController extends Controller
 
         $items = Item::where('item', 'like', "%{$query}%")
             ->orWhere('brand', 'like', "%{$query}%")
-            ->orderBy('created_at', 'desc')
             ->get();
 
         return response()->json([
-            'items' => $items->map(function ($item) {
-                return [
-                    'id' => $item->id,
-                    'item' => $item->item,
-                    'brand' => $item->brand,
-                    'price' => number_format($item->price, 2, '.', '') // Changed format to remove thousand separator and keep decimal points
-                ];
-            })
+            'items' => $items
         ]);
     }
 
