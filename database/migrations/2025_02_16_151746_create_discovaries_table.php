@@ -22,6 +22,15 @@ return new class extends Migration {
             $table->text('payment_method')->nullable();
             $table->timestamps();
         });
+
+        Schema::create('discovery_item', function (Blueprint $table) {
+            $table->id();
+            $table->foreignId('discovery_id')->constrained('discovaries')->onDelete('cascade');
+            $table->foreignId('item_id')->constrained('items')->onDelete('cascade');
+            $table->integer('quantity')->default(1);
+            $table->decimal('custom_price', 10, 2)->nullable();
+            $table->timestamps();
+        });
     }
 
     /**
@@ -30,5 +39,6 @@ return new class extends Migration {
     public function down(): void
     {
         Schema::dropIfExists('discovaries');
+        Schema::dropIfExists('discovery_item');
     }
 };

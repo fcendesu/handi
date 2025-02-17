@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
 class Discovery extends Model
 {
@@ -28,4 +29,11 @@ class Discovery extends Model
         'note_to_handi',
         'payment_method'
     ];
+
+    public function items(): BelongsToMany
+    {
+        return $this->belongsToMany(Item::class, 'discovery_item')
+            ->withPivot('quantity', 'custom_price')
+            ->withTimestamps();
+    }
 }

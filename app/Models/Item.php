@@ -15,5 +15,10 @@ class Item extends Model
     /**
      * Get the discoveries associated with the item.
      */
-
+    public function discoveries(): BelongsToMany
+    {
+        return $this->belongsToMany(Discovery::class, 'discovery_item')
+            ->withPivot('quantity', 'custom_price')
+            ->withTimestamps();
+    }
 }
