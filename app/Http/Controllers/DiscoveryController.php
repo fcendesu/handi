@@ -131,26 +131,33 @@ class DiscoveryController extends Controller
         ]);
 
         try {
-            // Handle image removals
-            $currentImages = $discovery->images ?? [];
+            // Get current images
+            $imagePaths = $discovery->images ?? [];
+
+            // Handle image removals first
             if ($request->has('remove_images')) {
                 foreach ($request->remove_images as $image) {
+                    // Remove from storage
                     if (Storage::disk('public')->exists($image)) {
                         Storage::disk('public')->delete($image);
                     }
-                    $currentImages = array_diff($currentImages, [$image]);
+                    // Remove from image paths array
+                    $imagePaths = array_values(array_filter($imagePaths, function ($img) use ($image) {
+                        return $img !== $image;
+                    }));
                 }
             }
 
-            // Handle new image uploads
+            // Then handle new image uploads if any
             if ($request->hasFile('images')) {
                 foreach ($request->file('images') as $image) {
                     $path = $image->store('discoveries', 'public');
-                    $currentImages[] = $path;
+                    $imagePaths[] = $path;
                 }
             }
 
-            $validated['images'] = array_values($currentImages);
+            // Update the images array in the validated data
+            $validated['images'] = array_values(array_filter($imagePaths));
 
             // Set default values for numeric fields
             $validated['service_cost'] = $validated['service_cost'] ?? 0;
@@ -163,7 +170,7 @@ class DiscoveryController extends Controller
             // Update discovery record
             $discovery->update($validated);
 
-            // Update items
+            // Update items if present
             if (isset($validated['items'])) {
                 // Remove existing items
                 $discovery->items()->detach();
