@@ -22,6 +22,7 @@ class DiscoveryController extends Controller
             'customer_name' => 'required|string|max:255',
             'customer_phone' => 'required|string|max:255',
             'customer_email' => 'required|email|max:255',
+            'address' => 'nullable|string|max:1000',  // Add this line
             'discovery' => 'required|string',
             'todo_list' => 'nullable|string',
             'note_to_customer' => 'nullable|string',
@@ -115,6 +116,7 @@ class DiscoveryController extends Controller
                 'customer_name' => 'required|string|max:255',
                 'customer_phone' => 'required|string|max:255',
                 'customer_email' => 'required|email|max:255',
+                'address' => 'nullable|string|max:1000',  // Add this line
                 'discovery' => 'required|string',
                 'todo_list' => 'nullable|string',
                 'note_to_customer' => 'nullable|string',

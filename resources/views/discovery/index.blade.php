@@ -81,6 +81,16 @@
                                         <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
                                     @enderror
                                 </div>
+
+                                <div class="col-span-full">
+                                    <label for="address" class="block text-sm font-medium text-gray-700 mb-2">Address</label>
+                                    <textarea name="address" id="address" rows="3"
+                                              class="bg-gray-100 mt-1 block w-full rounded-md border-2 border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 px-4 py-2"
+                                              >{{ old('address') }}</textarea>
+                                    @error('address')
+                                        <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                                    @enderror
+                                </div>
                             </div>
 
                             <!-- Discovery Details -->

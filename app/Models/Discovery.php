@@ -23,6 +23,7 @@ class Discovery extends Model
         'customer_name',
         'customer_phone',
         'customer_email',
+        'address',  // Add this line
         'discovery',
         'todo_list',
         'note_to_customer',
