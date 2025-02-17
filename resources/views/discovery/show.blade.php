@@ -18,7 +18,8 @@
                     brand: item.brand,
                     price: item.price,
                     quantity: item.pivot?.quantity || 1,
-                    custom_price: item.pivot?.custom_price || item.price
+                    custom_price: item.pivot?.custom_price || item.price,
+                    is_existing: true
                 })),
 
                 async searchItems() {
@@ -42,7 +43,8 @@
                         this.selectedItems.push({
                             ...item,
                             quantity: 1,
-                            custom_price: item.price
+                            custom_price: item.price,
+                            is_existing: false
                         });
                     }
                     this.searchQuery = '';
@@ -50,6 +52,7 @@
                 },
 
                 removeItem(index) {
+                    // Remove the item from the selectedItems array
                     this.selectedItems.splice(index, 1);
                 }
             }
@@ -276,14 +279,13 @@
     <div x-data="itemSelector({{ json_encode($discovery->items) }})" class="space-y-4">
     <div class="flex justify-between items-center">
         <label class="block text-sm font-medium text-gray-700 mb-2">Items</label>
-        <div class="relative w-64">
+        <div class="relative w-64" x-show="editMode">
             <input type="text"
                    x-model="searchQuery"
                    @input.debounce.300ms="searchItems()"
                    placeholder="Search items..."
                    :disabled="!editMode"
-                   class="bg-gray-100 w-full rounded-md border-2 border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 px-4 py-2"
-                   :class="{ 'bg-gray-50': !editMode }">
+                   class="bg-gray-100 w-full rounded-md border-2 border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 px-4 py-2">
 
             <!-- Search Results Dropdown -->
             <div x-show="searchResults.length > 0"
@@ -296,7 +298,7 @@
                                     <span x-text="item.item" class="font-medium"></span>
                                     <span class="text-sm text-gray-500" x-text="' - ' + item.brand"></span>
                                 </div>
-                                <span class="text-gray-600" x-text="'$' + item.price"></span>
+                                <span class="text-gray-600" x-text="item.price"></span>
                             </div>
                         </li>
                     </template>
@@ -312,19 +314,18 @@
                 <template x-for="(item, index) in selectedItems" :key="index">
                     <li class="p-4">
                         <div class="grid grid-cols-12 gap-4 items-center">
-                            <div class="col-span-4">
+                            <div class="col-span-5">
                                 <p class="font-medium" x-text="item.item"></p>
                                 <p class="text-sm text-gray-500" x-text="item.brand"></p>
-                                <p class="text-sm text-gray-600" x-text="'Base Price: $' + item.price"></p>
+                                <p class="text-sm text-gray-600" x-text="'Base Price: ' + item.price"></p>
                             </div>
-                            <div class="col-span-3">
+                            <div class="col-span-2">
                                 <label class="block text-xs text-gray-500 mb-1">Quantity</label>
                                 <input type="number"
                                        x-model.number="item.quantity"
                                        min="1"
                                        :disabled="!editMode"
-                                       class="bg-gray-100 w-20 rounded-md border-2 border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 px-2 py-1"
-                                       :class="{ 'bg-gray-50': !editMode }">
+                                       class="bg-gray-100 w-20 rounded-md border-2 border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 px-2 py-1">
                                 <input type="hidden" :name="'items['+index+'][id]'" :value="item.id">
                                 <input type="hidden" :name="'items['+index+'][quantity]'" :value="item.quantity">
                             </div>
@@ -334,20 +335,16 @@
                                        x-model.number="item.custom_price"
                                        step="0.01"
                                        :disabled="!editMode"
-                                       class="bg-gray-100 w-32 rounded-md border-2 border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 px-2 py-1"
-                                       :class="{ 'bg-gray-50': !editMode }">
+                                       class="bg-gray-100 w-32 rounded-md border-2 border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 px-2 py-1">
                                 <input type="hidden" :name="'items['+index+'][custom_price]'" :value="item.custom_price">
-                                <p class="text-xs text-gray-500 mt-1" x-show="item.custom_price != item.price">
-                                    Original price: $<span x-text="item.price"></span>
-                                </p>
                             </div>
                             <div class="col-span-1 text-right">
                                 <button type="button"
                                         @click="removeItem(index)"
-                                        :disabled="!editMode"
-                                        class="text-red-600 hover:text-red-800">
-                                    <svg class="h-5 w-5" fill="currentColor" viewBox="0 0 20 20">
-                                        <path fill-rule="evenodd" d="M4.293 4.293a1 1 011.414 0L10 8.586l4.293-4.293a1 1 111.414 1.414L11.414 10l4.293 4.293a1 1 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"/>
+                                        x-show="editMode"
+                                        class="bg-red-100 text-red-600 hover:bg-red-200 hover:text-red-700 rounded-full p-2">
+                                    <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
                                     </svg>
                                 </button>
                             </div>

@@ -306,4 +306,42 @@ class DiscoveryController extends Controller
 
         return back()->with('success', 'Discovery status updated successfully');
     }
+
+    public function apiList(): JsonResponse
+    {
+        try {
+            $discoveries = Discovery::with('items')
+                ->latest()
+                ->get()
+                ->map(function ($discovery) {
+                    return [
+                        'id' => $discovery->id,
+                        'customer_name' => $discovery->customer_name,
+                        'customer_phone' => $discovery->customer_phone,
+                        'customer_email' => $discovery->customer_email,
+                        'status' => $discovery->status,
+                        'discovery' => $discovery->discovery,
+                        'total_cost' => $discovery->total_cost,
+                        'created_at' => $discovery->created_at,
+                        'updated_at' => $discovery->updated_at,
+                        'image_urls' => array_map(function ($path) {
+                            return asset('storage/' . $path);
+                        }, $discovery->images ?? []),
+                        'items_count' => $discovery->items->count(),
+                        'has_todo' => !empty($discovery->todo_list)
+                    ];
+                });
+
+            return response()->json([
+                'success' => true,
+                'data' => $discoveries
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to fetch discoveries',
+                'error' => $e->getMessage()
+            ], 500);
+        }
+    }
 }
