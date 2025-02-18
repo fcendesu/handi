@@ -5,24 +5,24 @@
                 <h1 class="text-xl font-bold">{{ config('app.name', 'Handi') }}</h1>
                 <a href="{{ route('dashboard') }}"
                    class="text-gray-700 hover:text-gray-900 font-medium {{ request()->routeIs('dashboard') ? 'text-blue-600' : '' }}">
-                    Dashboard
+                    İşler
                 </a>
                 <a href="{{ route('discovery') }}"
                    class="text-gray-700 hover:text-gray-900 font-medium {{ request()->routeIs('discovery') ? 'text-blue-600' : '' }}">
-                    Discovery
+                    Keşif
                 </a>
                 <a href="{{ route('items') }}"
                    class="text-gray-700 hover:text-gray-900 font-medium {{ request()->routeIs('items') ? 'text-blue-600' : '' }}">
-                    Items
+                    Malzeme
                 </a>
             </div>
             <div class="flex items-center">
-                <span class="text-gray-700 mr-4">Welcome</span>
+                <span class="text-gray-700 mr-4">Hoşgeldin</span>
                 <form method="POST" action="{{ route('logout') }}" class="inline">
                     @csrf
                     <button type="submit"
                         class="bg-red-500 text-gray-700 px-4 py-2 rounded-md hover:bg-red-600 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2">
-                        Logout
+                        Çıkış
                     </button>
                 </form>
             </div>

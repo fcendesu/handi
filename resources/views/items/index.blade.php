@@ -4,7 +4,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="csrf-token" content="{{ csrf_token() }}">
-    <title>Add Item - {{ config('app.name', 'Handi') }}</title>
+    <title>Malzeme Ekleme - {{ config('app.name', 'Handi') }}</title>
     <link rel="preconnect" href="https://fonts.bunny.net">
     <link href="https://fonts.bunny.net/css?family=figtree:400,500,600&display=swap" rel="stylesheet" />
     @vite(['resources/css/app.css', 'resources/js/app.js'])
@@ -40,13 +40,13 @@
 
             <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
                 <div class="p-6">
-                    <h2 class="text-2xl font-semibold text-gray-800 mb-6">Add New Item</h2>
+                    <h2 class="text-2xl font-semibold text-gray-800 mb-6">Yeni Malzeme Ekle</h2>
 
                     <form method="POST" action="{{ route('items.store') }}" class="space-y-8">
                         @csrf
 
                         <div class="mb-6">
-                            <label for="item" class="block text-sm font-medium text-gray-700 mb-2">Item Name</label>
+                            <label for="item" class="block text-sm font-medium text-gray-700 mb-2">Malzeme Adı</label>
                             <input type="text" name="item" id="item"
                                 class="bg-gray-100 mt-1 block rounded-md border-2 border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 px-4 py-2"
                                 value="{{ old('item') }}" required>
@@ -56,7 +56,7 @@
                         </div>
 
                         <div class="mb-6">
-                            <label for="brand" class="block text-sm font-medium text-gray-700 mb-2">Brand</label>
+                            <label for="brand" class="block text-sm font-medium text-gray-700 mb-2">Marka</label>
                             <input type="text" name="brand" id="brand"
                                 class="bg-gray-100 mt-1 block rounded-md border-2 border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 px-4 py-2"
                                 value="{{ old('brand') }}" required>
@@ -66,7 +66,7 @@
                         </div>
 
                         <div class="mb-8">
-                            <label for="price" class="block text-sm font-medium text-gray-700 mb-2">Price</label>
+                            <label for="price" class="block text-sm font-medium text-gray-700 mb-2">Fiyat</label>
                             <input type="number" step="0.01" name="price" id="price"
                                 class="bg-gray-100 mt-1 block rounded-md border-2 border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 px-4 py-2"
                                 value="{{ old('price') }}" required>
@@ -78,7 +78,7 @@
                         <div class="flex justify-start mt-10">
                             <button type="submit"
                                 class="bg-blue-500 text-white px-6 py-3 rounded-md hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 text-lg font-medium">
-                                Add Item
+                                Malzemeyi Ekle
                             </button>
                         </div>
                     </form>
@@ -94,12 +94,12 @@
 
             <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
                 <div class="p-6">
-                    <h2 class="text-2xl font-semibold text-gray-800 mb-6">Items</h2>
+                    <h2 class="text-2xl font-semibold text-gray-800 mb-6">Malzemeler</h2>
 
                     <div class="mb-4">
                         <input type="text"
                                id="searchInput"
-                               placeholder="Search items..."
+                               placeholder="Malzeme arama ..."
                                class="w-full px-4 py-2 border rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
                                value="{{ request()->query('query') }}"
                                x-data
@@ -120,10 +120,10 @@
                         <table class="min-w-full divide-y divide-gray-200">
                             <thead class="bg-gray-50">
                                 <tr>
-                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Item</th>
-                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Brand</th>
-                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Price</th>
-                                    <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Malzeme</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Marka</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">FİYAT</th>
+                                    <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">İşlem</th>
                                 </tr>
                             </thead>
                             <tbody class="bg-white divide-y divide-gray-200">
@@ -152,7 +152,7 @@
                                                     @method('DELETE')
                                                     <button type="submit"
                                                             class="text-red-500 hover:text-red-600"
-                                                            onclick="return confirm('Are you sure you want to delete this item?')">
+                                                            onclick="return confirm('Bu öğeyi silmek istediğinizden emin misiniz?')">
                                                         <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                                                   d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
@@ -165,7 +165,7 @@
                                 @empty
                                     <tr>
                                         <td colspan="4" class="px-6 py-4 text-center text-gray-500">
-                                            No items found. Add your first item above.
+                                            Malzeme bulunamadı. Yukarıdan ilk malzemenizi ekleyin.
                                         </td>
                                     </tr>
                                 @endforelse

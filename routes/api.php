@@ -33,10 +33,10 @@ Route::delete('/item/destroy/{item}', [ItemController::class, 'destroy'])->middl
 Route::get('/token/validate', [AuthenticationController::class, 'validateToken'])->middleware('auth:sanctum');
 
 Route::middleware('auth:sanctum')->group(function () {
-    Route::get('/discoveries', [DiscoveryController::class, 'apiIndex']);
+    Route::get('/discoveries/list', [DiscoveryController::class, 'apiList']);
+
     Route::post('/discoveries', [DiscoveryController::class, 'apiStore']);
     Route::get('/discoveries/{discovery}', [DiscoveryController::class, 'apiShow']);
     Route::put('/discoveries/{discovery}', [DiscoveryController::class, 'apiUpdate']);
-    Route::delete('/discoveries/{discovery}', [DiscoveryController::class, 'apiDestroy']);
-    Route::patch('/discoveries/{discovery}/items/{item}/quantity', [DiscoveryController::class, 'apiUpdateItemQuantity']);
+    Route::patch('/discoveries/{discovery}/status', [DiscoveryController::class, 'apiUpdateStatus']);
 });
