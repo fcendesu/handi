@@ -221,6 +221,18 @@
     @csrf
     @method('PATCH')
 
+    <div class="flex items-center space-x-2 mb-4">
+        <input type="text"
+               value="{{ $discovery->share_url }}"
+               class="bg-gray-50 px-4 py-2 rounded border text-sm flex-1"
+               readonly>
+        <button type="button"
+                onclick="navigator.clipboard.writeText('{{ $discovery->share_url }}').then(() => alert('Link kopyalandı!'))"
+                class="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600">
+            Paylaşım Linki Kopyala
+        </button>
+    </div>
+
     <!-- Add this near the top of the form -->
     <div class="mb-6 bg-gray-50 p-4 rounded-lg">
         <h3 class="text-lg font-medium text-gray-900">Toplam Masraf</h3>

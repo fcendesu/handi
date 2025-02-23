@@ -565,4 +565,13 @@ class DiscoveryController extends Controller
             ], 500);
         }
     }
+
+    public function sharedView(string $token)
+    {
+        $discovery = Discovery::where('share_token', $token)
+            ->with('items')
+            ->firstOrFail();
+
+        return view('discovery.shared', compact('discovery'));
+    }
 }

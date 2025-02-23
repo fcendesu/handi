@@ -54,3 +54,6 @@ Route::middleware('auth')->group(function () {
 
     Route::post('/logout', [AuthenticationController::class, 'logout'])->name('logout');
 });
+
+Route::get('/shared/discovery/{token}', [DiscoveryController::class, 'sharedView'])
+    ->name('discovery.shared');

@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Support\Str;
 
 class Discovery extends Model
 {
@@ -38,7 +39,8 @@ class Discovery extends Model
         'discount_rate',
         'discount_amount',
         'payment_method',
-        'images'
+        'images',
+        'share_token'
     ];
 
     protected $casts = [
@@ -75,6 +77,9 @@ class Discovery extends Model
         static::creating(function ($discovery) {
             if (!$discovery->status) {
                 $discovery->status = self::STATUS_PENDING;
+            }
+            if (!$discovery->share_token) {
+                $discovery->share_token = Str::random(64);
             }
         });
     }
@@ -121,5 +126,10 @@ class Discovery extends Model
         return $this->belongsToMany(Item::class, 'discovery_item')
             ->withPivot('quantity', 'custom_price')
             ->withTimestamps();
+    }
+
+    public function getShareUrlAttribute(): string
+    {
+        return route('discovery.shared', $this->share_token);
     }
 }

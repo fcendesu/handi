@@ -12,10 +12,11 @@ return new class extends Migration {
     {
         Schema::create('discovaries', function (Blueprint $table) {
             $table->id();
+            $table->string('share_token', 64)->nullable()->unique();
             $table->string('customer_name');
             $table->string('customer_phone');
             $table->string('customer_email');
-            $table->text('address')->nullable()->after('customer_email');
+            $table->text('address')->nullable();
             $table->text('discovery');
             $table->text('todo_list');
             $table->text('note_to_customer')->nullable();

@@ -43,7 +43,7 @@ Handi is web application built with Laravel that helps manage service discoverie
 1. Clone the repository
 
 ```bash
-git clone https://github.com/yourusername/handi.git
+git clone https://github.com/fcendesu/handi.git
 cd handi
 ```
 
@@ -64,12 +64,7 @@ php artisan key:generate
 4. Configure your database in `.env` file
 
 ```env
-DB_CONNECTION=mysql
-DB_HOST=127.0.0.1
-DB_PORT=3306
-DB_DATABASE=handi
-DB_USERNAME=root
-DB_PASSWORD=
+DB_CONNECTION=sqlite
 ```
 
 5. Run migrations
