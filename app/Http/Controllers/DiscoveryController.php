@@ -319,6 +319,7 @@ class DiscoveryController extends Controller
                         'customer_name' => $discovery->customer_name,
                         'customer_phone' => $discovery->customer_phone,
                         'customer_email' => $discovery->customer_email,
+                        'address' => $discovery->address,
                         'status' => $discovery->status,
                         'discovery' => $discovery->discovery,
                         'total_cost' => $discovery->total_cost,

@@ -510,7 +510,7 @@
         <!-- Discount on Base Costs -->
         @if($discovery->discount_rate > 0)
         <div class="flex justify-between text-red-600">
-            <span>Discount on Base Costs ({{ number_format($discovery->discount_rate, 2) }}%):</span>
+            <span>İndirim ({{ number_format($discovery->discount_rate, 2) }}%):</span>
             <span>-{{ number_format($discovery->discount_rate_amount, 2) }}</span>
         </div>
         @endif
