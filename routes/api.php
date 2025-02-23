@@ -39,4 +39,5 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/discoveries/{discovery}', [DiscoveryController::class, 'apiShow']);
     Route::put('/discoveries/{discovery}', [DiscoveryController::class, 'apiUpdate']);
     Route::patch('/discoveries/{discovery}/status', [DiscoveryController::class, 'apiUpdateStatus']);
+    Route::get('/discoveries/{discovery}/share', [DiscoveryController::class, 'apiGetShareUrl']);
 });

@@ -574,4 +574,25 @@ class DiscoveryController extends Controller
 
         return view('discovery.shared', compact('discovery'));
     }
+
+    public function apiGetShareUrl(Discovery $discovery): JsonResponse
+    {
+        try {
+            return response()->json([
+                'success' => true,
+                'data' => [
+                    'id' => $discovery->id,
+                    'share_token' => $discovery->share_token,
+                    'share_url' => route('discovery.shared', $discovery->share_token),
+                    'customer_name' => $discovery->customer_name
+                ]
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to get share URL',
+                'error' => $e->getMessage()
+            ], 500);
+        }
+    }
 }
