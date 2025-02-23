@@ -158,11 +158,10 @@ class ItemController extends Controller
     public function webSearch(Request $request)
     {
         $query = $request->get('query');
-        // Store the search query in session
         session(['last_search_query' => $query]);
 
         $items = Item::where('item', 'like', "%{$query}%")
-            ->orWhere('brand', 'like', "%{$query}%")
+
             ->orderBy('created_at', 'desc')
             ->get();
 

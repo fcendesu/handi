@@ -105,11 +105,10 @@
                                x-data
                                @input.debounce.300ms="
                                    const query = $event.target.value;
-                                   fetch(`/items/search?query=${query}`)
+                                   fetch(`{{ route('items.search') }}?query=${encodeURIComponent(query)}`)
                                        .then(res => res.text())
                                        .then(html => {
                                            document.querySelector('tbody').innerHTML = html;
-                                           // Update URL with search query
                                            const url = new URL(window.location);
                                            url.searchParams.set('query', query);
                                            window.history.pushState({}, '', url);
