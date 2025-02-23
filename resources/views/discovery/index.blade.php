@@ -4,7 +4,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="csrf-token" content="{{ csrf_token() }}">
-    <title>Create Discovery - {{ config('app.name', 'Handi') }}</title>
+    <title>Keşif Oluşturma - {{ config('app.name', 'Handi') }}</title>
     <link rel="preconnect" href="https://fonts.bunny.net">
     <link href="https://fonts.bunny.net/css?family=figtree:400,500,600&display=swap" rel="stylesheet" />
     @vite(['resources/css/app.css', 'resources/js/app.js'])
@@ -37,74 +37,16 @@
         </div>
     @endif
 
-    <div class="py-12">
-        <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
-            <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
-                <div class="p-6">
-                    <div class="flex justify-between items-center mb-6">
-                        <h2 class="text-2xl font-semibold text-gray-800">Discoveries</h2>
 
-                    </div>
-
-                    <!-- Discoveries List -->
-                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                        @forelse($discoveries as $discovery)
-                            <div class="border rounded-lg p-4 {{
-                                $discovery->status === 'pending' ? 'bg-blue-50 border-blue-200' :
-                                ($discovery->status === 'in_progress' ? 'bg-yellow-50 border-yellow-200' :
-                                ($discovery->status === 'completed' ? 'bg-green-50 border-green-200' :
-                                'bg-red-50 border-red-200'))
-                            }}">
-                                <div class="flex justify-between items-start mb-4">
-                                    <div>
-                                        <h3 class="font-medium text-lg">{{ $discovery->customer_name }}</h3>
-                                        <p class="text-sm text-gray-600">{{ $discovery->customer_phone }}</p>
-                                        <p class="text-sm text-gray-600">{{ $discovery->customer_email }}</p>
-                                    </div>
-                                    <span class="px-2 py-1 rounded-full text-xs font-medium {{
-                                        $discovery->status === 'pending' ? 'bg-blue-100 text-blue-800' :
-                                        ($discovery->status === 'in_progress' ? 'bg-yellow-100 text-yellow-800' :
-                                        ($discovery->status === 'completed' ? 'bg-green-100 text-green-800' :
-                                        'bg-red-100 text-red-800'))
-                                    }}">
-                                        {{ ucfirst(str_replace('_', ' ', $discovery->status)) }}
-                                    </span>
-                                </div>
-
-                                <p class="text-sm text-gray-600 mb-4">{{ Str::limit($discovery->discovery, 100) }}</p>
-
-                                <div class="flex justify-between items-center">
-                                    <span class="text-sm font-medium">{{ number_format($discovery->total_cost, 2) }}</span>
-                                    <a href="{{ route('discovery.show', $discovery) }}"
-                                       class="text-blue-600 hover:text-blue-800 text-sm font-medium">
-                                        View Details →
-                                    </a>
-                                </div>
-                            </div>
-                        @empty
-                            <div class="col-span-full text-center py-12 text-gray-500">
-                                No discoveries found. Create your first discovery!
-                            </div>
-                        @endforelse
-                    </div>
-
-                    <!-- Pagination if needed -->
-                    @if($discoveries->hasPages())
-                        <div class="mt-6">
-                            {{ $discoveries->links() }}
-                        </div>
-                    @endif
-                </div>
-            </div>
-        </div>
-    </div>
 
     <div class="py-12">
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
             <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
                 <div class="p-6">
                     <div class="flex justify-between items-center mb-6">
-                        <h2 class="text-2xl font-semibold text-gray-800">Create New Discovery</h2>
+                        <h2 class="text-2xl font-semibold text-gray-800">Yeni Keşif Oluştur
+
+                        </h2>
 
                     </div>
 
@@ -115,7 +57,7 @@
                             <!-- Customer Information -->
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                                 <div>
-                                    <label for="customer_name" class="block text-sm font-medium text-gray-700 mb-2">Customer Name</label>
+                                    <label for="customer_name" class="block text-sm font-medium text-gray-700 mb-2">Müşteri Adı</label>
                                     <input type="text" name="customer_name" id="customer_name"
                                            class="bg-gray-100 mt-1 block w-full rounded-md border-2 border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 px-4 py-2"
                                            value="{{ old('customer_name') }}" required>
@@ -125,7 +67,7 @@
                                 </div>
 
                                 <div>
-                                    <label for="customer_phone" class="block text-sm font-medium text-gray-700 mb-2">Phone Number</label>
+                                    <label for="customer_phone" class="block text-sm font-medium text-gray-700 mb-2">Telefon Numarası</label>
                                     <input type="text" name="customer_phone" id="customer_phone"
                                            class="bg-gray-100 mt-1 block w-full rounded-md border-2 border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 px-4 py-2"
                                            value="{{ old('customer_phone') }}" required>
@@ -145,7 +87,7 @@
                                 </div>
 
                                 <div class="col-span-full">
-                                    <label for="address" class="block text-sm font-medium text-gray-700 mb-2">Address</label>
+                                    <label for="address" class="block text-sm font-medium text-gray-700 mb-2">Adres</label>
                                     <textarea name="address" id="address" rows="3"
                                               class="bg-gray-100 mt-1 block w-full rounded-md border-2 border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 px-4 py-2"
                                               >{{ old('address') }}</textarea>
@@ -157,7 +99,7 @@
 
                             <!-- Discovery Details -->
                             <div>
-                                <label for="discovery" class="block text-sm font-medium text-gray-700 mb-2">Discovery Details</label>
+                                <label for="discovery" class="block text-sm font-medium text-gray-700 mb-2">Keşif Detayı</label>
                                 <textarea name="discovery" id="discovery" rows="4"
                                           class="bg-gray-100 mt-1 block w-full rounded-md border-2 border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 px-4 py-2"
                                           required>{{ old('discovery') }}</textarea>
@@ -167,7 +109,7 @@
                             </div>
 
                             <div>
-                                <label for="todo_list" class="block text-sm font-medium text-gray-700 mb-2">Todo List</label>
+                                <label for="todo_list" class="block text-sm font-medium text-gray-700 mb-2">Yapılacaklar Listesi</label>
                                 <textarea name="todo_list" id="todo_list" rows="4"
                                           class="bg-gray-100 mt-1 block w-full rounded-md border-2 border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 px-4 py-2">{{ old('todo_list') }}</textarea>
                                 @error('todo_list')
@@ -176,14 +118,14 @@
                             </div>
 
                             <!-- Item Selection -->
-                            <div x-data="itemSelector()" class="space-y-4">
+                            <div x-data="itemSelector()" class="space-y-4 pt-3">
                                 <div class="flex justify-between items-center">
-                                    <label class="block text-sm font-medium text-gray-700 mb-2">Add Items</label>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">Malzeme Ekle</label>
                                     <div class="relative w-64">
                                         <input type="text"
                                                x-model="searchQuery"
                                                @input.debounce.300ms="searchItems()"
-                                               placeholder="Search items..."
+                                               placeholder="Malzeme Arama."
                                                class="bg-gray-100 w-full rounded-md border-2 border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 px-4 py-2">
 
                                         <!-- Search Results Dropdown -->
@@ -216,9 +158,10 @@
                                                         <div class="col-span-5">
                                                             <p class="font-medium" x-text="item.item"></p>
                                                             <p class="text-sm text-gray-500" x-text="item.brand"></p>
+                                                            <p class="font-medium" x-text="item.price"></p>
                                                         </div>
                                                         <div class="col-span-2">
-                                                            <label class="block text-xs text-gray-500 mb-1">Quantity</label>
+                                                            <label class="block text-xs text-gray-500 mb-1">Miktar</label>
                                                             <input type="number"
                                                                    x-model="item.quantity"
                                                                    min="1"
@@ -227,10 +170,10 @@
                                                             <input type="hidden" :name="'items['+index+'][quantity]'" :value="item.quantity">
                                                         </div>
                                                         <div class="col-span-4">
-                                                            <label class="block text-xs text-gray-500 mb-1">Custom Price (optional)</label>
+                                                            <label class="block text-xs text-gray-500 mb-1">Farklı Fiyat (opsiyonel)</label>
                                                             <input type="number"
                                                                    x-model="item.custom_price"
-                                                                   :placeholder="'Default: ' + item.price"
+                                                                   :placeholder="'Malzeme Fiyatı: ' + item.price"
                                                                    step="0.01"
                                                                    class="bg-gray-100 w-32 rounded-md border-2 border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 px-2 py-1">
                                                             <input type="hidden" :name="'items['+index+'][custom_price]'" :value="item.custom_price">
@@ -255,7 +198,7 @@
                             <!-- Cost Information -->
                             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                                 <div>
-                                    <label for="completion_time" class="block text-sm font-medium text-gray-700 mb-2">Completion Time (days)</label>
+                                    <label for="completion_time" class="block text-sm font-medium text-gray-700 mb-2">Tamamlanma Süresi (gün)</label>
                                     <input type="number" name="completion_time" id="completion_time"
                                            class="bg-gray-100 mt-1 block w-full rounded-md border-2 border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 px-4 py-2"
                                            min="1" value="{{ old('completion_time') }}">
@@ -265,7 +208,7 @@
                                 </div>
 
                                 <div>
-                                    <label for="offer_valid_until" class="block text-sm font-medium text-gray-700 mb-2">Offer Valid Until</label>
+                                    <label for="offer_valid_until" class="block text-sm font-medium text-gray-700 mb-2">Teklif Geçerlilik Tarihi</label>
                                     <input type="date" name="offer_valid_until" id="offer_valid_until"
                                            class="bg-gray-100 mt-1 block w-full rounded-md border-2 border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 px-4 py-2"
                                            value="{{ old('offer_valid_until') }}">
@@ -275,7 +218,7 @@
                                 </div>
 
                                 <div>
-                                    <label for="service_cost" class="block text-sm font-medium text-gray-700 mb-2">Service Cost</label>
+                                    <label for="service_cost" class="block text-sm font-medium text-gray-700 mb-2">Servis Masrafı</label>
                                     <input type="number" name="service_cost" id="service_cost"
                                            class="bg-gray-100 mt-1 block w-full rounded-md border-2 border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 px-4 py-2"
                                            min="0" step="0.01" value="{{ old('service_cost', 0) }}">
@@ -285,7 +228,7 @@
                                 </div>
 
                                 <div>
-                                    <label for="transportation_cost" class="block text-sm font-medium text-gray-700 mb-2">Transportation Cost</label>
+                                    <label for="transportation_cost" class="block text-sm font-medium text-gray-700 mb-2">Ulaşım Masrafı</label>
                                     <input type="number" name="transportation_cost" id="transportation_cost"
                                            class="bg-gray-100 mt-1 block w-full rounded-md border-2 border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 px-4 py-2"
                                            min="0" step="0.01" value="{{ old('transportation_cost', 0) }}">
@@ -295,7 +238,7 @@
                                 </div>
 
                                 <div>
-                                    <label for="labor_cost" class="block text-sm font-medium text-gray-700 mb-2">Labor Cost</label>
+                                    <label for="labor_cost" class="block text-sm font-medium text-gray-700 mb-2">İşçilik Masrafı</label>
                                     <input type="number" name="labor_cost" id="labor_cost"
                                            class="bg-gray-100 mt-1 block w-full rounded-md border-2 border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 px-4 py-2"
                                            min="0" step="0.01" value="{{ old('labor_cost', 0) }}">
@@ -305,7 +248,7 @@
                                 </div>
 
                                 <div>
-                                    <label for="extra_fee" class="block text-sm font-medium text-gray-700 mb-2">Extra Fee</label>
+                                    <label for="extra_fee" class="block text-sm font-medium text-gray-700 mb-2">Ekstra Masraflar</label>
                                     <input type="number" name="extra_fee" id="extra_fee"
                                            class="bg-gray-100 mt-1 block w-full rounded-md border-2 border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 px-4 py-2"
                                            min="0" step="0.01" value="{{ old('extra_fee', 0) }}">
@@ -315,7 +258,7 @@
                                 </div>
 
                                 <div>
-                                    <label for="discount_rate" class="block text-sm font-medium text-gray-700 mb-2">Discount Rate (%)</label>
+                                    <label for="discount_rate" class="block text-sm font-medium text-gray-700 mb-2">İndirim Oranı (%)</label>
                                     <input type="number" name="discount_rate" id="discount_rate"
                                            class="bg-gray-100 mt-1 block w-full rounded-md border-2 border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 px-4 py-2"
                                            min="0" max="100" step="0.01" value="{{ old('discount_rate', 0) }}">
@@ -325,7 +268,7 @@
                                 </div>
 
                                 <div>
-                                    <label for="discount_amount" class="block text-sm font-medium text-gray-700 mb-2">Discount Amount</label>
+                                    <label for="discount_amount" class="block text-sm font-medium text-gray-700 mb-2">İndirim Miktarı</label>
                                     <input type="number" name="discount_amount" id="discount_amount"
                                            class="bg-gray-100 mt-1 block w-full rounded-md border-2 border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 px-4 py-2"
                                            min="0" step="0.01" value="{{ old('discount_amount', 0) }}">
@@ -337,20 +280,20 @@
 
                             <!-- Notes -->
                             <div>
-                                <label for="note_to_customer" class="block text-sm font-medium text-gray-700 mb-2">Note to Customer</label>
+                                <label for="note_to_customer" class="block text-sm font-medium text-gray-700 mb-2">Müşteriye Not</label>
                                 <textarea name="note_to_customer" id="note_to_customer" rows="3"
                                           class="bg-gray-100 mt-1 block w-full rounded-md border-2 border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 px-4 py-2">{{ old('note_to_customer') }}</textarea>
                             </div>
 
                             <div>
-                                <label for="note_to_handi" class="block text-sm font-medium text-gray-700 mb-2">Internal Note</label>
+                                <label for="note_to_handi" class="block text-sm font-medium text-gray-700 mb-2">Özel Not</label>
                                 <textarea name="note_to_handi" id="note_to_handi" rows="3"
                                           class="bg-gray-100 mt-1 block w-full rounded-md border-2 border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 px-4 py-2">{{ old('note_to_handi') }}</textarea>
                             </div>
 
                             <!-- Payment Method -->
                             <div>
-                                <label for="payment_method" class="block text-sm font-medium text-gray-700 mb-2">Payment Method</label>
+                                <label for="payment_method" class="block text-sm font-medium text-gray-700 mb-2">Ödemek Şekli</label>
                                 <input type="text" name="payment_method" id="payment_method"
                                        class="bg-gray-100 mt-1 block w-full rounded-md border-2 border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 px-4 py-2"
                                        value="{{ old('payment_method') }}">
@@ -362,7 +305,7 @@
                             <!-- Image Upload with Preview -->
                             <div x-data="imageUploader()">
                                 <div class="flex justify-between items-center mb-2">
-                                    <label for="images" class="block text-sm font-medium text-gray-700">Images</label>
+                                    <label for="images" class="block text-sm font-medium text-gray-700">Resimler</label>
                                     <button type="button"
                                             @click="clearAllImages()"
                                             x-show="previews.length > 0"
@@ -402,7 +345,7 @@
                             <div class="flex justify-end space-x-3">
                                 <button type="submit"
                                         class="bg-blue-500 text-white px-6 py-3 rounded-md hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 text-lg font-medium">
-                                    Create Discovery
+                                    Keşif Oluştur
                                 </button>
                             </div>
                         </div>

@@ -100,7 +100,7 @@ class ItemController extends Controller
         ], 200);
     }
 
-    // Add new web-specific methods
+
     public function webIndex(Request $request)
     {
         $query = $request->get('query');
