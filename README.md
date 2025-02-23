@@ -11,7 +11,7 @@
 
 ## About Handi
 
-Handi is a web application built with Laravel that helps manage service discoveries and item tracking. It provides both web interface and API endpoints for creating and managing service discoveries.
+Handi is web application built with Laravel that helps manage service discoveries and item tracking. It provides both web interface and API endpoints for creating and managing service discoveries.
 
 ## Features
 

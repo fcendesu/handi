@@ -7,7 +7,7 @@
             <div class="text-sm text-gray-500">{{ $item->brand }}</div>
         </td>
         <td class="px-6 py-4 whitespace-nowrap">
-            <div class="text-sm text-gray-500">${{ number_format($item->price, 2) }}</div>
+            <div class="text-sm text-gray-500">{{ number_format($item->price, 2) }}</div>
         </td>
         <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
             <div class="flex justify-end space-x-3">

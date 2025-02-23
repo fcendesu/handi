@@ -363,7 +363,11 @@ class DiscoveryController extends Controller
                 'note_to_customer' => $discovery->note_to_customer,
                 'note_to_handi' => $discovery->note_to_handi,
                 'completion_time' => $discovery->completion_time,
+<<<<<<< HEAD
                 'offer_valid_until' => $discovery->offer_valid_until ? $discovery->offer_valid_until->toDateString() : null,
+=======
+                'offer_valid_until' => $discovery->offer_valid_until,
+>>>>>>> 0dee8bac052be9220222afa601a3d5d27b616754
                 'costs' => [
                     'service_cost' => $discovery->service_cost,
                     'transportation_cost' => $discovery->transportation_cost,
