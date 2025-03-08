@@ -1,42 +1,34 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
-
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
-
-# Handi - Service Discovery Management System
+Handi: Discovery Management System
 
 ## About Handi
 
-Handi is web application built with Laravel that helps manage service discoveries and item tracking. It provides both web interface and API endpoints for creating and managing service discoveries.
+Handi is a professional web application built with Laravel that streamlines service discovery management and item tracking for service-based businesses. It offers both a comprehensive web interface and robust API endpoints for creating and managing service discoveries.
 
 ## Features
 
--   Service Discovery Management
+### Service Discovery Management
 
-    -   Customer information tracking
-    -   Detailed service descriptions
-    -   Todo list management
-    -   Cost calculation and tracking
-    -   Image attachments support
-    -   Notes for customers and internal use
+-   **Customer Information Management**: Track and organize customer details efficiently
+-   **Discovery Documentation**: Create detailed service descriptions and assessments
+-   **Task Management**: Maintain organized todo lists for each service discovery
+-   **Financial Tracking**: Comprehensive cost calculation and tracking system
+-   **Visual Documentation**: Support for multiple image attachments
+-   **Communication Tools**: Separate notes for customer communication and internal use
 
--   Item Management
+### Item Management
 
-    -   Item catalog with search functionality
-    -   Price tracking
-    -   Custom pricing per discovery
-    -   Quantity management
+-   **Dynamic Item Catalog**: Full-featured catalog with powerful search functionality
+-   **Price Management**: Track and update item pricing
+-   **Flexible Pricing**: Set custom prices per discovery when needed
+-   **Inventory Control**: Manage item quantities effectively
 
--   Cost Management
-    -   Service cost tracking
-    -   Transportation cost calculation
-    -   Labor cost tracking
-    -   Extra fees management
-    -   Flexible discount system (rate or fixed amount)
+### Cost Management
+
+-   **Service Cost Tracking**: Track base service costs
+-   **Transportation Expenses**: Calculate and record transportation costs
+-   **Labor Cost Management**: Track labor expenses separately
+-   **Additional Expense Handling**: Manage extra fees as needed
+-   **Advanced Discount System**: Apply discounts as either percentage rates or fixed amounts
 
 ## Installation
 
@@ -61,7 +53,7 @@ cp .env.example .env
 php artisan key:generate
 ```
 
-4. Configure your database in `.env` file
+4. Configure your database in .env file
 
 ```env
 DB_CONNECTION=sqlite
@@ -121,13 +113,30 @@ php artisan serve
     -   `quantity`: integer
     -   `custom_price`: decimal
 
+## Technical Details
+
+### Cost Calculation
+
+Handi implements a sophisticated cost calculation system that:
+
+-   Sums base costs (service, transportation, labor, and extra fees)
+-   Applies percentage-based discounts to the base amount
+-   Adds costs of all associated items with their quantities
+-   Applies any fixed discount amounts to the final total
+
+### Database Structure
+
+-   **Discoveries**: Stores all service discovery information including customer details and cost data
+-   **Items**: Catalogs all available items with their standard pricing
+-   **Discovery-Item Relationship**: Tracks which items are associated with each discovery, including quantities and custom pricing when applicable
+
 ## Security
 
 -   CSRF protection enabled
--   Form validation
--   File upload restrictions
+-   Comprehensive form validation
+-   Secure file upload restrictions
 -   Authentication required for all actions
 
 ## License
 
-This project is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+This project is open-source software licensed under the [MIT license](https://opensource.org/licenses/MIT).
