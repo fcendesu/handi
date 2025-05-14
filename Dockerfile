@@ -3,12 +3,11 @@ FROM composer:2.5 AS build-backend
 
 WORKDIR /var/www
 
-# Copy composer files and install PHP dependencies
-COPY composer.json composer.lock ./
-RUN composer install --no-dev --optimize-autoloader
-
-# Copy the rest of the application code
+# Copy application code
 COPY . .
+
+# Install PHP dependencies
+RUN composer install --no-dev --optimize-autoloader
 
 # Stage 2: Build frontend assets
 FROM node:20 AS build-frontend
