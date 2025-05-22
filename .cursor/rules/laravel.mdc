@@ -55,6 +55,8 @@ alwaysApply: true
   3. Implement proper request validation using Form Requests.
   4. Use Laravel's Blade templating engine for views.
   5. Implement proper database relationships using Eloquent.
+  6. Use Tailwind CSS
   7. Implement proper API resource transformations.
   9. Implement proper database transactions for data integrity.
+
 
