@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -11,6 +13,10 @@ class Item extends Model
     use HasFactory;
 
     protected $fillable = ['item', 'brand', 'price'];
+
+    protected $casts = [
+        'price' => 'decimal:2',
+    ];
 
     /**
      * Get the discoveries associated with the item.

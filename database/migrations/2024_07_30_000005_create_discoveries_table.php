@@ -10,8 +10,12 @@ return new class extends Migration {
      */
     public function up(): void
     {
-        Schema::create('discovaries', function (Blueprint $table) {
+        Schema::create('discoveries', function (Blueprint $table) {
             $table->id();
+            $table->foreignId('creator_id')->constrained('users')->onDelete('cascade');
+            $table->foreignId('assignee_id')->nullable()->constrained('users')->onDelete('set null');
+            $table->foreignId('company_id')->nullable()->constrained('companies')->onDelete('cascade');
+            $table->foreignId('work_group_id')->nullable()->constrained('work_groups')->onDelete('set null');
             $table->string('share_token', 64)->nullable()->unique();
             $table->string('customer_name');
             $table->string('customer_phone');
@@ -37,7 +41,7 @@ return new class extends Migration {
 
         Schema::create('discovery_item', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('discovery_id')->constrained('discovaries')->onDelete('cascade');
+            $table->foreignId('discovery_id')->constrained('discoveries')->onDelete('cascade');
             $table->foreignId('item_id')->constrained('items')->onDelete('cascade');
             $table->integer('quantity')->default(1);
             $table->decimal('custom_price', 10, 2)->nullable();
@@ -50,7 +54,22 @@ return new class extends Migration {
      */
     public function down(): void
     {
-        Schema::dropIfExists('discovaries');
+        Schema::table('discoveries', function (Blueprint $table) {
+            // Drop foreign keys in the correct order if they might exist
+            if (Schema::hasColumn('discoveries', 'creator_id')) {
+                $table->dropForeign(['creator_id']);
+            }
+            if (Schema::hasColumn('discoveries', 'assignee_id')) {
+                $table->dropForeign(['assignee_id']);
+            }
+            if (Schema::hasColumn('discoveries', 'company_id')) {
+                $table->dropForeign(['company_id']);
+            }
+            if (Schema::hasColumn('discoveries', 'work_group_id')) {
+                $table->dropForeign(['work_group_id']);
+            }
+        });
         Schema::dropIfExists('discovery_item');
+        Schema::dropIfExists('discoveries');
     }
 };

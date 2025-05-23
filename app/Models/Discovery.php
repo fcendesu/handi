@@ -1,8 +1,11 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Support\Str;
 
@@ -13,7 +16,7 @@ class Discovery extends Model
      *
      * @var string
      */
-    protected $table = 'discovaries';
+    protected $table = 'discoveries';
 
     /**
      * The attributes that are mass assignable.
@@ -21,10 +24,14 @@ class Discovery extends Model
      * @var array<string>
      */
     protected $fillable = [
+        'creator_id',
+        'assignee_id',
+        'company_id',
+        'work_group_id',
         'customer_name',
         'customer_phone',
         'customer_email',
-        'address',  // Add this line
+        'address',
         'discovery',
         'todo_list',
         'note_to_customer',
@@ -40,7 +47,7 @@ class Discovery extends Model
         'discount_amount',
         'payment_method',
         'images',
-        'share_token'
+        'share_token',
     ];
 
     protected $casts = [
@@ -52,10 +59,11 @@ class Discovery extends Model
         'labor_cost' => 'decimal:2',
         'extra_fee' => 'decimal:2',
         'discount_rate' => 'decimal:2',
-        'discount_amount' => 'decimal:2'
+        'discount_amount' => 'decimal:2',
     ];
 
     const STATUS_PENDING = 'pending';
+    const STATUS_APPROVED = 'approved';
     const STATUS_IN_PROGRESS = 'in_progress';
     const STATUS_COMPLETED = 'completed';
     const STATUS_CANCELLED = 'cancelled';
@@ -64,9 +72,10 @@ class Discovery extends Model
     {
         return [
             self::STATUS_PENDING,
+            self::STATUS_APPROVED,
             self::STATUS_IN_PROGRESS,
             self::STATUS_COMPLETED,
-            self::STATUS_CANCELLED
+            self::STATUS_CANCELLED,
         ];
     }
 
@@ -74,7 +83,7 @@ class Discovery extends Model
     {
         parent::boot();
 
-        static::creating(function ($discovery) {
+        static::creating(function (self $discovery) {
             if (!$discovery->status) {
                 $discovery->status = self::STATUS_PENDING;
             }
@@ -84,41 +93,24 @@ class Discovery extends Model
         });
     }
 
-    public function getTotalCostAttribute()
+    public function creator(): BelongsTo
     {
-        // Calculate base costs
-        $baseCosts = $this->service_cost +
-            $this->transportation_cost +
-            $this->labor_cost +
-            $this->extra_fee;
-
-        // Apply discount rate to base costs
-        if ($this->discount_rate > 0) {
-            $baseCosts = $baseCosts * (1 - ($this->discount_rate / 100));
-        }
-
-        // Calculate items total separately
-        $itemsTotal = $this->items->sum(function ($item) {
-            return ($item->pivot->custom_price ?? $item->price) * $item->pivot->quantity;
-        });
-
-        // Sum discounted base costs with items total
-        $total = $baseCosts + $itemsTotal;
-
-        // Apply fixed discount amount last
-        $total = $total - $this->discount_amount;
-
-        return max(0, round($total, 2));
+        return $this->belongsTo(User::class, 'creator_id');
     }
 
-    public function getDiscountRateAmountAttribute()
+    public function assignee(): BelongsTo
     {
-        $baseCosts = $this->service_cost +
-            $this->transportation_cost +
-            $this->labor_cost +
-            $this->extra_fee;
+        return $this->belongsTo(User::class, 'assignee_id');
+    }
 
-        return round($baseCosts * ($this->discount_rate / 100), 2);
+    public function company(): BelongsTo
+    {
+        return $this->belongsTo(Company::class);
+    }
+
+    public function workGroup(): BelongsTo
+    {
+        return $this->belongsTo(WorkGroup::class);
     }
 
     public function items(): BelongsToMany
@@ -126,6 +118,37 @@ class Discovery extends Model
         return $this->belongsToMany(Item::class, 'discovery_item')
             ->withPivot('quantity', 'custom_price')
             ->withTimestamps();
+    }
+
+    public function getTotalCostAttribute(): float
+    {
+        $baseCosts = (float)$this->service_cost +
+            (float)$this->transportation_cost +
+            (float)$this->labor_cost +
+            (float)$this->extra_fee;
+
+        if ((float)$this->discount_rate > 0) {
+            $baseCosts *= (1 - ((float)$this->discount_rate / 100));
+        }
+
+        $itemsTotal = $this->items->sum(function ($item) {
+            return ((float)($item->pivot->custom_price ?? $item->price)) * (int)$item->pivot->quantity;
+        });
+
+        $total = $baseCosts + $itemsTotal;
+        $total -= (float)$this->discount_amount;
+
+        return max(0, round($total, 2));
+    }
+
+    public function getDiscountRateAmountAttribute(): float
+    {
+        $baseCosts = (float)$this->service_cost +
+            (float)$this->transportation_cost +
+            (float)$this->labor_cost +
+            (float)$this->extra_fee;
+
+        return round($baseCosts * ((float)$this->discount_rate / 100), 2);
     }
 
     public function getShareUrlAttribute(): string
