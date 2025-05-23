@@ -22,7 +22,7 @@ class Company extends Model
     ];
 
     // Relationships
-    public function admin(): BelongsTo
+    public function admin(): BelongsTo // Primary admin (founder)
     {
         return $this->belongsTo(User::class, 'admin_id');
     }
@@ -30,6 +30,11 @@ class Company extends Model
     public function employees(): HasMany
     {
         return $this->hasMany(User::class, 'company_id')->where('user_type', User::TYPE_COMPANY_EMPLOYEE);
+    }
+
+    public function allAdmins(): HasMany
+    {
+        return $this->hasMany(User::class, 'company_id')->where('user_type', User::TYPE_COMPANY_ADMIN);
     }
 
     public function discoveries(): HasMany
