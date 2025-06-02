@@ -14,10 +14,10 @@ class DiscoveryController extends Controller
     public function index()
     {
         $user = auth()->user();
-        
+
         // Scope discoveries based on user type
         $query = Discovery::with(['creator', 'assignee', 'company', 'workGroup']);
-        
+
         if ($user->isSoloHandyman()) {
             // Solo handyman sees only their own discoveries
             $query->where('creator_id', $user->id);
@@ -27,12 +27,12 @@ class DiscoveryController extends Controller
         } elseif ($user->isCompanyEmployee()) {
             // Employees see discoveries from their work groups or assigned to them
             $workGroupIds = $user->workGroups->pluck('id');
-            $query->where(function($q) use ($user, $workGroupIds) {
+            $query->where(function ($q) use ($user, $workGroupIds) {
                 $q->whereIn('work_group_id', $workGroupIds)
-                  ->orWhere('assignee_id', $user->id);
+                    ->orWhere('assignee_id', $user->id);
             });
         }
-        
+
         $discoveries = $query->latest()->paginate(12);
         return view('discovery.index', compact('discoveries'));
     }
@@ -41,12 +41,12 @@ class DiscoveryController extends Controller
     public function store(Request $request)
     {
         $user = auth()->user();
-        
+
         // Only solo handymen and company admins can create discoveries
         if ($user->isCompanyEmployee()) {
             abort(403, 'Employees cannot create discoveries. Only admins can create discoveries.');
         }
-        
+
         $validated = $request->validate([
             'customer_name' => 'required|string|max:255',
             'customer_phone' => 'required|string|max:255',
@@ -241,7 +241,7 @@ class DiscoveryController extends Controller
     {
         try {
             $user = auth()->user();
-            
+
             // Only solo handymen and company admins can create discoveries
             if ($user->isCompanyEmployee()) {
                 return response()->json([
@@ -361,7 +361,7 @@ class DiscoveryController extends Controller
     public function assignToSelf(Discovery $discovery)
     {
         $user = auth()->user();
-        
+
         // Check if user can assign themselves (company employees only for mobile)
         if (!$user->isCompanyEmployee()) {
             return response()->json([
@@ -369,24 +369,24 @@ class DiscoveryController extends Controller
                 'message' => 'Only company employees can assign themselves to discoveries'
             ], 403);
         }
-        
+
         // Check if discovery is from user's work groups or company
         $userWorkGroupIds = $user->workGroups->pluck('id')->toArray();
         $canAssign = false;
-        
+
         if ($discovery->work_group_id && in_array($discovery->work_group_id, $userWorkGroupIds)) {
             $canAssign = true;
         } elseif ($discovery->company_id === $user->company_id) {
             $canAssign = true;
         }
-        
+
         if (!$canAssign) {
             return response()->json([
                 'success' => false,
                 'message' => 'You cannot assign yourself to this discovery'
             ], 403);
         }
-        
+
         // Check if discovery is available for assignment
         if ($discovery->assignee_id) {
             return response()->json([
@@ -394,9 +394,9 @@ class DiscoveryController extends Controller
                 'message' => 'Discovery is already assigned to someone else'
             ], 400);
         }
-        
+
         $discovery->update(['assignee_id' => $user->id]);
-        
+
         return response()->json([
             'success' => true,
             'message' => 'Discovery assigned to you successfully',
@@ -411,7 +411,7 @@ class DiscoveryController extends Controller
     public function unassignFromSelf(Discovery $discovery)
     {
         $user = auth()->user();
-        
+
         // Check if user is assigned to this discovery
         if ($discovery->assignee_id !== $user->id) {
             return response()->json([
@@ -419,9 +419,9 @@ class DiscoveryController extends Controller
                 'message' => 'You are not assigned to this discovery'
             ], 403);
         }
-        
+
         $discovery->update(['assignee_id' => null]);
-        
+
         return response()->json([
             'success' => true,
             'message' => 'You have unassigned yourself from this discovery',
@@ -436,10 +436,10 @@ class DiscoveryController extends Controller
     {
         try {
             $user = auth()->user();
-            
+
             // Scope discoveries based on user type
             $query = Discovery::with('items');
-            
+
             if ($user->isSoloHandyman()) {
                 // Solo handyman sees only their own discoveries
                 $query->where('creator_id', $user->id);
@@ -449,12 +449,12 @@ class DiscoveryController extends Controller
             } elseif ($user->isCompanyEmployee()) {
                 // Employees see discoveries from their work groups or assigned to them
                 $workGroupIds = $user->workGroups->pluck('id');
-                $query->where(function($q) use ($user, $workGroupIds) {
+                $query->where(function ($q) use ($user, $workGroupIds) {
                     $q->whereIn('work_group_id', $workGroupIds)
-                      ->orWhere('assignee_id', $user->id);
+                        ->orWhere('assignee_id', $user->id);
                 });
             }
-            
+
             $discoveries = $query->latest()
                 ->get()
                 ->map(function ($discovery) {

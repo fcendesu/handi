@@ -16,27 +16,27 @@ class CompanyController extends Controller
     public function index()
     {
         $user = auth()->user();
-        
+
         // Only company admins can view their company details
         if (!$user->isCompanyAdmin()) {
             abort(403, 'Only company admins can access company management.');
         }
-        
+
         $company = $user->managedCompany ?? $user->company;
         $company->load(['admin', 'employees', 'workGroups', 'discoveries']);
-        
+
         return view('company.index', compact('company'));
     }
 
     public function show(Company $company)
     {
         $user = auth()->user();
-        
+
         // Only company admin can view their company
         if (!$user->isCompanyAdmin() || $user->company_id !== $company->id) {
             abort(403, 'You can only view your own company details.');
         }
-        
+
         $company->load(['admin', 'employees', 'workGroups', 'discoveries']);
         return view('company.show', compact('company'));
     }
@@ -44,12 +44,12 @@ class CompanyController extends Controller
     public function update(Request $request, Company $company)
     {
         $user = auth()->user();
-        
+
         // Only company admin can update their company
         if (!$user->isCompanyAdmin() || $user->company_id !== $company->id) {
             abort(403, 'You can only update your own company details.');
         }
-        
+
         $validated = $request->validate([
             'name' => 'required|string|max:255',
             'address' => 'nullable|string|max:1000',
@@ -81,7 +81,7 @@ class CompanyController extends Controller
     public function createEmployee(Request $request)
     {
         $user = auth()->user();
-        
+
         // Only company admins can create employees
         if (!$user->isCompanyAdmin()) {
             abort(403, 'Only company admins can create employees.');
@@ -111,7 +111,7 @@ class CompanyController extends Controller
                 $validWorkGroups = $user->company->workGroups()
                     ->whereIn('id', $validated['work_group_ids'])
                     ->pluck('id');
-                
+
                 $employee->workGroups()->attach($validWorkGroups);
             }
 
@@ -130,7 +130,7 @@ class CompanyController extends Controller
     public function updateEmployee(Request $request, User $employee)
     {
         $user = auth()->user();
-        
+
         // Only company admin can update employees from their company
         if (!$user->isCompanyAdmin() || $employee->company_id !== $user->company_id || !$employee->isCompanyEmployee()) {
             abort(403, 'You can only update employees from your company.');
@@ -168,7 +168,7 @@ class CompanyController extends Controller
                 $validWorkGroups = $user->company->workGroups()
                     ->whereIn('id', $validated['work_group_ids'])
                     ->pluck('id');
-                
+
                 $employee->workGroups()->sync($validWorkGroups);
             }
 
@@ -187,7 +187,7 @@ class CompanyController extends Controller
     public function deleteEmployee(User $employee)
     {
         $user = auth()->user();
-        
+
         // Only company admin can delete employees from their company
         if (!$user->isCompanyAdmin() || $employee->company_id !== $user->company_id || !$employee->isCompanyEmployee()) {
             abort(403, 'You can only delete employees from your company.');
@@ -209,7 +209,7 @@ class CompanyController extends Controller
     {
         try {
             $user = auth()->user();
-            
+
             // Only company admin can view company details
             if (!$user->isCompanyAdmin()) {
                 return response()->json([
@@ -217,7 +217,7 @@ class CompanyController extends Controller
                     'message' => 'Only company admins can access company details.'
                 ], 403);
             }
-            
+
             $company = $user->managedCompany ?? $user->company;
             $company->load(['admin', 'employees', 'workGroups']);
 
@@ -278,7 +278,7 @@ class CompanyController extends Controller
     {
         try {
             $user = auth()->user();
-            
+
             // Only company admins can create employees
             if (!$user->isCompanyAdmin()) {
                 return response()->json([
@@ -310,7 +310,7 @@ class CompanyController extends Controller
                 $validWorkGroups = $user->company->workGroups()
                     ->whereIn('id', $validated['work_group_ids'])
                     ->pluck('id');
-                
+
                 $employee->workGroups()->attach($validWorkGroups);
             }
 
@@ -354,7 +354,7 @@ class CompanyController extends Controller
     {
         try {
             $user = auth()->user();
-            
+
             // Only company admin can update employees from their company
             if (!$user->isCompanyAdmin() || $employee->company_id !== $user->company_id || !$employee->isCompanyEmployee()) {
                 return response()->json([
@@ -398,7 +398,7 @@ class CompanyController extends Controller
                 $validWorkGroups = $user->company->workGroups()
                     ->whereIn('id', $validated['work_group_ids'])
                     ->pluck('id');
-                
+
                 $employee->workGroups()->sync($validWorkGroups);
             }
 
@@ -443,7 +443,7 @@ class CompanyController extends Controller
     {
         try {
             $user = auth()->user();
-            
+
             // Only company admin can delete employees from their company
             if (!$user->isCompanyAdmin() || $employee->company_id !== $user->company_id || !$employee->isCompanyEmployee()) {
                 return response()->json([

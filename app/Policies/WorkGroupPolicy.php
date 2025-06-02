@@ -25,17 +25,17 @@ class WorkGroupPolicy
         if ($user->isSoloHandyman()) {
             return $workGroup->creator_id === $user->id;
         }
-        
+
         // Company admin can view company work groups
         if ($user->isCompanyAdmin()) {
             return $workGroup->company_id === $user->company_id;
         }
-        
+
         // Company employee can view work groups they belong to
         if ($user->isCompanyEmployee()) {
             return $user->workGroups()->where('work_groups.id', $workGroup->id)->exists();
         }
-        
+
         return false;
     }
 
@@ -57,12 +57,12 @@ class WorkGroupPolicy
         if ($user->isSoloHandyman()) {
             return $workGroup->creator_id === $user->id;
         }
-        
+
         // Company admin can update company work groups
         if ($user->isCompanyAdmin()) {
             return $workGroup->company_id === $user->company_id;
         }
-        
+
         // Company employees cannot update work groups
         return false;
     }
@@ -76,12 +76,12 @@ class WorkGroupPolicy
         if ($user->isSoloHandyman()) {
             return $workGroup->creator_id === $user->id;
         }
-        
+
         // Company admin can delete company work groups
         if ($user->isCompanyAdmin()) {
             return $workGroup->company_id === $user->company_id;
         }
-        
+
         // Company employees cannot delete work groups
         return false;
     }

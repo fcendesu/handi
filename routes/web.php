@@ -29,16 +29,16 @@ Route::middleware('guest')->group(function () {
 Route::middleware(['auth', 'restrict.employee.dashboard'])->group(function () {
     Route::get('/dashboard', function () {
         $user = auth()->user();
-        
+
         // Scope discoveries based on user type for dashboard
         $query = Discovery::query();
-        
+
         if ($user->isSoloHandyman()) {
             $query->where('creator_id', $user->id);
         } elseif ($user->isCompanyAdmin()) {
             $query->where('company_id', $user->company_id);
         }
-        
+
         $discoveries = [
             'in_progress' => $query->clone()->where('status', Discovery::STATUS_IN_PROGRESS)->latest()->get(),
             'pending' => $query->clone()->where('status', Discovery::STATUS_PENDING)->latest()->get(),

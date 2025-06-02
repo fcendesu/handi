@@ -16,10 +16,10 @@ class WorkGroupController extends Controller
     public function index()
     {
         $user = auth()->user();
-        
+
         // Scope work groups based on user type
         $query = WorkGroup::with(['creator', 'company', 'users']);
-        
+
         if ($user->isSoloHandyman()) {
             // Solo handyman sees only their work groups
             $query->where('creator_id', $user->id);
@@ -31,7 +31,7 @@ class WorkGroupController extends Controller
             $workGroupIds = $user->workGroups->pluck('id');
             $query->whereIn('id', $workGroupIds);
         }
-        
+
         $workGroups = $query->latest()->paginate(12);
         return view('work-groups.index', compact('workGroups'));
     }
@@ -39,12 +39,12 @@ class WorkGroupController extends Controller
     public function store(Request $request)
     {
         $user = auth()->user();
-        
+
         // Only solo handymen and company admins can create work groups
         if ($user->isCompanyEmployee()) {
             abort(403, 'Employees cannot create work groups.');
         }
-        
+
         $validated = $request->validate([
             'name' => 'required|string|max:255|unique:work_groups,name,NULL,id,creator_id,' . $user->id,
         ]);
@@ -73,7 +73,7 @@ class WorkGroupController extends Controller
     public function show(WorkGroup $workGroup)
     {
         $this->authorize('view', $workGroup);
-        
+
         $workGroup->load(['creator', 'company', 'users', 'discoveries']);
         return view('work-groups.show', compact('workGroup'));
     }
@@ -81,7 +81,7 @@ class WorkGroupController extends Controller
     public function update(Request $request, WorkGroup $workGroup)
     {
         $this->authorize('update', $workGroup);
-        
+
         $validated = $request->validate([
             'name' => [
                 'required',
@@ -111,7 +111,7 @@ class WorkGroupController extends Controller
     public function destroy(WorkGroup $workGroup)
     {
         $this->authorize('delete', $workGroup);
-        
+
         try {
             $workGroup->delete();
             return redirect()->route('work-groups.index')->with('success', 'Work group deleted successfully');
@@ -124,26 +124,26 @@ class WorkGroupController extends Controller
     public function assignUser(Request $request, WorkGroup $workGroup)
     {
         $this->authorize('update', $workGroup);
-        
+
         $validated = $request->validate([
             'user_id' => 'required|exists:users,id'
         ]);
 
         try {
             $user = User::findOrFail($validated['user_id']);
-            
+
             // Validate user can be assigned to this work group
             if ($workGroup->company_id && $user->company_id !== $workGroup->company_id) {
                 return back()->withErrors(['error' => 'User must belong to the same company as the work group.']);
             }
-            
+
             if (!$workGroup->users()->where('user_id', $user->id)->exists()) {
                 $workGroup->users()->attach($user->id);
                 return back()->with('success', $user->name . ' has been assigned to the work group.');
             }
-            
+
             return back()->withErrors(['error' => 'User is already assigned to this work group.']);
-            
+
         } catch (\Exception $e) {
             \Log::error('Work group user assignment failed: ' . $e->getMessage());
             return back()->withErrors(['error' => 'Failed to assign user to work group.']);
@@ -153,7 +153,7 @@ class WorkGroupController extends Controller
     public function removeUser(Request $request, WorkGroup $workGroup)
     {
         $this->authorize('update', $workGroup);
-        
+
         $validated = $request->validate([
             'user_id' => 'required|exists:users,id'
         ]);
@@ -161,9 +161,9 @@ class WorkGroupController extends Controller
         try {
             $user = User::findOrFail($validated['user_id']);
             $workGroup->users()->detach($user->id);
-            
+
             return back()->with('success', $user->name . ' has been removed from the work group.');
-            
+
         } catch (\Exception $e) {
             \Log::error('Work group user removal failed: ' . $e->getMessage());
             return back()->withErrors(['error' => 'Failed to remove user from work group.']);
@@ -175,10 +175,10 @@ class WorkGroupController extends Controller
     {
         try {
             $user = auth()->user();
-            
+
             // Scope work groups based on user type
             $query = WorkGroup::with(['creator', 'company']);
-            
+
             if ($user->isSoloHandyman()) {
                 $query->where('creator_id', $user->id);
             } elseif ($user->isCompanyAdmin()) {
@@ -187,7 +187,7 @@ class WorkGroupController extends Controller
                 $workGroupIds = $user->workGroups->pluck('id');
                 $query->whereIn('id', $workGroupIds);
             }
-            
+
             $workGroups = $query->latest()
                 ->get()
                 ->map(function ($workGroup) {
@@ -220,7 +220,7 @@ class WorkGroupController extends Controller
     {
         try {
             $user = auth()->user();
-            
+
             // Only solo handymen and company admins can create work groups
             if ($user->isCompanyEmployee()) {
                 return response()->json([
