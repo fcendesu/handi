@@ -5,6 +5,7 @@ use App\Http\Controllers\DiscoveryController;
 use App\Http\Controllers\ItemController;
 use App\Http\Controllers\WorkGroupController;
 use App\Http\Controllers\CompanyController;
+use App\Http\Controllers\InvitationController;
 use Illuminate\Support\Facades\Route;
 use App\Models\Discovery;
 
@@ -24,6 +25,10 @@ Route::middleware('guest')->group(function () {
     // Handle form submissions
     Route::post('/login', [AuthenticationController::class, 'webLogin']);
     Route::post('/register', [AuthenticationController::class, 'webRegister']);
+
+    // Invitation routes (accessible to guests for registration)
+    Route::post('/invitation/validate', [InvitationController::class, 'validate'])->name('invitation.validate');
+    Route::get('/register/{invitation}', [InvitationController::class, 'show'])->name('invitation.register');
 });
 
 Route::middleware(['auth', 'restrict.employee.dashboard'])->group(function () {
@@ -81,6 +86,12 @@ Route::middleware(['auth', 'restrict.employee.dashboard'])->group(function () {
     Route::post('/company/employees', [CompanyController::class, 'createEmployee'])->name('company.create-employee');
     Route::patch('/company/employees/{employee}', [CompanyController::class, 'updateEmployee'])->name('company.update-employee');
     Route::delete('/company/employees/{employee}', [CompanyController::class, 'deleteEmployee'])->name('company.delete-employee');
+
+    // Invitation Management Routes (for company admins)
+    Route::get('/invitations', [InvitationController::class, 'index'])->name('invitations.index');
+    Route::post('/invitations', [InvitationController::class, 'create'])->name('invitations.create');
+    Route::delete('/invitations/{invitation}', [InvitationController::class, 'destroy'])->name('invitations.destroy');
+    Route::post('/invitations/{invitation}/resend', [InvitationController::class, 'resend'])->name('invitations.resend');
 
     Route::post('/logout', [AuthenticationController::class, 'logout'])->name('logout');
 });
