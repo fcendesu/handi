@@ -23,52 +23,38 @@
                 <!-- User Type Selection -->
                 <div class="mb-8">
                     <label class="block text-gray-700 text-sm font-bold mb-4">What best describes you?</label>
-                    <div class="grid md:grid-cols-3 gap-4">
-                        <div class="border rounded-lg p-4 cursor-pointer hover:border-blue-500 transition-colors user-type-card" 
+                    <div class="grid md:grid-cols-2 gap-6">
+                        <div class="border rounded-lg p-6 cursor-pointer hover:border-blue-500 transition-colors user-type-card" 
                              data-type="solo_handyman">
                             <input type="radio" name="user_type" id="solo_handyman" value="solo_handyman" 
                                 class="sr-only" {{ old('user_type') === 'solo_handyman' ? 'checked' : '' }} required>
-                            <div class="flex items-center space-x-3">
+                            <div class="flex items-center space-x-4">
                                 <div class="flex-shrink-0">
-                                    <svg class="w-8 h-8 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <svg class="w-10 h-10 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
                                     </svg>
                                 </div>
                                 <div>
-                                    <h3 class="font-semibold text-gray-900">Solo Handyman</h3>
-                                    <p class="text-sm text-gray-600">Independent contractor working alone</p>
+                                    <h3 class="font-semibold text-gray-900 text-lg">Solo Handyman</h3>
+                                    <p class="text-sm text-gray-600 mt-1">Independent contractor working alone</p>
+                                    <p class="text-xs text-gray-500 mt-2">Perfect for individual craftsmen and contractors</p>
                                 </div>
                             </div>
                         </div>
-                        <div class="border rounded-lg p-4 cursor-pointer hover:border-green-500 transition-colors user-type-card" 
+                        <div class="border rounded-lg p-6 cursor-pointer hover:border-green-500 transition-colors user-type-card" 
                              data-type="company_admin">
                             <input type="radio" name="user_type" id="company_admin" value="company_admin" 
                                 class="sr-only" {{ old('user_type') === 'company_admin' ? 'checked' : '' }}>
-                            <div class="flex items-center space-x-3">
+                            <div class="flex items-center space-x-4">
                                 <div class="flex-shrink-0">
-                                    <svg class="w-8 h-8 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <svg class="w-10 h-10 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path>
                                     </svg>
                                 </div>
                                 <div>
-                                    <h3 class="font-semibold text-gray-900">Company Owner</h3>
-                                    <p class="text-sm text-gray-600">Creating or managing a handyman company</p>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="border rounded-lg p-4 cursor-pointer hover:border-purple-500 transition-colors user-type-card" 
-                             data-type="company_employee">
-                            <input type="radio" name="user_type" id="company_employee" value="company_employee" 
-                                class="sr-only" {{ old('user_type') === 'company_employee' || isset($invitation) ? 'checked' : '' }}>
-                            <div class="flex items-center space-x-3">
-                                <div class="flex-shrink-0">
-                                    <svg class="w-8 h-8 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path>
-                                    </svg>
-                                </div>
-                                <div>
-                                    <h3 class="font-semibold text-gray-900">Company Employee</h3>
-                                    <p class="text-sm text-gray-600">Join an existing handyman company</p>
+                                    <h3 class="font-semibold text-gray-900 text-lg">Company Owner</h3>
+                                    <p class="text-sm text-gray-600 mt-1">Creating or managing a handyman company</p>
+                                    <p class="text-xs text-gray-500 mt-2">Manage teams, projects, and company operations</p>
                                 </div>
                             </div>
                         </div>
