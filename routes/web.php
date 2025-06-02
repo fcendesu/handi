@@ -24,13 +24,24 @@ Route::middleware('guest')->group(function () {
     Route::post('/register', [AuthenticationController::class, 'webRegister']);
 });
 
-Route::middleware('auth')->group(function () {
+Route::middleware(['auth', 'restrict.employee.dashboard'])->group(function () {
     Route::get('/dashboard', function () {
+        $user = auth()->user();
+        
+        // Scope discoveries based on user type for dashboard
+        $query = Discovery::query();
+        
+        if ($user->isSoloHandyman()) {
+            $query->where('creator_id', $user->id);
+        } elseif ($user->isCompanyAdmin()) {
+            $query->where('company_id', $user->company_id);
+        }
+        
         $discoveries = [
-            'in_progress' => Discovery::where('status', Discovery::STATUS_IN_PROGRESS)->latest()->get(),
-            'pending' => Discovery::where('status', Discovery::STATUS_PENDING)->latest()->get(),
-            'completed' => Discovery::where('status', Discovery::STATUS_COMPLETED)->latest()->get(),
-            'cancelled' => Discovery::where('status', Discovery::STATUS_CANCELLED)->latest()->get(),
+            'in_progress' => $query->clone()->where('status', Discovery::STATUS_IN_PROGRESS)->latest()->get(),
+            'pending' => $query->clone()->where('status', Discovery::STATUS_PENDING)->latest()->get(),
+            'completed' => $query->clone()->where('status', Discovery::STATUS_COMPLETED)->latest()->get(),
+            'cancelled' => $query->clone()->where('status', Discovery::STATUS_CANCELLED)->latest()->get(),
         ];
         return view('dashboard', compact('discoveries'));
     })->name('dashboard');

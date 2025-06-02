@@ -39,5 +39,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/discoveries/{discovery}', [DiscoveryController::class, 'apiShow']);
     Route::put('/discoveries/{discovery}', [DiscoveryController::class, 'apiUpdate']);
     Route::patch('/discoveries/{discovery}/status', [DiscoveryController::class, 'apiUpdateStatus']);
+    Route::post('/discoveries/{discovery}/assign', [DiscoveryController::class, 'assignToSelf']);
+    Route::delete('/discoveries/{discovery}/assign', [DiscoveryController::class, 'unassignFromSelf']);
     Route::get('/discoveries/{discovery}/share', [DiscoveryController::class, 'apiGetShareUrl']);
 });
