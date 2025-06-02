@@ -469,4 +469,157 @@ class CompanyController extends Controller
             ], 500);
         }
     }
+
+    /**
+     * Promote an existing employee to company admin
+     */
+    public function promoteToAdmin(User $employee)
+    {
+        $user = auth()->user();
+
+        // Only primary admin can promote employees to admin
+        if (!$user->isCompanyAdmin() || $user->company->admin_id !== $user->id) {
+            abort(403, 'Only the primary company admin can promote employees to admin.');
+        }
+
+        // Verify employee belongs to this company
+        if ($employee->company_id !== $user->company_id || !$employee->isCompanyEmployee()) {
+            abort(403, 'You can only promote employees from your company.');
+        }
+
+        try {
+            $employee->update(['user_type' => User::TYPE_COMPANY_ADMIN]);
+
+            return redirect()
+                ->route('company.index')
+                ->with('success', $employee->name . ' has been promoted to company admin.');
+
+        } catch (\Exception $e) {
+            \Log::error('Employee promotion failed: ' . $e->getMessage());
+            return back()->withErrors(['error' => 'Failed to promote employee: ' . $e->getMessage()]);
+        }
+    }
+
+    /**
+     * Demote a company admin to employee
+     */
+    public function demoteFromAdmin(User $admin)
+    {
+        $user = auth()->user();
+
+        // Only primary admin can demote other admins
+        if (!$user->isCompanyAdmin() || $user->company->admin_id !== $user->id) {
+            abort(403, 'Only the primary company admin can demote other admins.');
+        }
+
+        // Cannot demote yourself (primary admin)
+        if ($admin->id === $user->id) {
+            abort(403, 'You cannot demote yourself. Transfer primary admin role first.');
+        }
+
+        // Verify admin belongs to this company
+        if ($admin->company_id !== $user->company_id || !$admin->isCompanyAdmin()) {
+            abort(403, 'You can only demote admins from your company.');
+        }
+
+        try {
+            $admin->update(['user_type' => User::TYPE_COMPANY_EMPLOYEE]);
+
+            return redirect()
+                ->route('company.index')
+                ->with('success', $admin->name . ' has been demoted to employee.');
+
+        } catch (\Exception $e) {
+            \Log::error('Admin demotion failed: ' . $e->getMessage());
+            return back()->withErrors(['error' => 'Failed to demote admin: ' . $e->getMessage()]);
+        }
+    }
+
+    /**
+     * Create a new company admin directly
+     */
+    public function createAdmin(Request $request)
+    {
+        $user = auth()->user();
+
+        // Only primary admin can create new admins
+        if (!$user->isCompanyAdmin() || $user->company->admin_id !== $user->id) {
+            abort(403, 'Only the primary company admin can create new admins.');
+        }
+
+        $validated = $request->validate([
+            'name' => 'required|string|max:255',
+            'email' => 'required|email|max:255|unique:users,email',
+            'password' => 'required|string|min:8|confirmed',
+            'work_group_ids' => 'nullable|array',
+            'work_group_ids.*' => 'exists:work_groups,id',
+        ]);
+
+        try {
+            // Create admin
+            $admin = User::create([
+                'name' => $validated['name'],
+                'email' => $validated['email'],
+                'password' => Hash::make($validated['password']),
+                'user_type' => User::TYPE_COMPANY_ADMIN,
+                'company_id' => $user->company_id,
+            ]);
+
+            // Assign to work groups if specified
+            if (!empty($validated['work_group_ids'])) {
+                // Validate work groups belong to the company
+                $validWorkGroups = $user->company->workGroups()
+                    ->whereIn('id', $validated['work_group_ids'])
+                    ->pluck('id');
+
+                $admin->workGroups()->attach($validWorkGroups);
+            }
+
+            return redirect()
+                ->route('company.index')
+                ->with('success', 'Company admin created successfully');
+
+        } catch (\Exception $e) {
+            \Log::error('Admin creation failed: ' . $e->getMessage());
+            return back()
+                ->withInput()
+                ->withErrors(['error' => 'Failed to create admin: ' . $e->getMessage()]);
+        }
+    }
+
+    /**
+     * Transfer primary admin role to another admin
+     */
+    public function transferPrimaryAdmin(Request $request)
+    {
+        $user = auth()->user();
+
+        // Only primary admin can transfer the role
+        if (!$user->isCompanyAdmin() || $user->company->admin_id !== $user->id) {
+            abort(403, 'Only the primary company admin can transfer the primary role.');
+        }
+
+        $validated = $request->validate([
+            'new_admin_id' => 'required|exists:users,id'
+        ]);
+
+        $newAdmin = User::findOrFail($validated['new_admin_id']);
+
+        // Verify new admin belongs to this company and is an admin
+        if ($newAdmin->company_id !== $user->company_id || !$newAdmin->isCompanyAdmin()) {
+            abort(403, 'New primary admin must be a company admin from your company.');
+        }
+
+        try {
+            $user->company->update(['admin_id' => $newAdmin->id]);
+
+            return redirect()
+                ->route('company.index')
+                ->with('success', 'Primary admin role transferred to ' . $newAdmin->name);
+
+        } catch (\Exception $e) {
+            \Log::error('Primary admin transfer failed: ' . $e->getMessage());
+            return back()->withErrors(['error' => 'Failed to transfer primary admin role: ' . $e->getMessage()]);
+        }
+    }
 }

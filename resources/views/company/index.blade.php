@@ -67,6 +67,77 @@
                         </div>
                     </div>
 
+                    <!-- Company Admins Management -->
+                    <div class="mb-8">
+                        <div class="flex justify-between items-center mb-4">
+                            <h3 class="text-lg font-semibold text-gray-800">Şirket Yöneticileri</h3>
+                            @if($company->admin_id === auth()->user()->id)
+                                <button onclick="showCreateAdminModal()" 
+                                    class="bg-purple-500 hover:bg-purple-700 text-white font-bold py-2 px-4 rounded">
+                                    Yeni Yönetici Ekle
+                                </button>
+                            @endif
+                        </div>
+
+                        @if($company->allAdmins->count() > 0)
+                            <div class="bg-white shadow overflow-hidden sm:rounded-md">
+                                <ul class="divide-y divide-gray-200">
+                                    @foreach($company->allAdmins as $admin)
+                                        <li class="px-6 py-4">
+                                            <div class="flex items-center justify-between">
+                                                <div class="flex items-center">
+                                                    <div class="flex-shrink-0 h-10 w-10">
+                                                        <div class="h-10 w-10 rounded-full bg-purple-300 flex items-center justify-center">
+                                                            <span class="text-sm font-medium text-purple-700">
+                                                                {{ strtoupper(substr($admin->name, 0, 2)) }}
+                                                            </span>
+                                                        </div>
+                                                    </div>
+                                                    <div class="ml-4">
+                                                        <div class="flex items-center">
+                                                            <div class="text-sm font-medium text-gray-900">{{ $admin->name }}</div>
+                                                            @if($admin->id === $company->admin_id)
+                                                                <span class="ml-2 inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
+                                                                    Ana Yönetici
+                                                                </span>
+                                                            @else
+                                                                <span class="ml-2 inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-purple-100 text-purple-800">
+                                                                    Yönetici
+                                                                </span>
+                                                            @endif
+                                                        </div>
+                                                        <div class="text-sm text-gray-500">{{ $admin->email }}</div>
+                                                        <div class="text-xs text-gray-400 mt-1">
+                                                            Katılım: {{ $admin->created_at->format('d.m.Y') }}
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                @if($company->admin_id === auth()->user()->id && $admin->id !== auth()->user()->id)
+                                                    <div class="flex items-center space-x-2">
+                                                        <button onclick="showTransferPrimaryModal('{{ $admin->name }}', {{ $admin->id }})" 
+                                                                class="text-yellow-600 hover:text-yellow-800 text-sm">
+                                                            Ana Yönetici Yap
+                                                        </button>
+                                                        <button onclick="showDemoteAdminModal('{{ $admin->name }}', {{ $admin->id }})" 
+                                                                class="text-red-600 hover:text-red-800">
+                                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 14l-7 7m0 0l-7-7m7 7V3"></path>
+                                                            </svg>
+                                                        </button>
+                                                    </div>
+                                                @endif
+                                            </div>
+                                        </li>
+                                    @endforeach
+                                </ul>
+                            </div>
+                        @else
+                            <div class="bg-white shadow rounded-lg p-6 text-center">
+                                <p class="text-gray-500">Henüz ek yönetici yok</p>
+                            </div>
+                        @endif
+                    </div>
+
                     <!-- Employee Management -->
                     <div class="mb-8">
                         <div class="flex justify-between items-center mb-4">
@@ -90,17 +161,38 @@
                                                                 {{ strtoupper(substr($employee->name, 0, 2)) }}
                                                             </span>
                                                         </div>
-                                                    </div>
-                                                    <div class="ml-4">
-                                                        <div class="text-sm font-medium text-gray-900">{{ $employee->name }}</div>
-                                                        <div class="text-sm text-gray-500">{{ $employee->email }}</div>
-                                                        <div class="text-xs text-gray-400">
-                                                            Çalışma Grupları: {{ $employee->workGroups->count() }} • 
-                                                            Atanan Keşifler: {{ $employee->assignedDiscoveries->count() }}
-                                                        </div>
-                                                    </div>
+                                                    </div>                                    <div class="ml-4">
+                                        <div class="text-sm font-medium text-gray-900">{{ $employee->name }}</div>
+                                        <div class="text-sm text-gray-500">{{ $employee->email }}</div>
+                                        <div class="mt-2">
+                                            @if($employee->workGroups->count() > 0)
+                                                <div class="flex flex-wrap gap-1">
+                                                    @foreach($employee->workGroups as $workGroup)
+                                                        <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                                                            {{ $workGroup->name }}
+                                                        </span>
+                                                    @endforeach
                                                 </div>
-                                                <div class="flex items-center space-x-2">
+                                            @else
+                                                <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-600">
+                                                    Atanmamış çalışma alanı
+                                                </span>
+                                            @endif
+                                        </div>
+                                        <div class="text-xs text-gray-400 mt-1">
+                                            Keşifler: {{ $employee->assignedDiscoveries->count() }} • 
+                                            Katılım: {{ $employee->created_at->format('d.m.Y') }}
+                                        </div>
+                                    </div>
+                                                </div>                                                <div class="flex items-center space-x-2">
+                                                    @if($company->admin_id === auth()->user()->id)
+                                                        <button onclick="showPromoteEmployeeModal('{{ $employee->name }}', {{ $employee->id }})" 
+                                                                class="text-purple-600 hover:text-purple-800" title="Yöneticiye Terfi Et">
+                                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 10l7-7m0 0l7 7m-7-7v18"></path>
+                                                            </svg>
+                                                        </button>
+                                                    @endif
                                                     <button onclick="showEditEmployeeModal({{ $employee->id }}, '{{ $employee->name }}', '{{ $employee->email }}', {{ $employee->workGroups->pluck('id') }})" 
                                                             class="text-blue-600 hover:text-blue-800">
                                                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -304,6 +396,127 @@
         </div>
     </div>
 
+    <!-- Create Admin Modal -->
+    <div id="createAdminModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full hidden">
+        <div class="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white">
+            <div class="mt-3">
+                <h3 class="text-lg font-medium text-gray-900 mb-4">Yeni Yönetici Ekle</h3>
+                <form method="POST" action="{{ route('company.create-admin') }}">
+                    @csrf
+                    <div class="mb-4">
+                        <label for="admin_name" class="block text-sm font-medium text-gray-700 mb-2">Ad Soyad</label>
+                        <input type="text" id="admin_name" name="name" required 
+                               class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    </div>
+                    <div class="mb-4">
+                        <label for="admin_email" class="block text-sm font-medium text-gray-700 mb-2">E-posta</label>
+                        <input type="email" id="admin_email" name="email" required 
+                               class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    </div>
+                    <div class="mb-4">
+                        <label for="admin_password" class="block text-sm font-medium text-gray-700 mb-2">Şifre</label>
+                        <input type="password" id="admin_password" name="password" required 
+                               class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    </div>
+                    <div class="mb-4">
+                        <label for="admin_password_confirmation" class="block text-sm font-medium text-gray-700 mb-2">Şifre Onayı</label>
+                        <input type="password" id="admin_password_confirmation" name="password_confirmation" required 
+                               class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    </div>
+                    <div class="flex justify-end space-x-3">
+                        <button type="button" onclick="hideCreateAdminModal()" 
+                                class="px-4 py-2 bg-gray-300 text-gray-700 rounded-md hover:bg-gray-400">
+                            İptal
+                        </button>
+                        <button type="submit" 
+                                class="px-4 py-2 bg-purple-500 text-white rounded-md hover:bg-purple-600">
+                            Ekle
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Promote Employee Modal -->
+    <div id="promoteEmployeeModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full hidden">
+        <div class="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white">
+            <div class="mt-3 text-center">
+                <h3 class="text-lg font-medium text-gray-900 mb-4">Çalışanı Yöneticiye Terfi Et</h3>
+                <p class="text-sm text-gray-500 mb-4">
+                    <span id="promoteEmployeeName"></span> çalışanını şirket yöneticisi yapmak istediğinizden emin misiniz?
+                </p>
+                <form id="promoteEmployeeForm" method="POST">
+                    @csrf
+                    @method('PATCH')
+                    <div class="flex justify-center space-x-3">
+                        <button type="button" onclick="hidePromoteEmployeeModal()" 
+                                class="px-4 py-2 bg-gray-300 text-gray-700 rounded-md hover:bg-gray-400">
+                            İptal
+                        </button>
+                        <button type="submit" 
+                                class="px-4 py-2 bg-purple-500 text-white rounded-md hover:bg-purple-600">
+                            Terfi Et
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Demote Admin Modal -->
+    <div id="demoteAdminModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full hidden">
+        <div class="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white">
+            <div class="mt-3 text-center">
+                <h3 class="text-lg font-medium text-gray-900 mb-4">Yöneticiyi Çalışan Yap</h3>
+                <p class="text-sm text-gray-500 mb-4">
+                    <span id="demoteAdminName"></span> yöneticisini çalışan yapmak istediğinizden emin misiniz?
+                </p>
+                <form id="demoteAdminForm" method="POST">
+                    @csrf
+                    @method('PATCH')
+                    <div class="flex justify-center space-x-3">
+                        <button type="button" onclick="hideDemoteAdminModal()" 
+                                class="px-4 py-2 bg-gray-300 text-gray-700 rounded-md hover:bg-gray-400">
+                            İptal
+                        </button>
+                        <button type="submit" 
+                                class="px-4 py-2 bg-red-500 text-white rounded-md hover:bg-red-600">
+                            Çalışan Yap
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Transfer Primary Admin Modal -->
+    <div id="transferPrimaryModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full hidden">
+        <div class="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white">
+            <div class="mt-3 text-center">
+                <h3 class="text-lg font-medium text-gray-900 mb-4">Ana Yöneticilik Devret</h3>
+                <p class="text-sm text-gray-500 mb-4">
+                    Ana yöneticilik yetkisini <span id="transferAdminName"></span> kişisine devretmek istediğinizden emin misiniz? Bu işlemden sonra o kişi şirketin ana yöneticisi olacak.
+                </p>
+                <form id="transferPrimaryForm" method="POST" action="{{ route('company.transfer-primary-admin') }}">
+                    @csrf
+                    @method('PATCH')
+                    <input type="hidden" id="new_admin_id" name="new_admin_id">
+                    <div class="flex justify-center space-x-3">
+                        <button type="button" onclick="hideTransferPrimaryModal()" 
+                                class="px-4 py-2 bg-gray-300 text-gray-700 rounded-md hover:bg-gray-400">
+                            İptal
+                        </button>
+                        <button type="submit" 
+                                class="px-4 py-2 bg-yellow-500 text-white rounded-md hover:bg-yellow-600">
+                            Devret
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
     <script>
         function showCreateEmployeeModal() {
             document.getElementById('createEmployeeModal').classList.remove('hidden');
@@ -339,6 +552,45 @@
 
         function hideDeleteEmployeeModal() {
             document.getElementById('deleteEmployeeModal').classList.add('hidden');
+        }
+
+        // Admin Management Functions
+        function showCreateAdminModal() {
+            document.getElementById('createAdminModal').classList.remove('hidden');
+        }
+
+        function hideCreateAdminModal() {
+            document.getElementById('createAdminModal').classList.add('hidden');
+        }
+
+        function showPromoteEmployeeModal(employeeName, employeeId) {
+            document.getElementById('promoteEmployeeName').textContent = employeeName;
+            document.getElementById('promoteEmployeeForm').action = `/company/employees/${employeeId}/promote`;
+            document.getElementById('promoteEmployeeModal').classList.remove('hidden');
+        }
+
+        function hidePromoteEmployeeModal() {
+            document.getElementById('promoteEmployeeModal').classList.add('hidden');
+        }
+
+        function showDemoteAdminModal(adminName, adminId) {
+            document.getElementById('demoteAdminName').textContent = adminName;
+            document.getElementById('demoteAdminForm').action = `/company/admins/${adminId}/demote`;
+            document.getElementById('demoteAdminModal').classList.remove('hidden');
+        }
+
+        function hideDemoteAdminModal() {
+            document.getElementById('demoteAdminModal').classList.add('hidden');
+        }
+
+        function showTransferPrimaryModal(adminName, adminId) {
+            document.getElementById('transferAdminName').textContent = adminName;
+            document.getElementById('new_admin_id').value = adminId;
+            document.getElementById('transferPrimaryModal').classList.remove('hidden');
+        }
+
+        function hideTransferPrimaryModal() {
+            document.getElementById('transferPrimaryModal').classList.add('hidden');
         }
     </script>
 </body>

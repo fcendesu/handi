@@ -93,6 +93,12 @@ Route::middleware(['auth', 'restrict.employee.dashboard'])->group(function () {
     Route::delete('/invitations/{invitation}', [InvitationController::class, 'destroy'])->name('invitations.destroy');
     Route::post('/invitations/{invitation}/resend', [InvitationController::class, 'resend'])->name('invitations.resend');
 
+    // Company Admin Management Routes
+    Route::post('/company/admins', [CompanyController::class, 'createAdmin'])->name('company.create-admin');
+    Route::patch('/company/employees/{employee}/promote', [CompanyController::class, 'promoteToAdmin'])->name('company.promote-admin');
+    Route::patch('/company/admins/{admin}/demote', [CompanyController::class, 'demoteFromAdmin'])->name('company.demote-admin');
+    Route::patch('/company/transfer-primary-admin', [CompanyController::class, 'transferPrimaryAdmin'])->name('company.transfer-primary-admin');
+
     Route::post('/logout', [AuthenticationController::class, 'logout'])->name('logout');
 });
 
