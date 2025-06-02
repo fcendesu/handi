@@ -51,7 +51,9 @@ class DiscoveryController extends Controller
             'customer_name' => 'required|string|max:255',
             'customer_phone' => 'required|string|max:255',
             'customer_email' => 'required|email|max:255',
-            'address' => 'nullable|string|max:1000',
+            'address_type' => 'required|in:property,manual',
+            'property_id' => 'nullable|exists:properties,id|required_if:address_type,property',
+            'address' => 'nullable|string|max:1000|required_if:address_type,manual',
             'discovery' => 'required|string',
             'todo_list' => 'nullable|string',
             'note_to_customer' => 'nullable|string',
@@ -72,6 +74,14 @@ class DiscoveryController extends Controller
             'items.*.quantity' => 'required|integer|min:1',
             'items.*.custom_price' => 'nullable|numeric|min:0'
         ]);
+
+        // Additional validation for property selection - ensure property belongs to user's company
+        if ($request->address_type === 'property' && $request->property_id) {
+            $property = \App\Models\Property::find($request->property_id);
+            if (!$property || $property->company_id !== $user->company_id) {
+                return back()->withErrors(['property_id' => 'Selected property does not belong to your company.']);
+            }
+        }
 
         try {
             // Handle image uploads

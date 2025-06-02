@@ -87,11 +87,67 @@
                                 </div>
 
                                 <div class="col-span-full">
-                                    <label for="address" class="block text-sm font-medium text-gray-700 mb-2">Adres</label>
-                                    <textarea name="address" id="address" rows="3"
-                                              class="bg-gray-100 mt-1 block w-full rounded-md border-2 border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 px-4 py-2"
-                                              >{{ old('address') }}</textarea>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">Adres</label>
+                                    
+                                    <!-- Property Selection -->
+                                    <div x-data="propertySelector()" class="space-y-4">
+                                        <!-- Option selector -->
+                                        <div class="flex space-x-4">
+                                            <label class="flex items-center">
+                                                <input type="radio" name="address_type" value="property" x-model="addressType" class="mr-2">
+                                                <span class="text-sm text-gray-700">Kayıtlı Mülk Seç</span>
+                                            </label>
+                                            <label class="flex items-center">
+                                                <input type="radio" name="address_type" value="manual" x-model="addressType" class="mr-2">
+                                                <span class="text-sm text-gray-700">Manuel Adres Gir</span>
+                                            </label>
+                                        </div>
+
+                                        <!-- Property Selection -->
+                                        <div x-show="addressType === 'property'" class="space-y-3">
+                                            <select name="property_id" x-model="selectedPropertyId" @change="onPropertyChange()"
+                                                    class="bg-gray-100 mt-1 block w-full rounded-md border-2 border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 px-4 py-2">
+                                                <option value="">Bir mülk seçin</option>
+                                                <template x-for="property in properties" :key="property.id">
+                                                    <option :value="property.id" x-text="property.name + ' - ' + property.full_address"></option>
+                                                </template>
+                                            </select>
+                                            
+                                            <!-- Selected property preview -->
+                                            <div x-show="selectedProperty" class="p-3 bg-blue-50 rounded-md border border-blue-200">
+                                                <div class="text-sm font-medium text-blue-900" x-text="selectedProperty ? selectedProperty.name : ''"></div>
+                                                <div class="text-sm text-blue-700" x-text="selectedProperty ? selectedProperty.full_address : ''"></div>
+                                                <div x-show="selectedProperty && selectedProperty.has_map_location" class="mt-2">
+                                                    <a :href="'https://www.google.com/maps?q=' + (selectedProperty ? selectedProperty.latitude : '') + ',' + (selectedProperty ? selectedProperty.longitude : '')" 
+                                                       target="_blank" 
+                                                       class="text-blue-600 hover:text-blue-800 text-sm">
+                                                        Haritada Görüntüle →
+                                                    </a>
+                                                </div>
+                                            </div>
+
+                                            <!-- Link to add new property -->
+                                            <div class="text-center py-2">
+                                                <a href="{{ route('properties.create') }}" 
+                                                   target="_blank"
+                                                   class="text-blue-600 hover:text-blue-800 text-sm">
+                                                    + Yeni Mülk Ekle
+                                                </a>
+                                            </div>
+                                        </div>
+
+                                        <!-- Manual Address Input -->
+                                        <div x-show="addressType === 'manual'">
+                                            <textarea name="address" id="address" rows="3"
+                                                      class="bg-gray-100 mt-1 block w-full rounded-md border-2 border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 px-4 py-2"
+                                                      >{{ old('address') }}</textarea>
+                                        </div>
+                                    </div>
+                                    
                                     @error('address')
+                                        <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                                    @enderror
+                                    @error('property_id')
                                         <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
                                     @enderror
                                 </div>
@@ -166,17 +222,17 @@
                                                                    x-model="item.quantity"
                                                                    min="1"
                                                                    class="bg-gray-100 w-20 rounded-md border-2 border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 px-2 py-1">
-                                                            <input type="hidden" :name="'items['+index+'][id]'" :value="item.id">
-                                                            <input type="hidden" :name="'items['+index+'][quantity]'" :value="item.quantity">
+                                                            <input type="hidden" x-bind:name="'items[' + index + '][id]'" x-bind:value="item.id">
+                                                            <input type="hidden" x-bind:name="'items[' + index + '][quantity]'" x-bind:value="item.quantity">
                                                         </div>
                                                         <div class="col-span-4">
                                                             <label class="block text-xs text-gray-500 mb-1">Farklı Fiyat (opsiyonel)</label>
                                                             <input type="number"
                                                                    x-model="item.custom_price"
-                                                                   :placeholder="'Malzeme Fiyatı: ' + item.price"
+                                                                   placeholder="Malzeme Fiyatı"
                                                                    step="0.01"
                                                                    class="bg-gray-100 w-32 rounded-md border-2 border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 px-2 py-1">
-                                                            <input type="hidden" :name="'items['+index+'][custom_price]'" :value="item.custom_price">
+                                                            <input type="hidden" x-bind:name="'items[' + index + '][custom_price]'" x-bind:value="item.custom_price">
                                                         </div>
                                                         <div class="col-span-1 text-right">
                                                             <button type="button"
@@ -392,6 +448,36 @@
 
             removeItem(index) {
                 this.selectedItems.splice(index, 1);
+            }
+        }
+    }
+
+    function propertySelector() {
+        return {
+            addressType: '{{ old("property_id") ? "property" : (old("address") ? "manual" : "property") }}',
+            properties: [],
+            selectedPropertyId: '{{ old("property_id") }}',
+            selectedProperty: null,
+
+            async init() {
+                await this.loadProperties();
+                if (this.selectedPropertyId) {
+                    this.onPropertyChange();
+                }
+            },
+
+            async loadProperties() {
+                try {
+                    const response = await fetch('/api/company-properties');
+                    const data = await response.json();
+                    this.properties = data;
+                } catch (error) {
+                    console.error('Error loading properties:', error);
+                }
+            },
+
+            onPropertyChange() {
+                this.selectedProperty = this.properties.find(p => p.id == this.selectedPropertyId) || null;
             }
         }
     }

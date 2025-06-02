@@ -28,6 +28,7 @@ class Discovery extends Model
         'assignee_id',
         'company_id',
         'work_group_id',
+        'property_id',
         'customer_name',
         'customer_phone',
         'customer_email',
@@ -113,6 +114,11 @@ class Discovery extends Model
         return $this->belongsTo(WorkGroup::class);
     }
 
+    public function property(): BelongsTo
+    {
+        return $this->belongsTo(Property::class);
+    }
+
     public function items(): BelongsToMany
     {
         return $this->belongsToMany(Item::class, 'discovery_item')
@@ -122,33 +128,33 @@ class Discovery extends Model
 
     public function getTotalCostAttribute(): float
     {
-        $baseCosts = (float)$this->service_cost +
-            (float)$this->transportation_cost +
-            (float)$this->labor_cost +
-            (float)$this->extra_fee;
+        $baseCosts = (float) $this->service_cost +
+            (float) $this->transportation_cost +
+            (float) $this->labor_cost +
+            (float) $this->extra_fee;
 
-        if ((float)$this->discount_rate > 0) {
-            $baseCosts *= (1 - ((float)$this->discount_rate / 100));
+        if ((float) $this->discount_rate > 0) {
+            $baseCosts *= (1 - ((float) $this->discount_rate / 100));
         }
 
         $itemsTotal = $this->items->sum(function ($item) {
-            return ((float)($item->pivot->custom_price ?? $item->price)) * (int)$item->pivot->quantity;
+            return ((float) ($item->pivot->custom_price ?? $item->price)) * (int) $item->pivot->quantity;
         });
 
         $total = $baseCosts + $itemsTotal;
-        $total -= (float)$this->discount_amount;
+        $total -= (float) $this->discount_amount;
 
         return max(0, round($total, 2));
     }
 
     public function getDiscountRateAmountAttribute(): float
     {
-        $baseCosts = (float)$this->service_cost +
-            (float)$this->transportation_cost +
-            (float)$this->labor_cost +
-            (float)$this->extra_fee;
+        $baseCosts = (float) $this->service_cost +
+            (float) $this->transportation_cost +
+            (float) $this->labor_cost +
+            (float) $this->extra_fee;
 
-        return round($baseCosts * ((float)$this->discount_rate / 100), 2);
+        return round($baseCosts * ((float) $this->discount_rate / 100), 2);
     }
 
     public function getShareUrlAttribute(): string

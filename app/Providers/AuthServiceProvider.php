@@ -3,8 +3,10 @@
 namespace App\Providers;
 
 use App\Models\Company;
+use App\Models\Property;
 use App\Models\WorkGroup;
 use App\Policies\CompanyPolicy;
+use App\Policies\PropertyPolicy;
 use App\Policies\WorkGroupPolicy;
 use Illuminate\Foundation\Support\Providers\AuthServiceProvider as ServiceProvider;
 
@@ -18,6 +20,7 @@ class AuthServiceProvider extends ServiceProvider
     protected $policies = [
         WorkGroup::class => WorkGroupPolicy::class,
         Company::class => CompanyPolicy::class,
+        Property::class => PropertyPolicy::class,
     ];
 
     /**

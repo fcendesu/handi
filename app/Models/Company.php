@@ -46,4 +46,9 @@ class Company extends Model
     {
         return $this->hasMany(WorkGroup::class);
     }
+
+    public function properties(): HasMany
+    {
+        return $this->hasMany(Property::class);
+    }
 }

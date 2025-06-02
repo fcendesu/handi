@@ -3,6 +3,7 @@
 use App\Http\Controllers\Auth\AuthenticationController;
 use App\Http\Controllers\DiscoveryController;
 use App\Http\Controllers\ItemController;
+use App\Http\Controllers\PropertyController;
 use App\Http\Controllers\WorkGroupController;
 use App\Http\Controllers\CompanyController;
 use App\Http\Controllers\InvitationController;
@@ -98,6 +99,11 @@ Route::middleware(['auth', 'restrict.employee.dashboard'])->group(function () {
     Route::patch('/company/employees/{employee}/promote', [CompanyController::class, 'promoteToAdmin'])->name('company.promote-admin');
     Route::patch('/company/admins/{admin}/demote', [CompanyController::class, 'demoteFromAdmin'])->name('company.demote-admin');
     Route::patch('/company/transfer-primary-admin', [CompanyController::class, 'transferPrimaryAdmin'])->name('company.transfer-primary-admin');
+
+    // Property Management Routes
+    Route::resource('properties', PropertyController::class);
+    Route::get('/api/neighborhoods', [PropertyController::class, 'getNeighborhoods'])->name('api.neighborhoods');
+    Route::get('/api/company-properties', [PropertyController::class, 'getCompanyProperties'])->name('api.company-properties');
 
     Route::post('/logout', [AuthenticationController::class, 'logout'])->name('logout');
 });
