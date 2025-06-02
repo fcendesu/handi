@@ -15,6 +15,18 @@
                    class="text-gray-700 hover:text-gray-900 font-medium {{ request()->routeIs('items') ? 'text-blue-600' : '' }}">
                     Malzeme
                 </a>
+                @if(auth()->user()->isSoloHandyman() || auth()->user()->isCompanyAdmin())
+                    <a href="{{ route('work-groups.index') }}"
+                       class="text-gray-700 hover:text-gray-900 font-medium {{ request()->routeIs('work-groups.*') ? 'text-blue-600' : '' }}">
+                        Çalışma Grupları
+                    </a>
+                @endif
+                @if(auth()->user()->isCompanyAdmin())
+                    <a href="{{ route('company.index') }}"
+                       class="text-gray-700 hover:text-gray-900 font-medium {{ request()->routeIs('company.*') ? 'text-blue-600' : '' }}">
+                        Şirket Yönetimi
+                    </a>
+                @endif
             </div>
             <div class="flex items-center">
                 <span class="text-gray-700 mr-4">Hoşgeldin</span>

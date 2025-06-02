@@ -58,5 +58,6 @@ alwaysApply: true
   6. Use Tailwind CSS
   7. Implement proper API resource transformations.
   9. Implement proper database transactions for data integrity.
+  10. Avoid saying let's test, be aware i am testing the changes.
 
 

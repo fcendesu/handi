@@ -4,6 +4,8 @@ use App\Http\Controllers\Auth\AuthenticationController;
 use App\Http\Controllers\DiscoveryController;
 use App\Http\Controllers\ItemController;
 use App\Http\Controllers\PostController;
+use App\Http\Controllers\WorkGroupController;
+use App\Http\Controllers\CompanyController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -33,8 +35,8 @@ Route::delete('/item/destroy/{item}', [ItemController::class, 'destroy'])->middl
 Route::get('/token/validate', [AuthenticationController::class, 'validateToken'])->middleware('auth:sanctum');
 
 Route::middleware('auth:sanctum')->group(function () {
+    // Discovery API routes
     Route::get('/discoveries/list', [DiscoveryController::class, 'apiList']);
-
     Route::post('/discoveries', [DiscoveryController::class, 'apiStore']);
     Route::get('/discoveries/{discovery}', [DiscoveryController::class, 'apiShow']);
     Route::put('/discoveries/{discovery}', [DiscoveryController::class, 'apiUpdate']);
@@ -42,4 +44,15 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/discoveries/{discovery}/assign', [DiscoveryController::class, 'assignToSelf']);
     Route::delete('/discoveries/{discovery}/assign', [DiscoveryController::class, 'unassignFromSelf']);
     Route::get('/discoveries/{discovery}/share', [DiscoveryController::class, 'apiGetShareUrl']);
+
+    // Work Group API routes
+    Route::get('/work-groups', [WorkGroupController::class, 'apiList']);
+    Route::post('/work-groups', [WorkGroupController::class, 'apiStore']);
+    Route::get('/work-groups/{workGroup}', [WorkGroupController::class, 'apiShow']);
+
+    // Company API routes
+    Route::get('/company', [CompanyController::class, 'apiShow']);
+    Route::post('/company/employees', [CompanyController::class, 'apiCreateEmployee']);
+    Route::patch('/company/employees/{employee}', [CompanyController::class, 'apiUpdateEmployee']);
+    Route::delete('/company/employees/{employee}', [CompanyController::class, 'apiDeleteEmployee']);
 });

@@ -3,6 +3,8 @@
 use App\Http\Controllers\Auth\AuthenticationController;
 use App\Http\Controllers\DiscoveryController;
 use App\Http\Controllers\ItemController;
+use App\Http\Controllers\WorkGroupController;
+use App\Http\Controllers\CompanyController;
 use Illuminate\Support\Facades\Route;
 use App\Models\Discovery;
 
@@ -62,6 +64,23 @@ Route::middleware(['auth', 'restrict.employee.dashboard'])->group(function () {
     Route::get('/items/{item}/edit', [ItemController::class, 'webEdit'])->name('items.edit');
     Route::put('/items/{item}', [ItemController::class, 'webUpdate'])->name('items.update');
     Route::delete('/items/{item}', [ItemController::class, 'webDestroy'])->name('items.destroy');
+
+    // Work Group Management Routes
+    Route::get('/work-groups', [WorkGroupController::class, 'index'])->name('work-groups.index');
+    Route::post('/work-groups', [WorkGroupController::class, 'store'])->name('work-groups.store');
+    Route::get('/work-groups/{workGroup}', [WorkGroupController::class, 'show'])->name('work-groups.show');
+    Route::patch('/work-groups/{workGroup}', [WorkGroupController::class, 'update'])->name('work-groups.update');
+    Route::delete('/work-groups/{workGroup}', [WorkGroupController::class, 'destroy'])->name('work-groups.destroy');
+    Route::post('/work-groups/{workGroup}/assign-user', [WorkGroupController::class, 'assignUser'])->name('work-groups.assign-user');
+    Route::post('/work-groups/{workGroup}/remove-user', [WorkGroupController::class, 'removeUser'])->name('work-groups.remove-user');
+
+    // Company Management Routes
+    Route::get('/company', [CompanyController::class, 'index'])->name('company.index');
+    Route::get('/company/{company}', [CompanyController::class, 'show'])->name('company.show');
+    Route::patch('/company/{company}', [CompanyController::class, 'update'])->name('company.update');
+    Route::post('/company/employees', [CompanyController::class, 'createEmployee'])->name('company.create-employee');
+    Route::patch('/company/employees/{employee}', [CompanyController::class, 'updateEmployee'])->name('company.update-employee');
+    Route::delete('/company/employees/{employee}', [CompanyController::class, 'deleteEmployee'])->name('company.delete-employee');
 
     Route::post('/logout', [AuthenticationController::class, 'logout'])->name('logout');
 });
