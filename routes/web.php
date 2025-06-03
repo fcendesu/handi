@@ -110,3 +110,9 @@ Route::middleware(['auth', 'restrict.employee.dashboard'])->group(function () {
 
 Route::get('/shared/discovery/{token}', [DiscoveryController::class, 'sharedView'])
     ->name('discovery.shared');
+
+// Public routes for customer approval/rejection from shared discovery
+Route::post('/shared/discovery/{token}/approve', [DiscoveryController::class, 'customerApprove'])
+    ->name('discovery.customer-approve');
+Route::post('/shared/discovery/{token}/reject', [DiscoveryController::class, 'customerReject'])
+    ->name('discovery.customer-reject');

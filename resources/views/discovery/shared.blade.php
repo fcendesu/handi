@@ -10,6 +10,101 @@
     <div class="py-12">
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
             <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg p-6">
+                <!-- Success/Error Messages -->
+                @if(session('success'))
+                <div class="mb-6 bg-green-100 border-l-4 border-green-500 text-green-700 p-4 rounded shadow-sm">
+                    <div class="flex items-center">
+                        <svg class="h-5 w-5 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 00-1.414 1.414l2 2a1 1 001.414 0l4-4z" clip-rule="evenodd"/>
+                        </svg>
+                        {{ session('success') }}
+                    </div>
+                </div>
+                @endif
+
+                @if(session('error'))
+                <div class="mb-6 bg-red-100 border-l-4 border-red-500 text-red-700 p-4 rounded shadow-sm">
+                    <div class="flex items-center">
+                        <svg class="h-5 w-5 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                            <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clip-rule="evenodd"/>
+                        </svg>
+                        {{ session('error') }}
+                    </div>
+                </div>
+                @endif
+
+                <!-- Status Display and Action Buttons -->
+                <div class="mb-8 p-6 bg-gray-50 rounded-lg">
+                    <div class="flex flex-col md:flex-row md:items-center md:justify-between">
+                        <div class="mb-4 md:mb-0">
+                            <h3 class="text-lg font-medium text-gray-900 mb-2">Keşif Durumu</h3>
+                            <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium {{
+                                $discovery->status === 'pending' ? 'bg-blue-100 text-blue-800' : (
+                                    $discovery->status === 'in_progress' ? 'bg-yellow-100 text-yellow-800' : (
+                                        $discovery->status === 'completed' ? 'bg-green-100 text-green-800' : 
+                                        'bg-red-100 text-red-800'
+                                    )
+                                )
+                            }}">
+                                {{ $discovery->status === 'pending' ? 'Beklemede' : (
+                                    $discovery->status === 'in_progress' ? 'Sürmekte' : (
+                                        $discovery->status === 'completed' ? 'Tamamlandı' : 'İptal Edildi'
+                                    )
+                                ) }}
+                            </span>
+                        </div>
+
+                        @if($discovery->status === 'pending')
+                        <div class="flex flex-col sm:flex-row gap-3">
+                            <form action="{{ route('discovery.customer-approve', $discovery->share_token) }}" method="POST" class="inline">
+                                @csrf
+                                <button type="submit" 
+                                        class="w-full sm:w-auto bg-green-600 hover:bg-green-700 text-white font-medium py-2 px-6 rounded-lg transition duration-150 ease-in-out"
+                                        onclick="return confirm('Bu keşifi onaylamak istediğinizden emin misiniz? Onayladıktan sonra çalışmalar başlayacaktır.')">
+                                    <svg class="w-5 h-5 inline mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                                    </svg>
+                                    Keşifi Onayla
+                                </button>
+                            </form>
+                            
+                            <form action="{{ route('discovery.customer-reject', $discovery->share_token) }}" method="POST" class="inline">
+                                @csrf
+                                <button type="submit" 
+                                        class="w-full sm:w-auto bg-red-600 hover:bg-red-700 text-white font-medium py-2 px-6 rounded-lg transition duration-150 ease-in-out"
+                                        onclick="return confirm('Bu keşifi reddetmek istediğinizden emin misiniz? Bu işlem geri alınamaz.')">
+                                    <svg class="w-5 h-5 inline mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                                    </svg>
+                                    Keşifi Reddet
+                                </button>
+                            </form>
+                        </div>
+                        @elseif($discovery->status === 'in_progress')
+                        <div class="text-sm text-gray-600">
+                            <svg class="w-5 h-5 inline mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                            </svg>
+                            Çalışmalar devam ediyor...
+                        </div>
+                        @elseif($discovery->status === 'completed')
+                        <div class="text-sm text-green-600">
+                            <svg class="w-5 h-5 inline mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                            </svg>
+                            Çalışmalar tamamlandı
+                        </div>
+                        @else
+                        <div class="text-sm text-red-600">
+                            <svg class="w-5 h-5 inline mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                            </svg>
+                            Bu keşif iptal edildi
+                        </div>
+                        @endif
+                    </div>
+                </div>
+
                 <!-- Customer Information -->
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
                     <div>

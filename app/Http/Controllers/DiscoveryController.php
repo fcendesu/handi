@@ -752,4 +752,69 @@ class DiscoveryController extends Controller
             ], 500);
         }
     }
+
+    public function customerApprove(string $token)
+    {
+        try {
+            $discovery = Discovery::where('share_token', $token)->firstOrFail();
+
+            // Only allow approval if discovery is pending
+            if ($discovery->status !== Discovery::STATUS_PENDING) {
+                return redirect()
+                    ->route('discovery.shared', $token)
+                    ->with('error', 'Bu keşif artık onaylanamaz. Mevcut durum: ' . $this->getStatusText($discovery->status));
+            }
+
+            $discovery->update(['status' => Discovery::STATUS_IN_PROGRESS]);
+
+            return redirect()
+                ->route('discovery.shared', $token)
+                ->with('success', 'Keşif başarıyla onaylandı! Çalışmalar başlayacak.');
+
+        } catch (\Exception $e) {
+            \Log::error('Customer approval failed: ' . $e->getMessage());
+            return redirect()
+                ->route('discovery.shared', $token)
+                ->with('error', 'Onaylama işlemi sırasında bir hata oluştu.');
+        }
+    }
+
+    public function customerReject(string $token)
+    {
+        try {
+            $discovery = Discovery::where('share_token', $token)->firstOrFail();
+
+            // Only allow rejection if discovery is pending
+            if ($discovery->status !== Discovery::STATUS_PENDING) {
+                return redirect()
+                    ->route('discovery.shared', $token)
+                    ->with('error', 'Bu keşif artık reddedilemez. Mevcut durum: ' . $this->getStatusText($discovery->status));
+            }
+
+            $discovery->update(['status' => Discovery::STATUS_CANCELLED]);
+
+            return redirect()
+                ->route('discovery.shared', $token)
+                ->with('success', 'Keşif reddedildi.');
+
+        } catch (\Exception $e) {
+            \Log::error('Customer rejection failed: ' . $e->getMessage());
+            return redirect()
+                ->route('discovery.shared', $token)
+                ->with('error', 'Reddetme işlemi sırasında bir hata oluştu.');
+        }
+    }
+
+    private function getStatusText(string $status): string
+    {
+        $statusTexts = [
+            Discovery::STATUS_PENDING => 'Beklemede',
+            Discovery::STATUS_APPROVED => 'Onaylandı',
+            Discovery::STATUS_IN_PROGRESS => 'Sürmekte',
+            Discovery::STATUS_COMPLETED => 'Tamamlandı',
+            Discovery::STATUS_CANCELLED => 'İptal Edildi',
+        ];
+
+        return $statusTexts[$status] ?? $status;
+    }
 }
