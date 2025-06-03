@@ -214,6 +214,16 @@ class AuthenticationController extends Controller
         ]);
 
         if (Auth::attempt($credentials)) {
+            $user = Auth::user();
+
+            // Check if user is a company employee
+            if ($user->isCompanyEmployee()) {
+                Auth::logout();
+                return back()->withErrors([
+                    'employee_restriction' => 'Company employees cannot access the web dashboard. Please use the mobile application to access your company features.',
+                ])->withInput();
+            }
+
             $request->session()->regenerate();
             return redirect()->intended('dashboard');
         }
