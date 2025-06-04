@@ -7,7 +7,11 @@
     <title>Add New Property - İşler</title>
     <link rel="preconnect" href="https://fonts.bunny.net">
     <link href="https://fonts.bunny.net/css?family=figtree:400,500,600&display=swap" rel="stylesheet" />
+    <!-- Leaflet CSS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     @vite(['resources/css/app.css', 'resources/js/app.js'])
+    <!-- Leaflet JS -->
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
 </head>
 <body class="bg-gray-100">
@@ -159,38 +163,26 @@
                                 </button>
                             </div>
 
-                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                <div>
-                                    <label for="latitude" class="block text-sm font-medium text-gray-700 mb-2">
-                                        Latitude
-                                    </label>
-                                    <input type="number" 
-                                           name="latitude" 
-                                           id="latitude" 
-                                           step="any"
-                                           x-model="latitude"
-                                           value="{{ old('latitude') }}"
-                                           class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 @error('latitude') border-red-500 @enderror">
-                                    @error('latitude')
-                                        <p class="mt-2 text-sm text-red-600">{{ $message }}</p>
-                                    @enderror
-                                </div>
+                            <!-- Hidden coordinate inputs for form submission -->
+                            <div class="hidden">
+                                <input type="number" 
+                                       name="latitude" 
+                                       id="latitude" 
+                                       step="any"
+                                       x-model="latitude"
+                                       value="{{ old('latitude') }}">
+                                <input type="number" 
+                                       name="longitude" 
+                                       id="longitude" 
+                                       step="any"
+                                       x-model="longitude"
+                                       value="{{ old('longitude') }}">
+                            </div>
 
-                                <div>
-                                    <label for="longitude" class="block text-sm font-medium text-gray-700 mb-2">
-                                        Longitude
-                                    </label>
-                                    <input type="number" 
-                                           name="longitude" 
-                                           id="longitude" 
-                                           step="any"
-                                           x-model="longitude"
-                                           value="{{ old('longitude') }}"
-                                           class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 @error('longitude') border-red-500 @enderror">
-                                    @error('longitude')
-                                        <p class="mt-2 text-sm text-red-600">{{ $message }}</p>
-                                    @enderror
-                                </div>
+                            <!-- Interactive Map -->
+                            <div class="mt-4">
+                                <p class="text-sm text-gray-600 mb-2">Click on the map to select a location:</p>
+                                <div id="map" style="height: 400px; width: 100%;" class="rounded-lg border border-gray-300"></div>
                             </div>
 
                             <div x-show="locationError" class="text-red-600 text-sm" x-text="locationError"></div>
@@ -237,10 +229,18 @@
                 latitude: {{ old('latitude') ?? 'null' }},
                 longitude: {{ old('longitude') ?? 'null' }},
                 loadingLocation: false,
-                locationError: '',                cityNeighborhoods: @json($districts),
+                locationError: '',
+                map: null,
+                marker: null,
+                cityNeighborhoods: @json($districts),
 
                 init() {
                     this.updateNeighborhoods();
+                    this.initMap();
+                    
+                    // Watch for manual changes to coordinates
+                    this.$watch('latitude', () => this.updateMapLocation());
+                    this.$watch('longitude', () => this.updateMapLocation());
                 },
 
                 updateNeighborhoods() {
@@ -263,6 +263,7 @@
                         (position) => {
                             this.latitude = position.coords.latitude;
                             this.longitude = position.coords.longitude;
+                            this.updateMapLocation();
                             this.loadingLocation = false;
                         },
                         (error) => {
@@ -283,6 +284,47 @@
                             }
                         }
                     );
+                },
+
+                initMap() {
+                    // Default center: Northern Cyprus (approximately Lefkoşa)
+                    const defaultLat = this.latitude || 35.1856;
+                    const defaultLng = this.longitude || 33.3823;
+                    
+                    // Initialize map
+                    this.map = L.map('map').setView([defaultLat, defaultLng], 10);
+                    
+                    // Add OpenStreetMap tiles
+                    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                        attribution: '© OpenStreetMap contributors'
+                    }).addTo(this.map);
+                    
+                    // Add marker if coordinates exist
+                    if (this.latitude && this.longitude) {
+                        this.marker = L.marker([this.latitude, this.longitude]).addTo(this.map);
+                    }
+                    
+                    // Handle map clicks
+                    this.map.on('click', (e) => {
+                        this.latitude = e.latlng.lat;
+                        this.longitude = e.latlng.lng;
+                        this.updateMapLocation();
+                    });
+                },
+
+                updateMapLocation() {
+                    if (!this.map || !this.latitude || !this.longitude) return;
+                    
+                    // Remove existing marker
+                    if (this.marker) {
+                        this.map.removeLayer(this.marker);
+                    }
+                    
+                    // Add new marker
+                    this.marker = L.marker([this.latitude, this.longitude]).addTo(this.map);
+                    
+                    // Center map on new location
+                    this.map.setView([this.latitude, this.longitude], this.map.getZoom());
                 }
             }
         }
