@@ -16,8 +16,6 @@ class TransactionLog extends Model
         'old_values',
         'new_values',
         'metadata',
-        'ip_address',
-        'user_agent',
         'performed_by_type',
         'performed_by_identifier',
     ];

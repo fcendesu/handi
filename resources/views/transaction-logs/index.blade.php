@@ -138,15 +138,13 @@
                     <!-- Transaction Logs Table -->
                     <div class="bg-white rounded-lg shadow-md overflow-hidden">
                         <div class="overflow-x-auto">
-                            <table class="min-w-full">
-                                <thead class="bg-gray-50">
+                            <table class="min-w-full">                                <thead class="bg-gray-50">
                                     <tr>
                                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Tarih/Saat</th>
                                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Varlık/İşlem</th>
                                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Yapan</th>
                                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Hedef</th>
                                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Detaylar</th>
-                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">IP/Tarayıcı</th>
                                     </tr>
                                 </thead>
                                 <tbody class="bg-white divide-y divide-gray-200">
@@ -276,24 +274,13 @@
                                                     @elseif(isset($metadata['rejection_method']))
                                                         <br><span class="text-xs text-red-500">{{ $metadata['rejection_method'] }} ile</span>
                                                     @elseif(isset($metadata['discovery_id']))
-                                                        <br><span class="text-xs text-gray-500">Keşif #{{ $metadata['discovery_id'] }} ile ilişkili</span>
-                                                    @endif
-                                                @endif
-                                            </td>
-                                            <td class="px-6 py-4 text-xs text-gray-500">
-                                                @if($log->ip_address)
-                                                    <div>IP: {{ $log->ip_address }}</div>
-                                                @endif
-                                                @if($log->user_agent)
-                                                    <div class="max-w-32 truncate" title="{{ $log->user_agent }}">
-                                                        {{ $log->user_agent }}
-                                                    </div>
+                                                        <br><span class="text-xs text-gray-500">Keşif #{{ $metadata['discovery_id'] }} ile ilişkili</span>                                                    @endif
                                                 @endif
                                             </td>
                                         </tr>
                                     @empty
                                         <tr>
-                                            <td colspan="6" class="px-6 py-8 text-center text-gray-500">
+                                            <td colspan="5" class="px-6 py-8 text-center text-gray-500">
                                                 İşlem geçmişi bulunamadı.
                                             </td>
                                         </tr>
