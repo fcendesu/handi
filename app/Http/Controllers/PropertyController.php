@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Http\Controllers;
 
 use App\Models\Property;
+use App\Services\TransactionLogService;
 use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
@@ -21,6 +22,8 @@ class PropertyController extends Controller
      */
     public function index(): View
     {
+        $this->authorize('viewAny', Property::class);
+
         $user = Auth::user();
 
         // Get properties for the user's company
@@ -66,7 +69,10 @@ class PropertyController extends Controller
 
         $validated['company_id'] = $user->company_id;
 
-        Property::create($validated);
+        $property = Property::create($validated);
+
+        // Log property creation
+        TransactionLogService::logPropertyCreated($property);
 
         return redirect()->route('properties.index')
             ->with('success', 'Property created successfully.');
@@ -119,6 +125,9 @@ class PropertyController extends Controller
 
         $property->update($validated);
 
+        // Log property update
+        TransactionLogService::logPropertyUpdated($property, $validated);
+
         return redirect()->route('properties.index')
             ->with('success', 'Property updated successfully.');
     }
@@ -132,6 +141,9 @@ class PropertyController extends Controller
 
         // Soft delete by marking as inactive
         $property->update(['is_active' => false]);
+
+        // Log property deactivation
+        TransactionLogService::logPropertyDeactivated($property);
 
         return redirect()->route('properties.index')
             ->with('success', 'Property deleted successfully.');

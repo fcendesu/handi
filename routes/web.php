@@ -105,6 +105,10 @@ Route::middleware(['auth', 'restrict.employee.dashboard'])->group(function () {
     Route::get('/api/neighborhoods', [PropertyController::class, 'getNeighborhoods'])->name('api.neighborhoods');
     Route::get('/api/company-properties', [PropertyController::class, 'getCompanyProperties'])->name('api.company-properties');
 
+    // Transaction Logs Routes (for admins to view activity)
+    Route::get('/transaction-logs', [DiscoveryController::class, 'transactionLogs'])->name('transaction-logs');
+    Route::post('/transaction-logs/cleanup', [DiscoveryController::class, 'cleanupTransactionLogs'])->name('transaction-logs.cleanup');
+
     Route::post('/logout', [AuthenticationController::class, 'logout'])->name('logout');
 });
 

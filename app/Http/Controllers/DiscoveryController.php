@@ -4,6 +4,8 @@ namespace App\Http\Controllers;
 
 use App\Models\Discovery;
 use App\Models\Item;
+use App\Models\User;
+use App\Services\TransactionLogService;
 use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Validation\Rule;
@@ -114,13 +116,22 @@ class DiscoveryController extends Controller
             // Attach items with their quantities and custom prices if present
             if (!empty($request->items)) {
                 foreach ($request->items as $item) {
-                    $basePrice = Item::find($item['id'])->price;
-                    $discovery->items()->attach($item['id'], [
+                    $itemModel = Item::findOrFail($item['id']);
+                    $basePrice = $itemModel->price;
+                    $pivotData = [
                         'quantity' => $item['quantity'],
                         'custom_price' => $item['custom_price'] ?? $basePrice
-                    ]);
+                    ];
+
+                    $discovery->items()->attach($item['id'], $pivotData);
+
+                    // Log item attachment to discovery
+                    TransactionLogService::logItemAttachedToDiscovery($itemModel, $discovery, $pivotData);
                 }
             }
+
+            // Log discovery creation
+            TransactionLogService::logDiscoveryCreated($discovery, $user);
 
             return redirect()
                 ->route('discovery')
@@ -211,21 +222,42 @@ class DiscoveryController extends Controller
             $validated['discount_rate'] = $validated['discount_rate'] ?? 0;
             $validated['discount_amount'] = $validated['discount_amount'] ?? 0;
 
+            // Track changes before update
+            $originalValues = $discovery->getAttributes();
+
             // Update discovery record
             $discovery->update($validated);
 
+            // Log discovery update
+            TransactionLogService::logDiscoveryUpdate($discovery, $validated);
+
             // Update items if present
             if (isset($validated['items'])) {
+                // Log detachment of existing items before removing them
+                foreach ($discovery->items as $existingItem) {
+                    $pivotData = [
+                        'quantity' => $existingItem->pivot->quantity,
+                        'custom_price' => $existingItem->pivot->custom_price
+                    ];
+                    TransactionLogService::logItemDetachedFromDiscovery($existingItem, $discovery, $pivotData);
+                }
+
                 // Remove existing items
                 $discovery->items()->detach();
 
                 // Attach new items
                 foreach ($validated['items'] as $item) {
-                    $basePrice = Item::find($item['id'])->price;
-                    $discovery->items()->attach($item['id'], [
+                    $itemModel = Item::findOrFail($item['id']);
+                    $basePrice = $itemModel->price;
+                    $pivotData = [
                         'quantity' => $item['quantity'],
                         'custom_price' => $item['custom_price'] ?? $basePrice
-                    ]);
+                    ];
+
+                    $discovery->items()->attach($item['id'], $pivotData);
+
+                    // Log item attachment to discovery
+                    TransactionLogService::logItemAttachedToDiscovery($itemModel, $discovery, $pivotData);
                 }
             }
 
@@ -243,6 +275,9 @@ class DiscoveryController extends Controller
 
     public function destroy(Discovery $discovery)
     {
+        // Log deletion before actually deleting
+        TransactionLogService::logDiscoveryDeleted($discovery);
+
         $discovery->delete();
         return redirect()->route('discovery')->with('success', 'Discovery deleted successfully');
     }
@@ -317,13 +352,22 @@ class DiscoveryController extends Controller
             // Attach items if present
             if (!empty($request->items)) {
                 foreach ($request->items as $item) {
-                    $basePrice = Item::find($item['id'])->price;
-                    $discovery->items()->attach($item['id'], [
+                    $itemModel = Item::findOrFail($item['id']);
+                    $basePrice = $itemModel->price;
+                    $pivotData = [
                         'quantity' => $item['quantity'],
                         'custom_price' => $item['custom_price'] ?? $basePrice
-                    ]);
+                    ];
+
+                    $discovery->items()->attach($item['id'], $pivotData);
+
+                    // Log item attachment to discovery
+                    TransactionLogService::logItemAttachedToDiscovery($itemModel, $discovery, $pivotData);
                 }
             }
+
+            // Log discovery creation
+            TransactionLogService::logDiscoveryCreated($discovery, $user);
 
             // Load the items relationship
             $discovery->load('items');
@@ -363,7 +407,11 @@ class DiscoveryController extends Controller
             'status' => ['required', 'string', Rule::in(Discovery::getStatuses())]
         ]);
 
+        $oldStatus = $discovery->status;
         $discovery->update($validated);
+
+        // Log status change
+        TransactionLogService::logStatusChange($discovery, $oldStatus, $validated['status']);
 
         return back()->with('success', 'Discovery status updated successfully');
     }
@@ -407,6 +455,9 @@ class DiscoveryController extends Controller
 
         $discovery->update(['assignee_id' => $user->id]);
 
+        // Log assignment
+        TransactionLogService::logAssignment($discovery, $user);
+
         return response()->json([
             'success' => true,
             'message' => 'Discovery assigned to you successfully',
@@ -429,6 +480,9 @@ class DiscoveryController extends Controller
                 'message' => 'You are not assigned to this discovery'
             ], 403);
         }
+
+        // Log unassignment before removing assignee
+        TransactionLogService::logUnassignment($discovery, $user);
 
         $discovery->update(['assignee_id' => null]);
 
@@ -637,15 +691,36 @@ class DiscoveryController extends Controller
             // Update discovery record
             $discovery->update($validated);
 
+            // Log discovery update
+            TransactionLogService::logDiscoveryUpdate($discovery, $validated);
+
             // Update items if present
             if (isset($validated['items'])) {
+                // Log detachment of existing items before removing them
+                foreach ($discovery->items as $existingItem) {
+                    $pivotData = [
+                        'quantity' => $existingItem->pivot->quantity,
+                        'custom_price' => $existingItem->pivot->custom_price
+                    ];
+                    TransactionLogService::logItemDetachedFromDiscovery($existingItem, $discovery, $pivotData);
+                }
+
+                // Remove existing items
                 $discovery->items()->detach();
+
+                // Attach new items
                 foreach ($validated['items'] as $item) {
-                    $basePrice = Item::find($item['id'])->price;
-                    $discovery->items()->attach($item['id'], [
+                    $itemModel = Item::findOrFail($item['id']);
+                    $basePrice = $itemModel->price;
+                    $pivotData = [
                         'quantity' => $item['quantity'],
                         'custom_price' => $item['custom_price'] ?? $basePrice
-                    ]);
+                    ];
+
+                    $discovery->items()->attach($item['id'], $pivotData);
+
+                    // Log item attachment to discovery
+                    TransactionLogService::logItemAttachedToDiscovery($itemModel, $discovery, $pivotData);
                 }
             }
 
@@ -695,7 +770,11 @@ class DiscoveryController extends Controller
                 'status' => ['required', 'string', Rule::in(Discovery::getStatuses())]
             ]);
 
+            $oldStatus = $discovery->status;
             $discovery->update($validated);
+
+            // Log status change
+            TransactionLogService::logStatusChange($discovery, $oldStatus, $validated['status']);
 
             return response()->json([
                 'success' => true,
@@ -729,12 +808,18 @@ class DiscoveryController extends Controller
             ->with('items')
             ->firstOrFail();
 
+        // Log that customer viewed the shared discovery
+        TransactionLogService::logDiscoveryViewed($discovery, null, 'shared_link');
+
         return view('discovery.shared', compact('discovery'));
     }
 
     public function apiGetShareUrl(Discovery $discovery): JsonResponse
     {
         try {
+            // Log that discovery was shared
+            TransactionLogService::logDiscoveryShared($discovery);
+
             return response()->json([
                 'success' => true,
                 'data' => [
@@ -767,6 +852,9 @@ class DiscoveryController extends Controller
 
             $discovery->update(['status' => Discovery::STATUS_IN_PROGRESS]);
 
+            // Log customer approval
+            TransactionLogService::logCustomerApproval($discovery, $discovery->customer_email);
+
             return redirect()
                 ->route('discovery.shared', $token)
                 ->with('success', 'Keşif başarıyla onaylandı! Çalışmalar başlayacak.');
@@ -793,6 +881,9 @@ class DiscoveryController extends Controller
 
             $discovery->update(['status' => Discovery::STATUS_CANCELLED]);
 
+            // Log customer rejection
+            TransactionLogService::logCustomerRejection($discovery, $discovery->customer_email);
+
             return redirect()
                 ->route('discovery.shared', $token)
                 ->with('success', 'Keşif reddedildi.');
@@ -816,5 +907,180 @@ class DiscoveryController extends Controller
         ];
 
         return $statusTexts[$status] ?? $status;
+    }
+
+    public function transactionLogs(Request $request)
+    {
+        $user = auth()->user();
+
+        // Only allow admins to view transaction logs
+        if (!$user->isCompanyAdmin() && !$user->isSoloHandyman()) {
+            abort(403, 'Only admins can view transaction logs.');
+        }
+
+        // Build base query with relationships
+        $query = \App\Models\TransactionLog::with(['user', 'discovery']);
+
+        // Apply user-based scoping
+        if ($user->isSoloHandyman()) {
+            // Solo handyman sees logs for their discoveries and items they created
+            $discoveryIds = Discovery::where('creator_id', $user->id)->pluck('id');
+            $query->where(function ($q) use ($user, $discoveryIds) {
+                $q->whereIn('discovery_id', $discoveryIds)
+                    ->orWhere('user_id', $user->id);
+            });
+        } elseif ($user->isCompanyAdmin()) {
+            // Company admin sees all logs related to their company
+            $discoveryIds = Discovery::where('company_id', $user->company_id)->pluck('id');
+            $companyUserIds = User::where('company_id', $user->company_id)->pluck('id');
+
+            $query->where(function ($q) use ($discoveryIds, $companyUserIds) {
+                $q->whereIn('discovery_id', $discoveryIds)
+                    ->orWhereIn('user_id', $companyUserIds)
+                    ->orWhere('entity_type', 'property'); // All property logs for company admin
+            });
+        }
+
+        // Apply filters
+        if ($request->filled('entity_type')) {
+            $query->where('entity_type', $request->entity_type);
+        }
+
+        if ($request->filled('action')) {
+            $query->where('action', $request->action);
+        }
+
+        if ($request->filled('performer_type')) {
+            $query->where('performed_by_type', $request->performer_type);
+        }
+
+        if ($request->filled('user_id')) {
+            $query->where('user_id', $request->user_id);
+        }
+
+        if ($request->filled('date_from')) {
+            $query->whereDate('created_at', '>=', $request->date_from);
+        }
+
+        if ($request->filled('date_to')) {
+            $query->whereDate('created_at', '<=', $request->date_to);
+        }
+
+        if ($request->filled('search')) {
+            $search = $request->search;
+            $query->where(function ($q) use ($search) {
+                $q->whereHas('discovery', function ($dq) use ($search) {
+                    $dq->where('customer_name', 'like', "%{$search}%")
+                        ->orWhere('customer_email', 'like', "%{$search}%");
+                })
+                    ->orWhereHas('user', function ($uq) use ($search) {
+                        $uq->where('name', 'like', "%{$search}%");
+                    })
+                    ->orWhereJsonContains('metadata->customer_name', $search)
+                    ->orWhereJsonContains('metadata->item_name', $search)
+                    ->orWhereJsonContains('metadata->property_name', $search);
+            });
+        }
+
+        // Get filter options for dropdown
+        $entityTypes = [
+            'discovery' => 'Keşif',
+            'item' => 'Malzeme',
+            'property' => 'Mülk',
+            'user' => 'Kullanıcı',
+            'company' => 'Şirket',
+        ];
+
+        $actions = [
+            'created' => 'Oluşturuldu',
+            'updated' => 'Güncellendi',
+            'deleted' => 'Silindi',
+            'status_changed' => 'Durum Değiştirildi',
+            'approved' => 'Onaylandı',
+            'rejected' => 'Reddedildi',
+            'assigned' => 'Atandı',
+            'unassigned' => 'Atama Kaldırıldı',
+            'viewed' => 'Görüntülendi',
+            'shared' => 'Paylaşıldı',
+            'activated' => 'Aktifleştirildi',
+            'deactivated' => 'Deaktifleştirildi',
+            'price_changed' => 'Fiyat Değiştirildi',
+            'attached' => 'Bağlandı',
+            'detached' => 'Bağlantısı Kesildi',
+        ];
+
+        $performerTypes = [
+            'user' => 'Kullanıcı',
+            'customer' => 'Müşteri',
+            'system' => 'Sistem',
+        ];
+
+        // Get users for user filter (scoped to company)
+        $users = collect();
+        if ($user->isCompanyAdmin()) {
+            $users = User::where('company_id', $user->company_id)
+                ->select('id', 'name')
+                ->orderBy('name')
+                ->get();
+        } elseif ($user->isSoloHandyman()) {
+            $users = collect([$user]);
+        }
+
+        $logs = $query->latest()->paginate(50)->withQueryString();
+
+        return view('transaction-logs.index', compact(
+            'logs',
+            'entityTypes',
+            'actions',
+            'performerTypes',
+            'users'
+        ));
+    }
+
+    public function cleanupTransactionLogs(Request $request)
+    {
+        $user = auth()->user();
+
+        // Only allow admins to cleanup logs
+        if (!$user->isCompanyAdmin() && !$user->isSoloHandyman()) {
+            abort(403, 'Only admins can cleanup transaction logs.');
+        }
+
+        $validated = $request->validate([
+            'cleanup_type' => 'required|in:days,action,all_old',
+            'days_to_keep' => 'nullable|integer|min:1|max:365',
+            'action_type' => 'nullable|string',
+            'action_days' => 'nullable|integer|min:1|max:365',
+        ]);
+
+        try {
+            $deletedCount = 0;
+
+            switch ($validated['cleanup_type']) {
+                case 'days':
+                    $days = $validated['days_to_keep'] ?? 30;
+                    $deletedCount = \App\Services\TransactionLogService::deleteOldLogs($days);
+                    $message = "Son {$days} günden eski {$deletedCount} işlem geçmişi silindi.";
+                    break;
+
+                case 'action':
+                    $action = $validated['action_type'];
+                    $days = $validated['action_days'] ?? 7;
+                    $deletedCount = \App\Services\TransactionLogService::deleteLogsByAction($action, $days);
+                    $message = "{$action} türündeki {$deletedCount} işlem geçmişi silindi.";
+                    break;
+
+                case 'all_old':
+                    $deletedCount = \App\Services\TransactionLogService::deleteOldLogs(15);
+                    $message = "15 günden eski tüm işlem geçmişleri ({$deletedCount} kayıt) silindi.";
+                    break;
+            }
+
+            return back()->with('success', $message);
+
+        } catch (\Exception $e) {
+            \Log::error('Transaction logs cleanup failed: ' . $e->getMessage());
+            return back()->withErrors(['error' => 'İşlem geçmişi temizleme başarısız: ' . $e->getMessage()]);
+        }
     }
 }

@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Item;
+use App\Services\TransactionLogService;
 use Illuminate\Http\Request;
 
 class ItemController extends Controller
@@ -48,6 +49,9 @@ class ItemController extends Controller
             'price' => $request->price,
         ]);
 
+        // Log item creation
+        TransactionLogService::logItemCreated($item);
+
         return response()->json([
             "message" => "Item created successfully",
             "item" => $item
@@ -70,11 +74,24 @@ class ItemController extends Controller
             ], 404);
         }
 
-        $itemFound->update([
+        // Track original price for price change logging
+        $originalPrice = $itemFound->price;
+
+        $newValues = [
             'item' => $request->item,
             'brand' => $request->brand,
             'price' => $request->price,
-        ]);
+        ];
+
+        $itemFound->update($newValues);
+
+        // Log item update
+        TransactionLogService::logItemUpdated($itemFound, $newValues);
+
+        // Log price change if price changed
+        if ($originalPrice != $newValues['price']) {
+            TransactionLogService::logItemPriceChanged($itemFound, $originalPrice, $newValues['price']);
+        }
 
         return response()->json([
             "message" => "Item updated successfully",
@@ -92,6 +109,9 @@ class ItemController extends Controller
                 'message' => 'Item not found'
             ], 404);
         }
+
+        // Log item deletion before deleting
+        TransactionLogService::logItemDeleted($itemFound);
 
         $itemFound->delete();
 
@@ -124,7 +144,11 @@ class ItemController extends Controller
             "price" => "required|numeric",
         ]);
 
-        Item::create($validated);
+        $item = Item::create($validated);
+
+        // Log item creation
+        TransactionLogService::logItemCreated($item);
+
         return redirect()->route('items')->with('success', 'Item created successfully');
     }
 
@@ -141,7 +165,22 @@ class ItemController extends Controller
             "price" => "required|numeric",
         ]);
 
+        // Track original values for logging
+        $originalValues = [
+            'item' => $item->item,
+            'brand' => $item->brand,
+            'price' => $item->price,
+        ];
+
         $item->update($validated);
+
+        // Log item update
+        TransactionLogService::logItemUpdated($item, $validated);
+
+        // Log price change if price changed
+        if ($originalValues['price'] != $validated['price']) {
+            TransactionLogService::logItemPriceChanged($item, $originalValues['price'], $validated['price']);
+        }
 
         // Redirect back with the search query if it exists
         $query = session('last_search_query');
@@ -151,6 +190,9 @@ class ItemController extends Controller
 
     public function webDestroy(Item $item)
     {
+        // Log item deletion before deleting
+        TransactionLogService::logItemDeleted($item);
+
         $item->delete();
         return redirect()->route('items')->with('success', 'Item deleted successfully');
     }

@@ -31,6 +31,12 @@
                         Şirket Yönetimi
                     </a>
                 @endif
+                @if(auth()->user()->isSoloHandyman() || auth()->user()->isCompanyAdmin())
+                    <a href="{{ route('transaction-logs') }}"
+                       class="text-gray-700 hover:text-gray-900 font-medium {{ request()->routeIs('transaction-logs') ? 'text-blue-600' : '' }}">
+                        İşlem Geçmişi
+                    </a>
+                @endif
             </div>
             <div class="flex items-center">
                 <span class="text-gray-700 mr-4">Hoşgeldin</span>

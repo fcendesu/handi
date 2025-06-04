@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\WorkGroup;
 use App\Models\User;
+use App\Services\TransactionLogService;
 use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Validation\Rule;
@@ -55,8 +56,10 @@ class WorkGroupController extends Controller
             if ($user->isCompanyAdmin()) {
                 $validated['company_id'] = $user->company_id;
             }
-
             $workGroup = WorkGroup::create($validated);
+
+            // Log work group creation
+            TransactionLogService::logWorkGroupCreated($workGroup, $validated);
 
             return redirect()
                 ->route('work-groups.index')
@@ -92,9 +95,11 @@ class WorkGroupController extends Controller
                 })
             ],
         ]);
-
         try {
             $workGroup->update($validated);
+
+            // Log work group update
+            TransactionLogService::logWorkGroupUpdated($workGroup, $validated);
 
             return redirect()
                 ->route('work-groups.show', $workGroup)
@@ -111,8 +116,10 @@ class WorkGroupController extends Controller
     public function destroy(WorkGroup $workGroup)
     {
         $this->authorize('delete', $workGroup);
-
         try {
+            // Log work group deletion before deleting
+            TransactionLogService::logWorkGroupDeleted($workGroup);
+
             $workGroup->delete();
             return redirect()->route('work-groups.index')->with('success', 'Work group deleted successfully');
         } catch (\Exception $e) {
@@ -128,18 +135,20 @@ class WorkGroupController extends Controller
         $validated = $request->validate([
             'user_id' => 'required|exists:users,id'
         ]);
-
         try {
-            $user = User::findOrFail($validated['user_id']);
+            $assignedUser = \App\Models\User::findOrFail($validated['user_id']);
 
             // Validate user can be assigned to this work group
-            if ($workGroup->company_id && $user->company_id !== $workGroup->company_id) {
+            if ($workGroup->company_id && $assignedUser->company_id !== $workGroup->company_id) {
                 return back()->withErrors(['error' => 'User must belong to the same company as the work group.']);
             }
 
-            if (!$workGroup->users()->where('user_id', $user->id)->exists()) {
-                $workGroup->users()->attach($user->id);
-                return back()->with('success', $user->name . ' has been assigned to the work group.');
+            if (!$workGroup->users()->where('user_id', $assignedUser->id)->exists()) {
+                $workGroup->users()->attach($assignedUser->id);
+                // Log user assignment to work group
+                TransactionLogService::logUserAssignedToWorkGroup($assignedUser, $workGroup, auth()->user());
+
+                return back()->with('success', $assignedUser->name . ' has been assigned to the work group.');
             }
 
             return back()->withErrors(['error' => 'User is already assigned to this work group.']);
@@ -157,12 +166,12 @@ class WorkGroupController extends Controller
         $validated = $request->validate([
             'user_id' => 'required|exists:users,id'
         ]);
-
         try {
-            $user = User::findOrFail($validated['user_id']);
-            $workGroup->users()->detach($user->id);
+            $removedUser = \App\Models\User::findOrFail($validated['user_id']);
+            $workGroup->users()->detach($removedUser->id);            // Log user removal from work group
+            TransactionLogService::logUserRemovedFromWorkGroup($removedUser, $workGroup, auth()->user());
 
-            return back()->with('success', $user->name . ' has been removed from the work group.');
+            return back()->with('success', $removedUser->name . ' has been removed from the work group.');
 
         } catch (\Exception $e) {
             \Log::error('Work group user removal failed: ' . $e->getMessage());
