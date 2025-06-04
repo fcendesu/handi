@@ -119,7 +119,7 @@
                                 </label>                                <select name="city" 
                                         id="city" 
                                         x-model="selectedCity"
-                                        @change="updateNeighborhoods()"
+                                        @change="updateDistricts()"
                                         required
                                         class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 @error('city') border-red-500 @enderror">
                                     <option value="">Select a city</option>
@@ -131,20 +131,20 @@
                                     <p class="mt-2 text-sm text-red-600">{{ $message }}</p>
                                 @enderror
                             </div>                            <div>
-                                <label for="neighborhood" class="block text-sm font-medium text-gray-700 mb-2">
+                                <label for="district" class="block text-sm font-medium text-gray-700 mb-2">
                                     District *
                                 </label>
-                                <select name="neighborhood" 
-                                        id="neighborhood" 
-                                        x-model="selectedNeighborhood"
+                                <select name="district" 
+                                        id="district" 
+                                        x-model="selectedDistrict"
                                         required
-                                        class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 @error('neighborhood') border-red-500 @enderror">
+                                        class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 @error('district') border-red-500 @enderror">
                                     <option value="">Select a district</option>
-                                    <template x-for="neighborhood in neighborhoods" :key="neighborhood">
-                                        <option :value="neighborhood" x-text="neighborhood"></option>
+                                    <template x-for="district in districts" :key="district">
+                                        <option :value="district" x-text="district"></option>
                                     </template>
                                 </select>
-                                @error('neighborhood')
+                                @error('district')
                                     <p class="mt-2 text-sm text-red-600">{{ $message }}</p>
                                 @enderror
                             </div>
@@ -224,18 +224,18 @@
         function propertyForm() {
             return {
                 selectedCity: '{{ old('city') }}',
-                selectedNeighborhood: '{{ old('neighborhood') }}',
-                neighborhoods: [],
+                selectedDistrict: '{{ old('district') }}',
+                districts: [],
                 latitude: {{ old('latitude') ?? 'null' }},
                 longitude: {{ old('longitude') ?? 'null' }},
                 loadingLocation: false,
                 locationError: '',
                 map: null,
                 marker: null,
-                cityNeighborhoods: @json($districts),
+                cityDistricts: @json($districts),
 
                 init() {
-                    this.updateNeighborhoods();
+                    this.updateDistricts();
                     this.initMap();
                     
                     // Watch for manual changes to coordinates
@@ -243,10 +243,10 @@
                     this.$watch('longitude', () => this.updateMapLocation());
                 },
 
-                updateNeighborhoods() {
-                    this.neighborhoods = this.cityNeighborhoods[this.selectedCity] || [];
-                    if (!this.neighborhoods.includes(this.selectedNeighborhood)) {
-                        this.selectedNeighborhood = '';
+                updateDistricts() {
+                    this.districts = this.cityDistricts[this.selectedCity] || [];
+                    if (!this.districts.includes(this.selectedDistrict)) {
+                        this.selectedDistrict = '';
                     }
                 },
 

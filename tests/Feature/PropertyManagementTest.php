@@ -36,7 +36,7 @@ class PropertyManagementTest extends TestCase
         $propertyData = [
             'name' => 'Test Property',
             'city' => 'Lefkoşa',
-            'neighborhood' => 'Dereboyu',
+            'district' => 'Dereboyu',
             'site_name' => 'Test Site',
             'building_name' => 'Building A',
             'street' => 'Test Street 123',

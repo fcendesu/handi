@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Models;
 
+use App\Data\AddressData;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -20,7 +21,7 @@ class Property extends Model
         'user_id',
         'name',
         'city',
-        'neighborhood',
+        'district',
         'site_name',
         'building_name',
         'street',
@@ -43,7 +44,8 @@ class Property extends Model
     ];
 
     /**
-     * Cities available in Northern Cyprus (Level 1 from CSV)
+     * Cities available in Northern Cyprus
+     * @deprecated Use AddressData::getCities() instead
      *
      * @var array<string>
      */
@@ -57,7 +59,8 @@ class Property extends Model
     ];
 
     /**
-     * Districts by city (Level 2 from CSV) - replaces old neighborhoods
+     * Districts by city
+     * @deprecated Use AddressData::getAllDistricts() instead
      *
      * @var array<string, array<string>>
      */
@@ -267,7 +270,7 @@ class Property extends Model
 
         $parts[] = $this->street;
         $parts[] = "No: {$this->door_apartment_no}";
-        $parts[] = $this->neighborhood;
+        $parts[] = $this->district;
         $parts[] = $this->city;
 
         return implode(', ', $parts);
@@ -275,10 +278,11 @@ class Property extends Model
 
     /**
      * Get districts for a specific city.
+     * Uses AddressData for current data
      */
     public static function getDistrictsForCity(string $city): array
     {
-        return self::$districts[$city] ?? [];
+        return AddressData::getDistricts($city);
     }
 
     /**
@@ -288,6 +292,24 @@ class Property extends Model
     public static function getNeighborhoodsForCity(string $city): array
     {
         return self::$neighborhoods[$city] ?? [];
+    }
+
+    /**
+     * Get all districts.
+     * Uses AddressData for current data
+     */
+    public static function getAllDistricts(): array
+    {
+        return AddressData::getAllDistricts();
+    }
+
+    /**
+     * Get all cities.
+     * Uses AddressData for current data
+     */
+    public static function getCities(): array
+    {
+        return AddressData::getCities();
     }
 
     /**

@@ -75,11 +75,10 @@ echo "- Solo Handyman 2: {$soloHandyman2->email}\n\n";
 
 // Create properties for each
 $properties = [
-    // Company 1 properties
-    Property::create([
+    // Company 1 properties    Property::create([
         'name' => 'Company 1 Property A',
         'city' => 'Lefkoşa',
-        'neighborhood' => 'Köşklüçiftlik',
+        'district' => 'Köşklüçiftlik',
         'street' => 'Test Street 1',
         'door_apartment_no' => '1A',
         'company_id' => $company1->id,
@@ -88,7 +87,7 @@ $properties = [
     Property::create([
         'name' => 'Company 1 Property B',
         'city' => 'Lefkoşa',
-        'neighborhood' => 'Köşklüçiftlik',
+        'district' => 'Köşklüçiftlik',
         'street' => 'Test Street 2',
         'door_apartment_no' => '2B',
         'company_id' => $company1->id,
@@ -98,7 +97,7 @@ $properties = [
     Property::create([
         'name' => 'Company 2 Property A',
         'city' => 'Mağusa',
-        'neighborhood' => 'Karakol',
+        'district' => 'Karakol',
         'street' => 'Test Avenue 1',
         'door_apartment_no' => '3A',
         'company_id' => $company2->id,
@@ -107,7 +106,7 @@ $properties = [
     Property::create([
         'name' => 'Company 2 Property B',
         'city' => 'Mağusa',
-        'neighborhood' => 'Karakol',
+        'district' => 'Karakol',
         'street' => 'Test Avenue 2',
         'door_apartment_no' => '4B',
         'company_id' => $company2->id,
@@ -118,7 +117,7 @@ $properties = [
     Property::create([
         'name' => 'Solo 1 Property A',
         'city' => 'Girne',
-        'neighborhood' => 'Karşıyaka',
+        'district' => 'Karşıyaka',
         'street' => 'Solo Street 1',
         'door_apartment_no' => '5A',
         'company_id' => null,
@@ -127,7 +126,7 @@ $properties = [
     Property::create([
         'name' => 'Solo 1 Property B',
         'city' => 'Girne',
-        'neighborhood' => 'Karşıyaka',
+        'district' => 'Karşıyaka',
         'street' => 'Solo Street 2',
         'door_apartment_no' => '6B',
         'company_id' => null,
@@ -138,7 +137,7 @@ $properties = [
     Property::create([
         'name' => 'Solo 2 Property A',
         'city' => 'Güzelyurt',
-        'neighborhood' => 'Morphou',
+        'district' => 'Morphou',
         'street' => 'Solo Avenue 1',
         'door_apartment_no' => '7A',
         'company_id' => null,
@@ -147,7 +146,7 @@ $properties = [
     Property::create([
         'name' => 'Solo 2 Property B',
         'city' => 'Güzelyurt',
-        'neighborhood' => 'Morphou',
+        'district' => 'Morphou',
         'street' => 'Solo Avenue 2',
         'door_apartment_no' => '8B',
         'company_id' => null,

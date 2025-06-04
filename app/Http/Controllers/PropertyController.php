@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Http\Controllers;
 
 use App\Models\Property;
+use App\Data\AddressData;
 use App\Services\TransactionLogService;
 use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
@@ -41,8 +42,8 @@ class PropertyController extends Controller
      */
     public function create(): View
     {
-        $cities = Property::$cities;
-        $districts = Property::$districts;
+        $cities = AddressData::getCities();
+        $districts = AddressData::getAllDistricts();
 
         return view('property.create', compact('cities', 'districts'));
     }
@@ -56,8 +57,8 @@ class PropertyController extends Controller
 
         $validated = $request->validate([
             'name' => 'required|string|max:255',
-            'city' => ['required', 'string', Rule::in(Property::$cities)],
-            'neighborhood' => 'required|string|max:255',
+            'city' => ['required', 'string', Rule::in(AddressData::getCities())],
+            'district' => 'required|string|max:255',
             'site_name' => 'nullable|string|max:255',
             'building_name' => 'nullable|string|max:255',
             'street' => 'nullable|string|max:255',
@@ -104,8 +105,8 @@ class PropertyController extends Controller
     {
         $this->authorize('update', $property);
 
-        $cities = Property::$cities;
-        $districts = Property::$districts;
+        $cities = AddressData::getCities();
+        $districts = AddressData::getAllDistricts();
 
         return view('property.edit', compact('property', 'cities', 'districts'));
     }
@@ -119,8 +120,8 @@ class PropertyController extends Controller
 
         $validated = $request->validate([
             'name' => 'required|string|max:255',
-            'city' => ['required', 'string', Rule::in(Property::$cities)],
-            'neighborhood' => 'required|string|max:255',
+            'city' => ['required', 'string', Rule::in(AddressData::getCities())],
+            'district' => 'required|string|max:255',
             'site_name' => 'nullable|string|max:255',
             'building_name' => 'nullable|string|max:255',
             'street' => 'nullable|string|max:255',
@@ -162,7 +163,7 @@ class PropertyController extends Controller
     public function getDistricts(Request $request): JsonResponse
     {
         $city = $request->get('city');
-        $districts = Property::getDistrictsForCity($city);
+        $districts = AddressData::getDistricts($city);
 
         return response()->json($districts);
     }

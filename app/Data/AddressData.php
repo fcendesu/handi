@@ -1,10 +1,13 @@
 <?php
 
+declare(strict_types=1);
+
+namespace App\Data;
+
 /**
  * Parsed Address Data from CSV
  * Generated from Address.csv file
  */
-
 class AddressData
 {
     // Level 1: Cities
@@ -78,17 +81,11 @@ class AddressData
     public static function getDistricts(string $city): array
     {
         return self::$districts[$city] ?? [];
-    }
-
-    /**
-     * Get all districts formatted for dropdown
-     */
+    }    /**
+         * Get all districts formatted for dropdown
+         */
     public static function getAllDistricts(): array
     {
         return self::$districts;
     }
 }
-
-echo "Address data processed successfully!\n";
-echo "Cities: " . count(AddressData::getCities()) . "\n";
-echo "Total districts: " . array_sum(array_map('count', AddressData::getAllDistricts())) . "\n";
