@@ -13,8 +13,8 @@ class PropertyPolicy
      */
     public function viewAny(User $user): bool
     {
-        // Company employees and admins can view their company's properties
-        return $user->isCompanyEmployee() || $user->isCompanyAdmin();
+        // Solo handymen, company employees and admins can view their properties
+        return $user->isSoloHandyman() || $user->isCompanyEmployee() || $user->isCompanyAdmin();
     }
 
     /**
@@ -22,7 +22,11 @@ class PropertyPolicy
      */
     public function view(User $user, Property $property): bool
     {
-        // Users can only view properties from their own company
+        // Solo handymen can view their own properties, company users can view company properties
+        if ($user->isSoloHandyman()) {
+            return $property->user_id === $user->id;
+        }
+
         return $user->company_id === $property->company_id;
     }
 
@@ -31,8 +35,8 @@ class PropertyPolicy
      */
     public function create(User $user): bool
     {
-        // Company employees and admins can create properties
-        return $user->isCompanyEmployee() || $user->isCompanyAdmin();
+        // Solo handymen, company employees and admins can create properties
+        return $user->isSoloHandyman() || $user->isCompanyEmployee() || $user->isCompanyAdmin();
     }
 
     /**
@@ -40,7 +44,11 @@ class PropertyPolicy
      */
     public function update(User $user, Property $property): bool
     {
-        // Users can only update properties from their own company
+        // Solo handymen can update their own properties, company users can update company properties
+        if ($user->isSoloHandyman()) {
+            return $property->user_id === $user->id;
+        }
+
         return $user->company_id === $property->company_id;
     }
 
@@ -49,7 +57,11 @@ class PropertyPolicy
      */
     public function delete(User $user, Property $property): bool
     {
-        // Users can only delete properties from their own company
+        // Solo handymen can delete their own properties, company users can delete company properties
+        if ($user->isSoloHandyman()) {
+            return $property->user_id === $user->id;
+        }
+
         return $user->company_id === $property->company_id;
     }
 
@@ -58,7 +70,11 @@ class PropertyPolicy
      */
     public function restore(User $user, Property $property): bool
     {
-        // Users can only restore properties from their own company
+        // Solo handymen can restore their own properties, company users can restore company properties
+        if ($user->isSoloHandyman()) {
+            return $property->user_id === $user->id;
+        }
+
         return $user->company_id === $property->company_id;
     }
 
@@ -67,7 +83,11 @@ class PropertyPolicy
      */
     public function forceDelete(User $user, Property $property): bool
     {
-        // Only company admins can permanently delete properties
+        // Only company admins and solo handymen can permanently delete properties
+        if ($user->isSoloHandyman()) {
+            return $property->user_id === $user->id;
+        }
+
         return $user->isCompanyAdmin() && $user->company_id === $property->company_id;
     }
 }

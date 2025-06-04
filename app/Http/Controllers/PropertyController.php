@@ -26,9 +26,9 @@ class PropertyController extends Controller
 
         $user = Auth::user();
 
-        // Get properties for the user's company
-        $properties = Property::with('company')
-            ->forCompany($user->company_id)
+        // Get properties accessible by the user (company or solo handyman)
+        $properties = Property::with(['company', 'user'])
+            ->accessibleBy($user)
             ->active()
             ->orderBy('name')
             ->paginate(15);
@@ -67,7 +67,14 @@ class PropertyController extends Controller
             'notes' => 'nullable|string|max:1000',
         ]);
 
-        $validated['company_id'] = $user->company_id;
+        // Set ownership based on user type
+        if ($user->isSoloHandyman()) {
+            $validated['user_id'] = $user->id;
+            $validated['company_id'] = null;
+        } else {
+            $validated['company_id'] = $user->company_id;
+            $validated['user_id'] = null;
+        }
 
         $property = Property::create($validated);
 
@@ -161,13 +168,14 @@ class PropertyController extends Controller
     }
 
     /**
-     * Get properties for a specific company (AJAX endpoint for discovery form)
+     * Get properties for the authenticated user (AJAX endpoint for discovery form)
      */
     public function getCompanyProperties(Request $request): JsonResponse
     {
         $user = Auth::user();
 
-        $properties = Property::forCompany($user->company_id)
+        // Get properties accessible by the user (company or solo handyman)
+        $properties = Property::accessibleBy($user)
             ->active()
             ->orderBy('name')
             ->get()

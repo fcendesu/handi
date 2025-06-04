@@ -47,22 +47,73 @@
                             @error('name')
                                 <p class="mt-2 text-sm text-red-600">{{ $message }}</p>
                             @enderror
-                        </div>
+                        </div>                        <!-- Address Components -->
+                        <div class="space-y-4">
+                            <h3 class="text-lg font-medium text-gray-900">Address</h3>
+                            
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div>
+                                    <label for="site_name" class="block text-sm font-medium text-gray-700 mb-2">
+                                        Site Name
+                                    </label>
+                                    <input type="text" 
+                                           name="site_name" 
+                                           id="site_name" 
+                                           value="{{ old('site_name', $property->site_name) }}"
+                                           placeholder="e.g., Marina Complex"
+                                           class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 @error('site_name') border-red-500 @enderror">
+                                    @error('site_name')
+                                        <p class="mt-2 text-sm text-red-600">{{ $message }}</p>
+                                    @enderror
+                                </div>
 
-                        <!-- Address -->
-                        <div>
-                            <label for="address" class="block text-sm font-medium text-gray-700 mb-2">
-                                Address *
-                            </label>
-                            <input type="text" 
-                                   name="address" 
-                                   id="address" 
-                                   value="{{ old('address', $property->address) }}"
-                                   required
-                                   class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 @error('address') border-red-500 @enderror">
-                            @error('address')
-                                <p class="mt-2 text-sm text-red-600">{{ $message }}</p>
-                            @enderror
+                                <div>
+                                    <label for="building_name" class="block text-sm font-medium text-gray-700 mb-2">
+                                        Building Name
+                                    </label>
+                                    <input type="text" 
+                                           name="building_name" 
+                                           id="building_name" 
+                                           value="{{ old('building_name', $property->building_name) }}"
+                                           placeholder="e.g., Building A"
+                                           class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 @error('building_name') border-red-500 @enderror">
+                                    @error('building_name')
+                                        <p class="mt-2 text-sm text-red-600">{{ $message }}</p>
+                                    @enderror
+                                </div>
+                            </div>
+
+                            <div>
+                                <label for="street" class="block text-sm font-medium text-gray-700 mb-2">
+                                    Street *
+                                </label>
+                                <input type="text" 
+                                       name="street" 
+                                       id="street" 
+                                       value="{{ old('street', $property->street) }}"
+                                       required
+                                       placeholder="e.g., Şehit Salahi Şevket Sokağı"
+                                       class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 @error('street') border-red-500 @enderror">
+                                @error('street')
+                                    <p class="mt-2 text-sm text-red-600">{{ $message }}</p>
+                                @enderror
+                            </div>
+
+                            <div>
+                                <label for="door_apartment_no" class="block text-sm font-medium text-gray-700 mb-2">
+                                    Door/Apartment Number *
+                                </label>
+                                <input type="text" 
+                                       name="door_apartment_no" 
+                                       id="door_apartment_no" 
+                                       value="{{ old('door_apartment_no', $property->door_apartment_no) }}"
+                                       required
+                                       placeholder="e.g., 15A or Apartment 3"
+                                       class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 @error('door_apartment_no') border-red-500 @enderror">
+                                @error('door_apartment_no')
+                                    <p class="mt-2 text-sm text-red-600">{{ $message }}</p>
+                                @enderror
+                            </div>
                         </div>
 
                         <!-- City and Neighborhood -->
@@ -70,19 +121,16 @@
                             <div>
                                 <label for="city" class="block text-sm font-medium text-gray-700 mb-2">
                                     City *
-                                </label>
-                                <select name="city" 
+                                </label>                                <select name="city" 
                                         id="city" 
                                         x-model="selectedCity"
                                         @change="updateNeighborhoods()"
                                         required
                                         class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 @error('city') border-red-500 @enderror">
                                     <option value="">Select a city</option>
-                                    <option value="İstanbul" {{ old('city', $property->city) == 'İstanbul' ? 'selected' : '' }}>İstanbul</option>
-                                    <option value="Ankara" {{ old('city', $property->city) == 'Ankara' ? 'selected' : '' }}>Ankara</option>
-                                    <option value="İzmir" {{ old('city', $property->city) == 'İzmir' ? 'selected' : '' }}>İzmir</option>
-                                    <option value="Bursa" {{ old('city', $property->city) == 'Bursa' ? 'selected' : '' }}>Bursa</option>
-                                    <option value="Antalya" {{ old('city', $property->city) == 'Antalya' ? 'selected' : '' }}>Antalya</option>
+                                    @foreach($cities as $city)
+                                        <option value="{{ $city }}" {{ old('city', $property->city) == $city ? 'selected' : '' }}>{{ $city }}</option>
+                                    @endforeach
                                 </select>
                                 @error('city')
                                     <p class="mt-2 text-sm text-red-600">{{ $message }}</p>

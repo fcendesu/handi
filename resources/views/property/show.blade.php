@@ -56,10 +56,18 @@
                                 <h2 class="text-xl font-semibold text-gray-900">Property Details</h2>
                             </div>
                             <div class="p-6">
-                                <dl class="space-y-4">
-                                    <div>
+                                <dl class="space-y-4">                                    <div>
                                         <dt class="text-sm font-medium text-gray-500">Property Name</dt>
                                         <dd class="mt-1 text-lg text-gray-900">{{ $property->name }}</dd>
+                                    </div>
+
+                                    <div>
+                                        <dt class="text-sm font-medium text-gray-500">Owner</dt>
+                                        <dd class="mt-1 text-sm text-gray-900">
+                                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium {{ $property->isSoloHandymanProperty() ? 'bg-purple-100 text-purple-800' : 'bg-green-100 text-green-800' }}">
+                                                {{ $property->owner_name }}
+                                            </span>
+                                        </dd>
                                     </div>
 
                                     <div>

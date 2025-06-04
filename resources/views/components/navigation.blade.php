@@ -21,11 +21,13 @@
                         Çalışma Grupları
                     </a>
                 @endif
-                @if(auth()->user()->isCompanyAdmin())
+                @if(auth()->user()->isSoloHandyman() || auth()->user()->isCompanyAdmin())
                     <a href="{{ route('properties.index') }}"
                        class="text-gray-700 hover:text-gray-900 font-medium {{ request()->routeIs('properties.*') ? 'text-blue-600' : '' }}">
                         Mülkler
                     </a>
+                @endif
+                @if(auth()->user()->isCompanyAdmin())
                     <a href="{{ route('company.index') }}"
                        class="text-gray-700 hover:text-gray-900 font-medium {{ request()->routeIs('company.*') ? 'text-blue-600' : '' }}">
                         Şirket Yönetimi

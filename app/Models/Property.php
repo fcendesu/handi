@@ -17,6 +17,7 @@ class Property extends Model
      */
     protected $fillable = [
         'company_id',
+        'user_id',
         'name',
         'city',
         'neighborhood',
@@ -144,6 +145,14 @@ class Property extends Model
     }
 
     /**
+     * Get the user (solo handyman) that owns this property.
+     */
+    public function user(): BelongsTo
+    {
+        return $this->belongsTo(User::class);
+    }
+
+    /**
      * Get discoveries that use this property.
      */
     public function discoveries(): HasMany
@@ -165,6 +174,28 @@ class Property extends Model
     public function scopeForCompany($query, $companyId)
     {
         return $query->where('company_id', $companyId);
+    }
+
+    /**
+     * Scope a query to only include properties for a specific user (solo handyman).
+     */
+    public function scopeForUser($query, $userId)
+    {
+        return $query->where('user_id', $userId);
+    }
+
+    /**
+     * Scope a query to include properties accessible by a user (company or solo handyman).
+     */
+    public function scopeAccessibleBy($query, User $user)
+    {
+        if ($user->isSoloHandyman()) {
+            return $query->where('user_id', $user->id);
+        } elseif ($user->isCompanyAdmin() || $user->isCompanyEmployee()) {
+            return $query->where('company_id', $user->company_id);
+        }
+
+        return $query->whereRaw('1 = 0'); // Return no results for invalid user types
     }
 
     /**
@@ -204,5 +235,35 @@ class Property extends Model
     public function hasMapLocation(): bool
     {
         return !is_null($this->latitude) && !is_null($this->longitude);
+    }
+
+    /**
+     * Get the owner name (company name or solo handyman name).
+     */
+    public function getOwnerNameAttribute(): string
+    {
+        if ($this->company_id && $this->company) {
+            return $this->company->name;
+        } elseif ($this->user_id && $this->user) {
+            return $this->user->name . ' (Solo Handyman)';
+        }
+
+        return 'Unknown Owner';
+    }
+
+    /**
+     * Check if the property belongs to a solo handyman.
+     */
+    public function isSoloHandymanProperty(): bool
+    {
+        return !is_null($this->user_id) && is_null($this->company_id);
+    }
+
+    /**
+     * Check if the property belongs to a company.
+     */
+    public function isCompanyProperty(): bool
+    {
+        return !is_null($this->company_id);
     }
 }
