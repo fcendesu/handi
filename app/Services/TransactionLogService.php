@@ -700,7 +700,8 @@ class TransactionLogService
         return TransactionLog::where('action', $action)
             ->where('created_at', '<', $cutoffDate)
             ->delete();
-    }    private static function createLog(array $data): void
+    }
+    private static function createLog(array $data): void
     {
         // Set default values
         $data['entity_type'] = $data['entity_type'] ?? TransactionLog::ENTITY_DISCOVERY;
