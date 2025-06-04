@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Discovery;
 use App\Models\Item;
+use App\Models\Property;
 use App\Models\User;
 use App\Services\TransactionLogService;
 use Illuminate\Http\Request;
@@ -77,11 +78,11 @@ class DiscoveryController extends Controller
             'items.*.custom_price' => 'nullable|numeric|min:0'
         ]);
 
-        // Additional validation for property selection - ensure property belongs to user's company
+        // Additional validation for property selection - ensure property is accessible to user
         if ($request->address_type === 'property' && $request->property_id) {
-            $property = \App\Models\Property::find($request->property_id);
-            if (!$property || $property->company_id !== $user->company_id) {
-                return back()->withErrors(['property_id' => 'Selected property does not belong to your company.']);
+            $property = \App\Models\Property::accessibleBy($user)->find($request->property_id);
+            if (!$property) {
+                return back()->withErrors(['property_id' => 'Selected property is not accessible to you.']);
             }
         }
 
@@ -934,10 +935,16 @@ class DiscoveryController extends Controller
             $discoveryIds = Discovery::where('company_id', $user->company_id)->pluck('id');
             $companyUserIds = User::where('company_id', $user->company_id)->pluck('id');
 
-            $query->where(function ($q) use ($discoveryIds, $companyUserIds) {
+            // Get property IDs that are accessible to this company admin
+            $accessiblePropertyIds = Property::accessibleBy($user)->pluck('id');
+
+            $query->where(function ($q) use ($discoveryIds, $companyUserIds, $accessiblePropertyIds) {
                 $q->whereIn('discovery_id', $discoveryIds)
                     ->orWhereIn('user_id', $companyUserIds)
-                    ->orWhere('entity_type', 'property'); // All property logs for company admin
+                    ->orWhere(function ($propertyQuery) use ($accessiblePropertyIds) {
+                        $propertyQuery->where('entity_type', 'property')
+                            ->whereIn('entity_id', $accessiblePropertyIds);
+                    });
             });
         }
 
