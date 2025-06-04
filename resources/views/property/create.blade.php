@@ -80,42 +80,34 @@
                                         <p class="mt-2 text-sm text-red-600">{{ $message }}</p>
                                     @enderror
                                 </div>
-                            </div>
-
-                            <div>
+                            </div>                            <div>
                                 <label for="street" class="block text-sm font-medium text-gray-700 mb-2">
-                                    Street *
+                                    Street
                                 </label>
                                 <input type="text" 
                                        name="street" 
                                        id="street" 
                                        value="{{ old('street') }}"
-                                       required
                                        placeholder="e.g., Şehit Salahi Şevket Sokağı"
                                        class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 @error('street') border-red-500 @enderror">
                                 @error('street')
                                     <p class="mt-2 text-sm text-red-600">{{ $message }}</p>
                                 @enderror
-                            </div>
-
-                            <div>
+                            </div>                            <div>
                                 <label for="door_apartment_no" class="block text-sm font-medium text-gray-700 mb-2">
-                                    Door/Apartment Number *
+                                    Door/Apartment Number
                                 </label>
                                 <input type="text" 
                                        name="door_apartment_no" 
                                        id="door_apartment_no" 
                                        value="{{ old('door_apartment_no') }}"
-                                       required
                                        placeholder="e.g., 15A or Apartment 3"
                                        class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 @error('door_apartment_no') border-red-500 @enderror">
                                 @error('door_apartment_no')
                                     <p class="mt-2 text-sm text-red-600">{{ $message }}</p>
                                 @enderror
                             </div>
-                        </div>
-
-                        <!-- City and Neighborhood -->
+                        </div>                        <!-- City and District -->
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                             <div>
                                 <label for="city" class="block text-sm font-medium text-gray-700 mb-2">
@@ -134,17 +126,17 @@
                                 @error('city')
                                     <p class="mt-2 text-sm text-red-600">{{ $message }}</p>
                                 @enderror
-                            </div>
-
-                            <div>
+                            </div>                            <div>
                                 <label for="neighborhood" class="block text-sm font-medium text-gray-700 mb-2">
-                                    Neighborhood
+                                    District *
                                 </label>
                                 <select name="neighborhood" 
                                         id="neighborhood" 
                                         x-model="selectedNeighborhood"
+                                        required
                                         class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 @error('neighborhood') border-red-500 @enderror">
-                                    <option value="">Select a neighborhood</option>                                    <template x-for="neighborhood in neighborhoods" :key="neighborhood">
+                                    <option value="">Select a district</option>
+                                    <template x-for="neighborhood in neighborhoods" :key="neighborhood">
                                         <option :value="neighborhood" x-text="neighborhood"></option>
                                     </template>
                                 </select>
@@ -245,7 +237,7 @@
                 latitude: {{ old('latitude') ?? 'null' }},
                 longitude: {{ old('longitude') ?? 'null' }},
                 loadingLocation: false,
-                locationError: '',                cityNeighborhoods: @json($neighborhoods),
+                locationError: '',                cityNeighborhoods: @json($districts),
 
                 init() {
                     this.updateNeighborhoods();

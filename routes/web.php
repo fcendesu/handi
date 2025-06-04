@@ -102,7 +102,8 @@ Route::middleware(['auth', 'restrict.employee.dashboard'])->group(function () {
 
     // Property Management Routes
     Route::resource('properties', PropertyController::class);
-    Route::get('/api/neighborhoods', [PropertyController::class, 'getNeighborhoods'])->name('api.neighborhoods');
+    Route::get('/api/districts', [PropertyController::class, 'getDistricts'])->name('api.districts');
+    Route::get('/api/neighborhoods', [PropertyController::class, 'getNeighborhoods'])->name('api.neighborhoods'); // Deprecated
     Route::get('/api/company-properties', [PropertyController::class, 'getCompanyProperties'])->name('api.company-properties');
 
     // Transaction Logs Routes (for admins to view activity)

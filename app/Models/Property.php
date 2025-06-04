@@ -43,21 +43,73 @@ class Property extends Model
     ];
 
     /**
-     * Cities available in Northern Cyprus
+     * Cities available in Northern Cyprus (Level 1 from CSV)
      *
      * @var array<string>
      */
     public static array $cities = [
-        'Lefkoşa',
-        'Girne',
-        'Mağusa',
-        'İskele',
-        'Güzelyurt',
-        'Lefke',
+        'GİRNE',
+        'GÜZELYURT',
+        'İSKELE',
+        'LEFKE',
+        'LEFKOŞA',
+        'MAĞUSA',
     ];
 
     /**
-     * Neighborhoods by city - you can expand this list
+     * Districts by city (Level 2 from CSV) - replaces old neighborhoods
+     *
+     * @var array<string, array<string>>
+     */
+    public static array $districts = [
+        'GİRNE' => [
+            'ALSANCAK',
+            'ÇATALKÖY',
+            'DİKMEN',
+            'ESENTEPE',
+            'KARMİ',
+            'LAPTA',
+            'MERKEZ',
+        ],
+        'GÜZELYURT' => [
+            'MERKEZ',
+        ],
+        'İSKELE' => [
+            'BÜYÜKKONUK',
+            'DİPKARPAZ',
+            'KANTARA',
+            'MEHMETÇİK',
+            'MERKEZ',
+            'YENİERENKÖY',
+        ],
+        'LEFKE' => [
+            'MERKEZ',
+        ],
+        'LEFKOŞA' => [
+            'AKINCILAR',
+            'ALAYKÖY',
+            'DEĞİRMENLİK',
+            'GÖNYELİ',
+            'MERKEZ',
+        ],
+        'MAĞUSA' => [
+            'AKDOĞAN',
+            'BEYARMUDU',
+            'GEÇİTKALE',
+            'İNÖNÜ',
+            'MERKEZ',
+            'PAŞAKÖY',
+            'PİLE',
+            'SERDARLI',
+            'TATLISU',
+            'VADİLİ',
+            'YENİBOĞAZİÇİ',
+        ],
+    ];
+
+    /**
+     * Legacy neighborhoods array - kept for backward compatibility
+     * @deprecated Use $districts instead
      *
      * @var array<string, array<string>>
      */
@@ -222,7 +274,16 @@ class Property extends Model
     }
 
     /**
+     * Get districts for a specific city.
+     */
+    public static function getDistrictsForCity(string $city): array
+    {
+        return self::$districts[$city] ?? [];
+    }
+
+    /**
      * Get neighborhoods for a specific city.
+     * @deprecated Use getDistrictsForCity instead
      */
     public static function getNeighborhoodsForCity(string $city): array
     {

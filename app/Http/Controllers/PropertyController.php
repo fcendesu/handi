@@ -42,9 +42,9 @@ class PropertyController extends Controller
     public function create(): View
     {
         $cities = Property::$cities;
-        $neighborhoods = Property::$neighborhoods;
+        $districts = Property::$districts;
 
-        return view('property.create', compact('cities', 'neighborhoods'));
+        return view('property.create', compact('cities', 'districts'));
     }
 
     /**
@@ -60,8 +60,8 @@ class PropertyController extends Controller
             'neighborhood' => 'required|string|max:255',
             'site_name' => 'nullable|string|max:255',
             'building_name' => 'nullable|string|max:255',
-            'street' => 'required|string|max:255',
-            'door_apartment_no' => 'required|string|max:100',
+            'street' => 'nullable|string|max:255',
+            'door_apartment_no' => 'nullable|string|max:100',
             'latitude' => 'nullable|numeric|between:-90,90',
             'longitude' => 'nullable|numeric|between:-180,180',
             'notes' => 'nullable|string|max:1000',
@@ -105,9 +105,9 @@ class PropertyController extends Controller
         $this->authorize('update', $property);
 
         $cities = Property::$cities;
-        $neighborhoods = Property::$neighborhoods;
+        $districts = Property::$districts;
 
-        return view('property.edit', compact('property', 'cities', 'neighborhoods'));
+        return view('property.edit', compact('property', 'cities', 'districts'));
     }
 
     /**
@@ -123,8 +123,8 @@ class PropertyController extends Controller
             'neighborhood' => 'required|string|max:255',
             'site_name' => 'nullable|string|max:255',
             'building_name' => 'nullable|string|max:255',
-            'street' => 'required|string|max:255',
-            'door_apartment_no' => 'required|string|max:100',
+            'street' => 'nullable|string|max:255',
+            'door_apartment_no' => 'nullable|string|max:100',
             'latitude' => 'nullable|numeric|between:-90,90',
             'longitude' => 'nullable|numeric|between:-180,180',
             'notes' => 'nullable|string|max:1000',
@@ -157,7 +157,19 @@ class PropertyController extends Controller
     }
 
     /**
+     * Get districts for a specific city (AJAX endpoint)
+     */
+    public function getDistricts(Request $request): JsonResponse
+    {
+        $city = $request->get('city');
+        $districts = Property::getDistrictsForCity($city);
+
+        return response()->json($districts);
+    }
+
+    /**
      * Get neighborhoods for a specific city (AJAX endpoint)
+     * @deprecated Use getDistricts instead
      */
     public function getNeighborhoods(Request $request): JsonResponse
     {
