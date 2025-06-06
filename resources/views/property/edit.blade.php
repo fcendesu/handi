@@ -4,7 +4,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="csrf-token" content="{{ csrf_token() }}">
-    <title>Edit Property - İşler</title>
+    <title>Mülk Düzenle - İşler</title>
     <link rel="preconnect" href="https://fonts.bunny.net">
     <link href="https://fonts.bunny.net/css?family=figtree:400,500,600&display=swap" rel="stylesheet" />
     <!-- Leaflet CSS -->
@@ -54,9 +54,9 @@
                     <div class="flex items-center mb-6">
                         <a href="{{ route('properties.index') }}" 
                            class="text-blue-600 hover:text-blue-800 mr-4">
-                            ← Back to Properties
+                            ← Mülklere Dön
                         </a>
-                        <h1 class="text-3xl font-bold text-gray-900">Edit Property: {{ $property->name }}</h1>
+                        <h1 class="text-3xl font-bold text-gray-900">Mülk Düzenle: {{ $property->name }}</h1>
                     </div>
 
                     <form action="{{ route('properties.update', $property) }}" method="POST" class="space-y-6">
@@ -66,14 +66,14 @@
                         <!-- Property Name -->
                         <div>
                             <label for="name" class="block text-sm font-medium text-gray-700 mb-2">
-                                Property Name *
+                                Mülk Adı *
                             </label>
                             <input type="text" 
                                    name="name" 
                                    id="name" 
                                    value="{{ old('name', $property->name) }}"
                                    required
-                                   placeholder="e.g., Main Office, Customer Site A"
+                                   placeholder="ör. Ana Ofis, Müşteri Sahası A"
                                    class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 @error('name') border-red-500 @enderror">
                             @error('name')
                                 <p class="mt-2 text-sm text-red-600">{{ $message }}</p>
@@ -84,13 +84,13 @@
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                             <div>
                                 <label for="city" class="block text-sm font-medium text-gray-700 mb-2">
-                                    City *
+                                    Şehir *
                                 </label>
                                 <select name="city" 
                                         id="city" 
                                         required
                                         class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 @error('city') border-red-500 @enderror">
-                                    <option value="">Select a city</option>
+                                    <option value="">Bir şehir seçin</option>
                                     @foreach($cities as $city)
                                         <option value="{{ $city }}" {{ old('city', $property->city) == $city ? 'selected' : '' }}>{{ $city }}</option>
                                     @endforeach
@@ -102,13 +102,13 @@
 
                             <div>
                                 <label for="district" class="block text-sm font-medium text-gray-700 mb-2">
-                                    District *
+                                    İlçe *
                                 </label>
                                 <select name="district" 
                                         id="district" 
                                         required
                                         class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 @error('district') border-red-500 @enderror">
-                                    <option value="">Select a district</option>
+                                    <option value="">Bir ilçe seçin</option>
                                 </select>
                                 @error('district')
                                     <p class="mt-2 text-sm text-red-600">{{ $message }}</p>
@@ -118,18 +118,18 @@
 
                         <!-- Address Components -->
                         <div class="space-y-4">
-                            <h3 class="text-lg font-medium text-gray-900">Address Details (Optional)</h3>
+                            <h3 class="text-lg font-medium text-gray-900">Adres Detayları (İsteğe Bağlı)</h3>
                             
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 <div>
                                     <label for="site_name" class="block text-sm font-medium text-gray-700 mb-2">
-                                        Site Name
+                                        Site Adı
                                     </label>
                                     <input type="text" 
                                            name="site_name" 
                                            id="site_name" 
                                            value="{{ old('site_name', $property->site_name) }}"
-                                           placeholder="e.g., Marina Complex"
+                                           placeholder="ör. Marina Kompleksi"
                                            class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 @error('site_name') border-red-500 @enderror">
                                     @error('site_name')
                                         <p class="mt-2 text-sm text-red-600">{{ $message }}</p>
@@ -138,13 +138,13 @@
 
                                 <div>
                                     <label for="building_name" class="block text-sm font-medium text-gray-700 mb-2">
-                                        Building Name
+                                        Bina Adı
                                     </label>
                                     <input type="text" 
                                            name="building_name" 
                                            id="building_name" 
                                            value="{{ old('building_name', $property->building_name) }}"
-                                           placeholder="e.g., Building A"
+                                           placeholder="ör. A Binası"
                                            class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 @error('building_name') border-red-500 @enderror">
                                     @error('building_name')
                                         <p class="mt-2 text-sm text-red-600">{{ $message }}</p>
@@ -154,13 +154,13 @@
 
                             <div>
                                 <label for="street" class="block text-sm font-medium text-gray-700 mb-2">
-                                    Street
+                                    Sokak
                                 </label>
                                 <input type="text" 
                                        name="street" 
                                        id="street" 
                                        value="{{ old('street', $property->street) }}"
-                                       placeholder="e.g., Şehit Salahi Şevket Sokağı"
+                                       placeholder="ör. Şehit Salahi Şevket Sokağı"
                                        class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 @error('street') border-red-500 @enderror">
                                 @error('street')
                                     <p class="mt-2 text-sm text-red-600">{{ $message }}</p>
@@ -169,13 +169,13 @@
 
                             <div>
                                 <label for="door_apartment_no" class="block text-sm font-medium text-gray-700 mb-2">
-                                    Door/Apartment Number
+                                    Kapı/Daire Numarası
                                 </label>
                                 <input type="text" 
                                        name="door_apartment_no" 
                                        id="door_apartment_no" 
                                        value="{{ old('door_apartment_no', $property->door_apartment_no) }}"
-                                       placeholder="e.g., 15A or Apartment 3"
+                                       placeholder="ör. 15A veya Daire 3"
                                        class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 @error('door_apartment_no') border-red-500 @enderror">
                                 @error('door_apartment_no')
                                     <p class="mt-2 text-sm text-red-600">{{ $message }}</p>
@@ -186,11 +186,11 @@
                         <!-- Geolocation -->
                         <div class="space-y-4">
                             <div class="flex items-center justify-between">
-                                <h3 class="text-lg font-medium text-gray-900">Location Coordinates (Optional)</h3>
+                                <h3 class="text-lg font-medium text-gray-900">Konum Koordinatları (İsteğe Bağlı)</h3>
                                 <button type="button" 
                                         id="get-current-location"
                                         class="bg-green-600 hover:bg-green-700 disabled:bg-gray-400 text-white px-4 py-2 rounded-md text-sm transition duration-200">
-                                    Get Current Location
+                                    Mevcut Konumu Al
                                 </button>
                             </div>
 
@@ -210,7 +210,7 @@
 
                             <!-- Interactive Map for Location Selection -->
                             <div class="mt-4">
-                                <h4 class="text-sm font-medium text-gray-700 mb-2">Interactive Map Location Picker:</h4>
+                                <h4 class="text-sm font-medium text-gray-700 mb-2">İnteraktif Harita Konum Seçici:</h4>
 
                                 
                                 <!-- Leaflet Map Container -->
@@ -226,7 +226,7 @@
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/>
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/>
                                         </svg>
-                                        Center Map on Coordinates
+                                        Haritayı Koordinatlara Ortala
                                     </button>
                                     <a href="https://www.google.com/maps?q={{ old('latitude', $property->latitude) ?: '35.1856' }},{{ old('longitude', $property->longitude) ?: '33.3823' }}" 
                                        target="_blank"
@@ -234,7 +234,7 @@
                                         <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/>
                                         </svg>
-                                        View on Google Maps
+                                        Google Haritalar'da Görüntüle
                                     </a>
                                 </div>
                             </div>
@@ -245,13 +245,13 @@
                         <!-- Notes -->
                         <div>
                             <label for="notes" class="block text-sm font-medium text-gray-700 mb-2">
-                                Additional Notes (Optional)
+                                Ek Notlar (İsteğe Bağlı)
                             </label>
                             <textarea name="notes" 
                                       id="notes" 
                                       rows="4"
                                       class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 @error('notes') border-red-500 @enderror"
-                                      placeholder="Any additional notes about this property...">{{ old('notes', $property->notes) }}</textarea>
+                                      placeholder="Bu mülk hakkında ek notlar...">{{ old('notes', $property->notes) }}</textarea>
                             @error('notes')
                                 <p class="mt-2 text-sm text-red-600">{{ $message }}</p>
                             @enderror
@@ -261,11 +261,11 @@
                         <div class="flex items-center justify-end space-x-4 pt-6">
                             <a href="{{ route('properties.index') }}" 
                                class="bg-gray-300 hover:bg-gray-400 text-gray-800 font-bold py-2 px-4 rounded-lg transition duration-200">
-                                Cancel
+                                İptal
                             </a>
                             <button type="submit" 
                                     class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg transition duration-200">
-                                Update Property
+                                Mülkü Güncelle
                             </button>
                         </div>
                     </form>
@@ -324,7 +324,7 @@
                     // Update marker
                     updateMapLocation();
                     
-                    showLocationStatus('Location updated from map click!', 'success');
+                    showLocationStatus('Harita tıklamasından konum güncellendi!', 'success');
                 });
             }
 
@@ -352,7 +352,7 @@
             // Function to update districts based on selected city
             function updateDistricts() {
                 const selectedCity = citySelect.value;
-                districtSelect.innerHTML = '<option value="">Select a district</option>';
+                districtSelect.innerHTML = '<option value="">Bir ilçe seçin</option>';
                 
                 if (selectedCity && districts[selectedCity]) {
                     districts[selectedCity].forEach(function(district) {
@@ -380,9 +380,9 @@
                     
                     if (lat && lng && map) {
                         map.setView([lat, lng], 15);
-                        showLocationStatus('Map centered on current coordinates', 'info');
+                        showLocationStatus('Harita mevcut koordinatlara ortalandı', 'info');
                     } else {
-                        showLocationStatus('Please enter valid coordinates first', 'error');
+                        showLocationStatus('Lütfen önce geçerli koordinatları girin', 'error');
                     }
                 });
             }
@@ -404,13 +404,13 @@
             if (locationButton) {
                 locationButton.addEventListener('click', function() {
                     if (!navigator.geolocation) {
-                        showLocationStatus('Geolocation is not supported by this browser.', 'error');
+                        showLocationStatus('Tarayıcınız coğrafi konum belirlemeyi desteklemiyor.', 'error');
                         return;
                     }
 
-                    locationButton.textContent = 'Getting location...';
+                    locationButton.textContent = 'Konum alınıyor...';
                     locationButton.disabled = true;
-                    showLocationStatus('Getting your current location...', 'info');
+                    showLocationStatus('Mevcut konumunuz alınıyor...', 'info');
 
                     navigator.geolocation.getCurrentPosition(
                         function(position) {
@@ -420,11 +420,11 @@
                             // Update map with new coordinates
                             updateMapLocation();
                             
-                            locationButton.textContent = 'Location Obtained!';
-                            showLocationStatus('Location successfully obtained and map updated!', 'success');
+                            locationButton.textContent = 'Konum Alındı!';
+                            showLocationStatus('Konum başarıyla alındı ve harita güncellendi!', 'success');
                             
                             setTimeout(function() {
-                                locationButton.textContent = 'Get Current Location';
+                                locationButton.textContent = 'Mevcut Konumu Al';
                                 locationButton.disabled = false;
                                 hideLocationStatus();
                             }, 3000);
@@ -433,21 +433,21 @@
                             let errorMessage;
                             switch(error.code) {
                                 case error.PERMISSION_DENIED:
-                                    errorMessage = 'Location access denied by user.';
+                                    errorMessage = 'Konum erişimi kullanıcı tarafından reddedildi.';
                                     break;
                                 case error.POSITION_UNAVAILABLE:
-                                    errorMessage = 'Location information is unavailable.';
+                                    errorMessage = 'Konum bilgisi mevcut değil.';
                                     break;
                                 case error.TIMEOUT:
-                                    errorMessage = 'Location request timed out.';
+                                    errorMessage = 'Konum isteği zaman aşımına uğradı.';
                                     break;
                                 default:
-                                    errorMessage = 'An unknown error occurred while getting location.';
+                                    errorMessage = 'Konum alınırken bilinmeyen bir hata oluştu.';
                                     break;
                             }
                             
                             showLocationStatus(errorMessage, 'error');
-                            locationButton.textContent = 'Get Current Location';
+                            locationButton.textContent = 'Mevcut Konumu Al';
                             locationButton.disabled = false;
                         },
                         {

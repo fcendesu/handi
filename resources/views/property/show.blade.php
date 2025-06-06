@@ -19,30 +19,27 @@
             <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
                 <div class="p-6">
                     <div class="flex items-center justify-between mb-6">
-                        <div class="flex items-center">
-                            <a href="{{ route('properties.index') }}" 
+                        <div class="flex items-center">                            <a href="{{ route('properties.index') }}" 
                                class="text-blue-600 hover:text-blue-800 mr-4">
-                                ← Back to Properties
+                                ← Mülklere Dön
                             </a>
                             <h1 class="text-3xl font-bold text-gray-900">{{ $property->name }}</h1>
                         </div>
                         <div class="flex space-x-3">
-                            @can('update', $property)
-                                <a href="{{ route('properties.edit', $property) }}" 
+                            @can('update', $property)                                <a href="{{ route('properties.edit', $property) }}" 
                                    class="bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-md transition duration-200">
-                                    Edit Property
+                                    Mülkü Düzenle
                                 </a>
                             @endcan
                             @can('delete', $property)
                                 <form action="{{ route('properties.destroy', $property) }}" 
                                       method="POST" 
-                                      class="inline"
-                                      onsubmit="return confirm('Are you sure you want to delete this property?')">
+                                      class="inline"                                      onsubmit="return confirm('Bu mülkü silmek istediğinizden emin misiniz?')">
                                     @csrf
                                     @method('DELETE')
                                     <button type="submit" 
                                             class="bg-red-600 hover:bg-red-700 text-white font-medium py-2 px-4 rounded-md transition duration-200">
-                                        Delete Property
+                                        Mülkü Sil
                                     </button>
                                 </form>
                             @endcan
@@ -53,54 +50,54 @@
                         <!-- Property Details -->
                         <div class="bg-white shadow-lg rounded-lg overflow-hidden">
                             <div class="px-6 py-4 bg-gray-50 border-b border-gray-200">
-                                <h2 class="text-xl font-semibold text-gray-900">Property Details</h2>
+                                <h2 class="text-xl font-semibold text-gray-900">Mülk Detayları</h2>
                             </div>
                             <div class="p-6">
                                 <dl class="space-y-4">                                    <div>
-                                        <dt class="text-sm font-medium text-gray-500">Property Name</dt>
+                                        <dt class="text-sm font-medium text-gray-500">Mülk Adı</dt>
                                         <dd class="mt-1 text-lg text-gray-900">{{ $property->name }}</dd>
                                     </div>
 
                                     <div>
-                                        <dt class="text-sm font-medium text-gray-500">Owner</dt>
+                                        <dt class="text-sm font-medium text-gray-500">Sahibi</dt>
                                         <dd class="mt-1 text-sm text-gray-900">
                                             <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium {{ $property->isSoloHandymanProperty() ? 'bg-purple-100 text-purple-800' : 'bg-green-100 text-green-800' }}">
                                                 {{ $property->owner_name }}
                                             </span>
                                         </dd>
                                     </div>                                    <div>
-                                        <dt class="text-sm font-medium text-gray-500">Full Address</dt>
+                                        <dt class="text-sm font-medium text-gray-500">Tam Adres</dt>
                                         <dd class="mt-1 text-sm text-gray-900">{{ $property->full_address }}</dd>
                                     </div>
 
                                     <!-- Detailed Address Components -->
                                     <div class="space-y-3 pt-4 border-t border-gray-200">
-                                        <h4 class="text-sm font-medium text-gray-700">Address Components</h4>
+                                        <h4 class="text-sm font-medium text-gray-700">Adres Bileşenleri</h4>
                                         
                                         @if($property->site_name)
                                             <div class="grid grid-cols-3 gap-4">
-                                                <dt class="text-xs font-medium text-gray-500">Site Name:</dt>
+                                                <dt class="text-xs font-medium text-gray-500">Site Adı:</dt>
                                                 <dd class="col-span-2 text-xs text-gray-900">{{ $property->site_name }}</dd>
                                             </div>
                                         @endif
 
                                         @if($property->building_name)
                                             <div class="grid grid-cols-3 gap-4">
-                                                <dt class="text-xs font-medium text-gray-500">Building:</dt>
+                                                <dt class="text-xs font-medium text-gray-500">Bina:</dt>
                                                 <dd class="col-span-2 text-xs text-gray-900">{{ $property->building_name }}</dd>
                                             </div>
                                         @endif
 
                                         @if($property->street)
                                             <div class="grid grid-cols-3 gap-4">
-                                                <dt class="text-xs font-medium text-gray-500">Street:</dt>
+                                                <dt class="text-xs font-medium text-gray-500">Sokak:</dt>
                                                 <dd class="col-span-2 text-xs text-gray-900">{{ $property->street }}</dd>
                                             </div>
                                         @endif
 
                                         @if($property->door_apartment_no)
                                             <div class="grid grid-cols-3 gap-4">
-                                                <dt class="text-xs font-medium text-gray-500">Door/Apt No:</dt>
+                                                <dt class="text-xs font-medium text-gray-500">Kapı/Daire No:</dt>
                                                 <dd class="col-span-2 text-xs text-gray-900">{{ $property->door_apartment_no }}</dd>
                                             </div>
                                         @endif
@@ -108,7 +105,7 @@
 
                                     <div class="grid grid-cols-2 gap-4">
                                         <div>
-                                            <dt class="text-sm font-medium text-gray-500">City</dt>
+                                            <dt class="text-sm font-medium text-gray-500">Şehir</dt>
                                             <dd class="mt-1 text-sm text-gray-900">
                                                 <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-blue-100 text-blue-800">
                                                     {{ $property->city }}
@@ -116,7 +113,7 @@
                                             </dd>
                                         </div>                                        @if($property->district)
                                             <div>
-                                                <dt class="text-sm font-medium text-gray-500">District</dt>
+                                                <dt class="text-sm font-medium text-gray-500">İlçe</dt>
                                                 <dd class="mt-1 text-sm text-gray-900">{{ $property->district }}</dd>
                                             </div>
                                         @endif
@@ -124,18 +121,18 @@
 
                                     @if($property->notes)
                                         <div>
-                                            <dt class="text-sm font-medium text-gray-500">Notes</dt>
+                                            <dt class="text-sm font-medium text-gray-500">Notlar</dt>
                                             <dd class="mt-1 text-sm text-gray-900">{{ $property->notes }}</dd>
                                         </div>
                                     @endif
 
                                     <div class="grid grid-cols-2 gap-4">
                                         <div>
-                                            <dt class="text-sm font-medium text-gray-500">Created</dt>
+                                            <dt class="text-sm font-medium text-gray-500">Oluşturulma</dt>
                                             <dd class="mt-1 text-sm text-gray-900">{{ $property->created_at->format('M d, Y') }}</dd>
                                         </div>
                                         <div>
-                                            <dt class="text-sm font-medium text-gray-500">Last Updated</dt>
+                                            <dt class="text-sm font-medium text-gray-500">Son Güncelleme</dt>
                                             <dd class="mt-1 text-sm text-gray-900">{{ $property->updated_at->format('M d, Y') }}</dd>
                                         </div>
                                     </div>
@@ -146,15 +143,14 @@
                         <!-- Map and Location -->
                         <div class="bg-white shadow-lg rounded-lg overflow-hidden">
                             <div class="px-6 py-4 bg-gray-50 border-b border-gray-200">
-                                <h2 class="text-xl font-semibold text-gray-900">Location</h2>
+                                <h2 class="text-xl font-semibold text-gray-900">Konum</h2>
                             </div>
                             <div class="p-6">
                                 @if($property->latitude && $property->longitude)
                                     <div class="space-y-4">                                        <div class="space-y-2">
                                             <a href="https://www.google.com/maps?q={{ $property->latitude }},{{ $property->longitude }}" 
-                                               target="_blank"
-                                               class="inline-flex items-center px-4 py-2 bg-green-600 hover:bg-green-700 text-white text-sm font-medium rounded-md transition duration-200">
-                                                View on Google Maps
+                                               target="_blank"                                               class="inline-flex items-center px-4 py-2 bg-green-600 hover:bg-green-700 text-white text-sm font-medium rounded-md transition duration-200">
+                                                Google Haritalar'da Görüntüle
                                                 <svg class="ml-2 h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path>
                                                 </svg>
@@ -177,9 +173,8 @@
                                                         <div class="text-gray-600 mb-2">📍</div>
                                                         <div class="text-sm text-gray-500">
                                                             {{ $property->latitude }}, {{ $property->longitude }}
-                                                        </div>
-                                                        <div class="text-xs text-gray-400 mt-1">
-                                                            Map cannot be displayed with these coordinates
+                                                        </div>                                                        <div class="text-xs text-gray-400 mt-1">
+                                                            Harita bu koordinatlarla görüntülenemiyor
                                                         </div>
                                                     </div>
                                                 </div>
@@ -188,9 +183,8 @@
                                     </div>
                                 @else
                                     <div class="text-center py-8">
-                                        <div class="text-gray-400 text-lg mb-2">📍</div>
-                                        <div class="text-gray-500">No location coordinates set</div>
-                                        <p class="text-sm text-gray-400 mt-2">Edit the property to add location coordinates</p>
+                                        <div class="text-gray-400 text-lg mb-2">📍</div>                                        <div class="text-gray-500">Konum koordinatları ayarlanmamış</div>
+                                        <p class="text-sm text-gray-400 mt-2">Konum koordinatları eklemek için mülkü düzenleyin</p>
                                     </div>
                                 @endif
                             </div>
@@ -200,29 +194,27 @@
                     <!-- Associated Discoveries -->
                     @if($property->discoveries && $property->discoveries->count() > 0)
                         <div class="mt-8 bg-white shadow-lg rounded-lg overflow-hidden">
-                            <div class="px-6 py-4 bg-gray-50 border-b border-gray-200">
-                                <h2 class="text-xl font-semibold text-gray-900">
-                                    Associated Discoveries ({{ $property->discoveries->count() }})
+                            <div class="px-6 py-4 bg-gray-50 border-b border-gray-200">                                <h2 class="text-xl font-semibold text-gray-900">
+                                    İlişkili Keşifler ({{ $property->discoveries->count() }})
                                 </h2>
                             </div>
                             <div class="overflow-x-auto">
-                                <table class="min-w-full divide-y divide-gray-200">
-                                    <thead class="bg-gray-50">
+                                <table class="min-w-full divide-y divide-gray-200">                                    <thead class="bg-gray-50">
                                         <tr>
                                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                                Customer
+                                                Müşteri
                                             </th>
                                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                                Discovery
+                                                Keşif
                                             </th>
                                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                                Status
+                                                Durum
                                             </th>
                                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                                Date
+                                                Tarih
                                             </th>
                                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                                Actions
+                                                İşlemler
                                             </th>
                                         </tr>
                                     </thead>
@@ -246,11 +238,10 @@
                                                 </td>
                                                 <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                                                     {{ $discovery->created_at->format('M d, Y') }}
-                                                </td>
-                                                <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                                                </td>                                                <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
                                                     <a href="{{ route('discovery.show', $discovery) }}" 
                                                        class="text-blue-600 hover:text-blue-900">
-                                                        View Discovery
+                                                        Keşfi Görüntüle
                                                     </a>
                                                 </td>
                                             </tr>
