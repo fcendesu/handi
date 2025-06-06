@@ -4,7 +4,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="csrf-token" content="{{ csrf_token() }}">
-    <title>Property Management - İşler</title>
+    <title>Mülk Yönetimi - İşler</title>
     <link rel="preconnect" href="https://fonts.bunny.net">
     <link href="https://fonts.bunny.net/css?family=figtree:400,500,600&display=swap" rel="stylesheet" />
     @vite(['resources/css/app.css', 'resources/js/app.js'])
@@ -18,12 +18,11 @@
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
             <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
                 <div class="p-6">
-                    <div class="flex justify-between items-center mb-6">
-                        <h1 class="text-3xl font-bold text-gray-900">Property Management</h1>
+                    <div class="flex justify-between items-center mb-6">                        <h1 class="text-3xl font-bold text-gray-900">Mülk Yönetimi</h1>
                         @can('create', App\Models\Property::class)
                             <a href="{{ route('properties.create') }}" 
                                class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg transition duration-200">
-                                Add New Property
+                                Yeni Mülk Ekle
                             </a>
                         @endcan
                     </div>
@@ -40,22 +39,22 @@
                                 <table class="min-w-full divide-y divide-gray-200">
                                     <thead class="bg-gray-50">
                                         <tr>                                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                                Property Name
+                                                Mülk Adı
                                             </th>
                                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                                Owner
+                                                Sahibi
                                             </th>
                                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                                Address
+                                                Adres
                                             </th>
                                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                                City
+                                                Şehir
                                             </th>
                                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                                Map Location
+                                                Harita Konumu
                                             </th>
                                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                                Actions
+                                                İşlemler
                                             </th>
                                         </tr>
                                     </thead>
@@ -79,33 +78,31 @@
                                                     <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-blue-100 text-blue-800">
                                                         {{ $property->city }}
                                                     </span>
-                                                </td>
-                                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                                                </td>                                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                                                     @if($property->latitude && $property->longitude)
-                                                        <span class="text-green-600">✓ Available</span>
+                                                        <span class="text-green-600">✓ Mevcut</span>
                                                     @else
-                                                        <span class="text-gray-400">Not set</span>
+                                                        <span class="text-gray-400">Ayarlanmamış</span>
                                                     @endif
                                                 </td>
                                                 <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                                                    <div class="flex space-x-2">
-                                                        @can('view', $property)
+                                                    <div class="flex space-x-2">                                                        @can('view', $property)
                                                             <a href="{{ route('properties.show', $property) }}" 
-                                                               class="text-blue-600 hover:text-blue-900">View</a>
+                                                               class="text-blue-600 hover:text-blue-900">Görüntüle</a>
                                                         @endcan
                                                         @can('update', $property)
                                                             <a href="{{ route('properties.edit', $property) }}" 
-                                                               class="text-indigo-600 hover:text-indigo-900">Edit</a>
+                                                               class="text-indigo-600 hover:text-indigo-900">Düzenle</a>
                                                         @endcan
                                                         @can('delete', $property)
                                                             <form action="{{ route('properties.destroy', $property) }}" 
                                                                   method="POST" 
                                                                   class="inline"
-                                                                  onsubmit="return confirm('Are you sure you want to delete this property?')">
+                                                                  onsubmit="return confirm('Bu mülkü silmek istediğinizden emin misiniz?')">
                                                                 @csrf
                                                                 @method('DELETE')
                                                                 <button type="submit" class="text-red-600 hover:text-red-900">
-                                                                    Delete
+                                                                    Sil
                                                                 </button>
                                                             </form>
                                                         @endcan
@@ -121,14 +118,13 @@
                             <div class="bg-white px-4 py-3 border-t border-gray-200 sm:px-6">
                                 {{ $properties->links() }}
                             </div>
-                        @else
-                            <div class="text-center py-12">
-                                <div class="text-gray-500 text-lg mb-4">No properties found</div>
-                                <p class="text-gray-400 mb-6">Create your first property to get started</p>
+                        @else                            <div class="text-center py-12">
+                                <div class="text-gray-500 text-lg mb-4">Hiç mülk bulunamadı</div>
+                                <p class="text-gray-400 mb-6">Başlamak için ilk mülkünüzü oluşturun</p>
                                 @can('create', App\Models\Property::class)
                                     <a href="{{ route('properties.create') }}" 
                                        class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg transition duration-200">
-                                        Add First Property
+                                        İlk Mülkü Ekle
                                     </a>
                                 @endcan
                             </div>
