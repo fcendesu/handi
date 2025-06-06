@@ -4,7 +4,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="csrf-token" content="{{ csrf_token() }}">
-    <title>Add New Property - İşler</title>
+    <title>Yeni Mülk Ekle - İşler</title>
     <link rel="preconnect" href="https://fonts.bunny.net">
     <link href="https://fonts.bunny.net/css?family=figtree:400,500,600&display=swap" rel="stylesheet" />
     <!-- Leaflet CSS -->
@@ -26,9 +26,9 @@
                     <div class="flex items-center mb-6">
                         <a href="{{ route('properties.index') }}" 
                            class="text-blue-600 hover:text-blue-800 mr-4">
-                            ← Back to Properties
+                            ← Mülklere Geri Dön
                         </a>
-                        <h1 class="text-3xl font-bold text-gray-900">Add New Property</h1>
+                        <h1 class="text-3xl font-bold text-gray-900">Yeni Mülk Ekle</h1>
                     </div>
 
                     <form action="{{ route('properties.store') }}" method="POST" 
@@ -39,7 +39,7 @@
                         <!-- Property Name -->
                         <div>
                             <label for="name" class="block text-sm font-medium text-gray-700 mb-2">
-                                Property Name *
+                                Mülk Adı *
                             </label>
                             <input type="text" 
                                    name="name" 
@@ -52,18 +52,18 @@
                             @enderror
                         </div>                        <!-- Address Components -->
                         <div class="space-y-4">
-                            <h3 class="text-lg font-medium text-gray-900">Address</h3>
+                            <h3 class="text-lg font-medium text-gray-900">Adres</h3>
                             
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 <div>
                                     <label for="site_name" class="block text-sm font-medium text-gray-700 mb-2">
-                                        Site Name
+                                        Site Adı
                                     </label>
                                     <input type="text" 
                                            name="site_name" 
                                            id="site_name" 
                                            value="{{ old('site_name') }}"
-                                           placeholder="e.g., Marina Complex"
+                                           placeholder="örn., Marina Kompleksi"
                                            class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 @error('site_name') border-red-500 @enderror">
                                     @error('site_name')
                                         <p class="mt-2 text-sm text-red-600">{{ $message }}</p>
@@ -72,13 +72,13 @@
 
                                 <div>
                                     <label for="building_name" class="block text-sm font-medium text-gray-700 mb-2">
-                                        Building Name
+                                        Bina Adı
                                     </label>
                                     <input type="text" 
                                            name="building_name" 
                                            id="building_name" 
                                            value="{{ old('building_name') }}"
-                                           placeholder="e.g., Building A"
+                                           placeholder="örn., A Blok"
                                            class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 @error('building_name') border-red-500 @enderror">
                                     @error('building_name')
                                         <p class="mt-2 text-sm text-red-600">{{ $message }}</p>
@@ -86,26 +86,26 @@
                                 </div>
                             </div>                            <div>
                                 <label for="street" class="block text-sm font-medium text-gray-700 mb-2">
-                                    Street
+                                    Sokak
                                 </label>
                                 <input type="text" 
                                        name="street" 
                                        id="street" 
                                        value="{{ old('street') }}"
-                                       placeholder="e.g., Şehit Salahi Şevket Sokağı"
+                                       placeholder="örn., Şehit Salahi Şevket Sokağı"
                                        class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 @error('street') border-red-500 @enderror">
                                 @error('street')
                                     <p class="mt-2 text-sm text-red-600">{{ $message }}</p>
                                 @enderror
                             </div>                            <div>
                                 <label for="door_apartment_no" class="block text-sm font-medium text-gray-700 mb-2">
-                                    Door/Apartment Number
+                                    Kapı/Daire Numarası
                                 </label>
                                 <input type="text" 
                                        name="door_apartment_no" 
                                        id="door_apartment_no" 
                                        value="{{ old('door_apartment_no') }}"
-                                       placeholder="e.g., 15A or Apartment 3"
+                                       placeholder="örn., 15A veya Daire 3"
                                        class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 @error('door_apartment_no') border-red-500 @enderror">
                                 @error('door_apartment_no')
                                     <p class="mt-2 text-sm text-red-600">{{ $message }}</p>
@@ -115,14 +115,14 @@
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                             <div>
                                 <label for="city" class="block text-sm font-medium text-gray-700 mb-2">
-                                    City *
+                                    Şehir *
                                 </label>                                <select name="city" 
                                         id="city" 
                                         x-model="selectedCity"
                                         @change="updateDistricts()"
                                         required
                                         class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 @error('city') border-red-500 @enderror">
-                                    <option value="">Select a city</option>
+                                    <option value="">Bir şehir seçin</option>
                                     @foreach($cities as $city)
                                         <option value="{{ $city }}" {{ old('city') == $city ? 'selected' : '' }}>{{ $city }}</option>
                                     @endforeach
@@ -132,14 +132,14 @@
                                 @enderror
                             </div>                            <div>
                                 <label for="district" class="block text-sm font-medium text-gray-700 mb-2">
-                                    District *
+                                    İlçe *
                                 </label>
                                 <select name="district" 
                                         id="district" 
                                         x-model="selectedDistrict"
                                         required
                                         class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 @error('district') border-red-500 @enderror">
-                                    <option value="">Select a district</option>
+                                    <option value="">Bir ilçe seçin</option>
                                     <template x-for="district in districts" :key="district">
                                         <option :value="district" x-text="district"></option>
                                     </template>
@@ -153,13 +153,13 @@
                         <!-- Geolocation -->
                         <div class="space-y-4">
                             <div class="flex items-center justify-between">
-                                <h3 class="text-lg font-medium text-gray-900">Location Coordinates</h3>
+                                <h3 class="text-lg font-medium text-gray-900">Konum Koordinatları</h3>
                                 <button type="button" 
                                         @click="getCurrentLocation()"
                                         :disabled="loadingLocation"
                                         class="bg-green-600 hover:bg-green-700 disabled:bg-gray-400 text-white px-4 py-2 rounded-md text-sm transition duration-200">
-                                    <span x-show="!loadingLocation">Get Current Location</span>
-                                    <span x-show="loadingLocation">Getting Location...</span>
+                                    <span x-show="!loadingLocation">Mevcut Konumu Al</span>
+                                    <span x-show="loadingLocation">Konum Alınıyor...</span>
                                 </button>
                             </div>
 
@@ -181,7 +181,7 @@
 
                             <!-- Interactive Map -->
                             <div class="mt-4">
-                                <p class="text-sm text-gray-600 mb-2">Click on the map to select a location:</p>
+                                <p class="text-sm text-gray-600 mb-2">Bir konum seçmek için harita üzerine tıklayın:</p>
                                 <div id="map" style="height: 400px; width: 100%;" class="rounded-lg border border-gray-300"></div>
                             </div>
 
@@ -191,13 +191,13 @@
                         <!-- Notes -->
                         <div>
                             <label for="notes" class="block text-sm font-medium text-gray-700 mb-2">
-                                Notes
+                                Notlar
                             </label>
                             <textarea name="notes" 
                                       id="notes" 
                                       rows="4"
                                       class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 @error('notes') border-red-500 @enderror"
-                                      placeholder="Any additional notes about this property...">{{ old('notes') }}</textarea>
+                                      placeholder="Bu mülk hakkında ek notlar...">{{ old('notes') }}</textarea>
                             @error('notes')
                                 <p class="mt-2 text-sm text-red-600">{{ $message }}</p>
                             @enderror
@@ -207,11 +207,11 @@
                         <div class="flex items-center justify-end space-x-4 pt-6">
                             <a href="{{ route('properties.index') }}" 
                                class="bg-gray-300 hover:bg-gray-400 text-gray-800 font-bold py-2 px-4 rounded-lg transition duration-200">
-                                Cancel
+                                İptal
                             </a>
                             <button type="submit" 
                                     class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg transition duration-200">
-                                Create Property
+                                Mülk Oluştur
                             </button>
                         </div>
                     </form>
@@ -252,7 +252,7 @@
 
                 getCurrentLocation() {
                     if (!navigator.geolocation) {
-                        this.locationError = 'Geolocation is not supported by this browser.';
+                        this.locationError = 'Tarayıcınız coğrafi konum belirlemeyi desteklemiyor.';
                         return;
                     }
 
@@ -270,16 +270,16 @@
                             this.loadingLocation = false;
                             switch(error.code) {
                                 case error.PERMISSION_DENIED:
-                                    this.locationError = 'Location access denied by user.';
+                                    this.locationError = 'Konum erişimi kullanıcı tarafından reddedildi.';
                                     break;
                                 case error.POSITION_UNAVAILABLE:
-                                    this.locationError = 'Location information is unavailable.';
+                                    this.locationError = 'Konum bilgisi mevcut değil.';
                                     break;
                                 case error.TIMEOUT:
-                                    this.locationError = 'Location request timed out.';
+                                    this.locationError = 'Konum isteği zaman aşımına uğradı.';
                                     break;
                                 default:
-                                    this.locationError = 'An unknown error occurred.';
+                                    this.locationError = 'Bilinmeyen bir hata oluştu.';
                                     break;
                             }
                         }
