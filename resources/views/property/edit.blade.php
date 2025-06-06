@@ -194,57 +194,24 @@
                                 </button>
                             </div>
 
-                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                <div>
-                                    <label for="latitude" class="block text-sm font-medium text-gray-700 mb-2">
-                                        Latitude
-                                    </label>
-                                    <input type="number" 
-                                           name="latitude" 
-                                           id="latitude" 
-                                           step="0.00000001"
-                                           value="{{ old('latitude', $property->latitude) }}"
-                                           placeholder="35.1856"
-                                           class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 @error('latitude') border-red-500 @enderror">
-                                    @error('latitude')
-                                        <p class="mt-2 text-sm text-red-600">{{ $message }}</p>
-                                    @enderror
-                                </div>
-
-                                <div>
-                                    <label for="longitude" class="block text-sm font-medium text-gray-700 mb-2">
-                                        Longitude
-                                    </label>
-                                    <input type="number" 
-                                           name="longitude" 
-                                           id="longitude" 
-                                           step="0.00000001"
-                                           value="{{ old('longitude', $property->longitude) }}"
-                                           placeholder="33.3823"
-                                           class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 @error('longitude') border-red-500 @enderror">
-                                    @error('longitude')
-                                        <p class="mt-2 text-sm text-red-600">{{ $message }}</p>
-                                    @enderror
-                                </div>
-                            </div>                            @if($property->hasMapLocation())
-                                <div class="mt-3">
-                                    <a href="https://www.google.com/maps?q={{ $property->latitude }},{{ $property->longitude }}" 
-                                       target="_blank"
-                                       class="text-blue-600 hover:text-blue-800 text-sm">
-                                        View current location on Google Maps →
-                                    </a>
-                                </div>
-                            @endif
+                            <!-- Hidden coordinate inputs for form submission -->
+                            <div class="hidden">
+                                <input type="number" 
+                                       name="latitude" 
+                                       id="latitude" 
+                                       step="0.00000001"
+                                       value="{{ old('latitude', $property->latitude) }}">
+                                <input type="number" 
+                                       name="longitude" 
+                                       id="longitude" 
+                                       step="0.00000001"
+                                       value="{{ old('longitude', $property->longitude) }}">
+                            </div>
 
                             <!-- Interactive Map for Location Selection -->
                             <div class="mt-4">
                                 <h4 class="text-sm font-medium text-gray-700 mb-2">Interactive Map Location Picker:</h4>
-                                <div class="text-xs text-gray-500 bg-blue-50 p-2 rounded border-l-4 border-blue-400 mb-2">
-                                    <strong>💡 How to set location:</strong> Click directly on the map below to select coordinates, enter them manually in the fields above, or use the "Get Current Location" button.
-                                </div>
-                                <div class="text-xs text-green-600 bg-green-50 p-2 rounded border-l-4 border-green-400 mb-2">
-                                    <strong>🖱️ Interactive Map:</strong> Click anywhere on the map to instantly set that location as your property coordinates!
-                                </div>
+
                                 
                                 <!-- Leaflet Map Container -->
                                 <div class="border border-gray-300 rounded-lg overflow-hidden bg-gray-100">
