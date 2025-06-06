@@ -7,7 +7,40 @@
     <title>Edit Property - İşler</title>
     <link rel="preconnect" href="https://fonts.bunny.net">
     <link href="https://fonts.bunny.net/css?family=figtree:400,500,600&display=swap" rel="stylesheet" />
+    <!-- Leaflet CSS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     @vite(['resources/css/app.css', 'resources/js/app.js'])
+    <!-- Leaflet JS -->
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <style>
+        .map-controls {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 6px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+        
+        .coordinate-display {
+            font-family: 'Courier New', monospace;
+            background: rgba(59, 130, 246, 0.1);
+            border: 1px solid rgba(59, 130, 246, 0.2);
+            border-radius: 4px;
+            padding: 4px 8px;
+        }
+        
+        #location-map {
+            transition: opacity 0.3s ease;
+        }
+        
+        .map-help-text {
+            background: linear-gradient(90deg, #3b82f6, #1d4ed8);
+            color: white;
+            border-radius: 6px;
+            padding: 8px 12px;
+            font-size: 12px;
+            text-align: center;
+        }
+    </style>
 </head>
 <body class="bg-gray-100">
     <!-- Navigation -->
@@ -193,17 +226,51 @@
                                         <p class="mt-2 text-sm text-red-600">{{ $message }}</p>
                                     @enderror
                                 </div>
-                            </div>
-
-                            @if($property->hasMapLocation())
+                            </div>                            @if($property->hasMapLocation())
                                 <div class="mt-3">
                                     <a href="https://www.google.com/maps?q={{ $property->latitude }},{{ $property->longitude }}" 
-                                       target="_blank" 
+                                       target="_blank"
                                        class="text-blue-600 hover:text-blue-800 text-sm">
                                         View current location on Google Maps →
                                     </a>
                                 </div>
                             @endif
+
+                            <!-- Interactive Map for Location Selection -->
+                            <div class="mt-4">
+                                <h4 class="text-sm font-medium text-gray-700 mb-2">Interactive Map Location Picker:</h4>
+                                <div class="text-xs text-gray-500 bg-blue-50 p-2 rounded border-l-4 border-blue-400 mb-2">
+                                    <strong>💡 How to set location:</strong> Click directly on the map below to select coordinates, enter them manually in the fields above, or use the "Get Current Location" button.
+                                </div>
+                                <div class="text-xs text-green-600 bg-green-50 p-2 rounded border-l-4 border-green-400 mb-2">
+                                    <strong>🖱️ Interactive Map:</strong> Click anywhere on the map to instantly set that location as your property coordinates!
+                                </div>
+                                
+                                <!-- Leaflet Map Container -->
+                                <div class="border border-gray-300 rounded-lg overflow-hidden bg-gray-100">
+                                    <div id="map" style="height: 400px; width: 100%;" class="rounded-lg"></div>
+                                </div>
+                                
+                                <div class="mt-2 flex flex-wrap gap-2">
+                                    <button type="button" 
+                                            id="center-map-on-coordinates"
+                                            class="bg-blue-600 hover:bg-blue-700 text-white px-3 py-1 rounded text-sm transition duration-200 flex items-center">
+                                        <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/>
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/>
+                                        </svg>
+                                        Center Map on Coordinates
+                                    </button>
+                                    <a href="https://www.google.com/maps?q={{ old('latitude', $property->latitude) ?: '35.1856' }},{{ old('longitude', $property->longitude) ?: '33.3823' }}" 
+                                       target="_blank"
+                                       class="bg-green-600 hover:bg-green-700 text-white px-3 py-1 rounded text-sm transition duration-200 flex items-center">
+                                        <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/>
+                                        </svg>
+                                        View on Google Maps
+                                    </a>
+                                </div>
+                            </div>
 
                             <div id="location-status" class="text-sm hidden"></div>
                         </div>
@@ -250,6 +317,70 @@
             const locationStatus = document.getElementById('location-status');
             const latitudeInput = document.getElementById('latitude');
             const longitudeInput = document.getElementById('longitude');
+            const centerMapButton = document.getElementById('center-map-on-coordinates');
+
+            // Leaflet map variables
+            let map = null;
+            let marker = null;
+
+            // Default coordinates (Cyprus/Turkey region)
+            const defaultLat = {{ old('latitude', $property->latitude) ?: '35.1856' }};
+            const defaultLng = {{ old('longitude', $property->longitude) ?: '33.3823' }};
+
+            // Initialize Leaflet map
+            function initMap() {
+                // Initialize map with default or existing coordinates
+                const lat = parseFloat(latitudeInput.value) || defaultLat;
+                const lng = parseFloat(longitudeInput.value) || defaultLng;
+                
+                map = L.map('map').setView([lat, lng], 12);
+                
+                // Add OpenStreetMap tiles
+                L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                    attribution: '© OpenStreetMap contributors'
+                }).addTo(map);
+                
+                // Add marker if coordinates exist
+                if (latitudeInput.value && longitudeInput.value) {
+                    marker = L.marker([lat, lng]).addTo(map);
+                }
+                
+                // Handle map clicks
+                map.on('click', function(e) {
+                    const clickedLat = e.latlng.lat;
+                    const clickedLng = e.latlng.lng;
+                    
+                    // Update input fields
+                    latitudeInput.value = clickedLat.toFixed(8);
+                    longitudeInput.value = clickedLng.toFixed(8);
+                    
+                    // Update marker
+                    updateMapLocation();
+                    
+                    showLocationStatus('Location updated from map click!', 'success');
+                });
+            }
+
+            // Update map location with current coordinates
+            function updateMapLocation() {
+                if (!map) return;
+                
+                const lat = parseFloat(latitudeInput.value);
+                const lng = parseFloat(longitudeInput.value);
+                
+                if (isNaN(lat) || isNaN(lng)) return;
+                
+                // Remove existing marker
+                if (marker) {
+                    map.removeLayer(marker);
+                }
+                
+                // Add new marker
+                marker = L.marker([lat, lng]).addTo(map);
+                
+                // Center map on new location
+                map.setView([lat, lng], map.getZoom());
+            }
 
             // Function to update districts based on selected city
             function updateDistricts() {
@@ -272,67 +403,98 @@
             // Update districts when city changes
             citySelect.addEventListener('change', function() {
                 updateDistricts();
-                console.log('City changed, districts updated');
             });
 
-            // Load districts for current city on page load
-            updateDistricts();
+            // Center map on coordinates button
+            if (centerMapButton) {
+                centerMapButton.addEventListener('click', function() {
+                    const lat = parseFloat(latitudeInput.value);
+                    const lng = parseFloat(longitudeInput.value);
+                    
+                    if (lat && lng && map) {
+                        map.setView([lat, lng], 15);
+                        showLocationStatus('Map centered on current coordinates', 'info');
+                    } else {
+                        showLocationStatus('Please enter valid coordinates first', 'error');
+                    }
+                });
+            }
+
+            // Update map when coordinates change manually
+            latitudeInput.addEventListener('change', function() {
+                if (this.value) {
+                    updateMapLocation();
+                }
+            });
+
+            longitudeInput.addEventListener('change', function() {
+                if (this.value) {
+                    updateMapLocation();
+                }
+            });
 
             // Geolocation functionality
-            locationButton.addEventListener('click', function() {
-                if (!navigator.geolocation) {
-                    showLocationStatus('Geolocation is not supported by this browser.', 'error');
-                    return;
-                }
+            if (locationButton) {
+                locationButton.addEventListener('click', function() {
+                    if (!navigator.geolocation) {
+                        showLocationStatus('Geolocation is not supported by this browser.', 'error');
+                        return;
+                    }
 
-                locationButton.textContent = 'Getting location...';
-                locationButton.disabled = true;
-                showLocationStatus('Getting your current location...', 'info');
+                    locationButton.textContent = 'Getting location...';
+                    locationButton.disabled = true;
+                    showLocationStatus('Getting your current location...', 'info');
 
-                navigator.geolocation.getCurrentPosition(
-                    function(position) {
-                        latitudeInput.value = position.coords.latitude.toFixed(8);
-                        longitudeInput.value = position.coords.longitude.toFixed(8);
-                        
-                        locationButton.textContent = 'Location Obtained!';
-                        showLocationStatus('Location successfully obtained!', 'success');
-                        
-                        setTimeout(function() {
+                    navigator.geolocation.getCurrentPosition(
+                        function(position) {
+                            latitudeInput.value = position.coords.latitude.toFixed(8);
+                            longitudeInput.value = position.coords.longitude.toFixed(8);
+                            
+                            // Update map with new coordinates
+                            updateMapLocation();
+                            
+                            locationButton.textContent = 'Location Obtained!';
+                            showLocationStatus('Location successfully obtained and map updated!', 'success');
+                            
+                            setTimeout(function() {
+                                locationButton.textContent = 'Get Current Location';
+                                locationButton.disabled = false;
+                                hideLocationStatus();
+                            }, 3000);
+                        },
+                        function(error) {
+                            let errorMessage;
+                            switch(error.code) {
+                                case error.PERMISSION_DENIED:
+                                    errorMessage = 'Location access denied by user.';
+                                    break;
+                                case error.POSITION_UNAVAILABLE:
+                                    errorMessage = 'Location information is unavailable.';
+                                    break;
+                                case error.TIMEOUT:
+                                    errorMessage = 'Location request timed out.';
+                                    break;
+                                default:
+                                    errorMessage = 'An unknown error occurred while getting location.';
+                                    break;
+                            }
+                            
+                            showLocationStatus(errorMessage, 'error');
                             locationButton.textContent = 'Get Current Location';
                             locationButton.disabled = false;
-                            hideLocationStatus();
-                        }, 3000);
-                    },
-                    function(error) {
-                        let errorMessage;
-                        switch(error.code) {
-                            case error.PERMISSION_DENIED:
-                                errorMessage = 'Location access denied by user.';
-                                break;
-                            case error.POSITION_UNAVAILABLE:
-                                errorMessage = 'Location information is unavailable.';
-                                break;
-                            case error.TIMEOUT:
-                                errorMessage = 'Location request timed out.';
-                                break;
-                            default:
-                                errorMessage = 'An unknown error occurred while getting location.';
-                                break;
+                        },
+                        {
+                            enableHighAccuracy: true,
+                            timeout: 10000,
+                            maximumAge: 60000
                         }
-                        
-                        showLocationStatus(errorMessage, 'error');
-                        locationButton.textContent = 'Get Current Location';
-                        locationButton.disabled = false;
-                    },
-                    {
-                        enableHighAccuracy: true,
-                        timeout: 10000,
-                        maximumAge: 60000
-                    }
-                );
-            });
+                    );
+                });
+            }
 
             function showLocationStatus(message, type) {
+                if (!locationStatus) return;
+                
                 locationStatus.textContent = message;
                 locationStatus.className = 'text-sm block mt-2';
                 
@@ -343,12 +505,24 @@
                 } else {
                     locationStatus.classList.add('text-blue-600');
                 }
+
+                // Auto-hide info and success messages after 3 seconds
+                if (type !== 'error') {
+                    setTimeout(hideLocationStatus, 3000);
+                }
             }
 
             function hideLocationStatus() {
+                if (!locationStatus) return;
                 locationStatus.className = 'text-sm hidden';
                 locationStatus.textContent = '';
             }
+
+            // Load districts for current city on page load
+            updateDistricts();
+
+            // Initialize map
+            initMap();
         });
     </script>
 </body>

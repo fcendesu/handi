@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OpenStreetMap Test</title>
+    <style>
+        body { font-family: Arial, sans-serif; padding: 20px; }
+        .map-container { border: 1px solid #ccc; height: 400px; width: 100%; margin: 20px 0; }
+        .controls { margin: 10px 0; }
+        button { margin: 5px; padding: 8px 12px; }
+        .coordinates { background: #f0f0f0; padding: 10px; margin: 10px 0; }
+    </style>
+</head>
+<body>
+    <h1>OpenStreetMap Functionality Test</h1>
+    
+    <div class="coordinates">
+        <strong>Test Coordinates:</strong><br>
+        Latitude: <input type="number" id="lat" value="35.1856" step="0.000001"><br>
+        Longitude: <input type="number" id="lng" value="33.3823" step="0.000001">
+    </div>
+    
+    <div class="controls">
+        <button onclick="updateMap()">Update Map</button>
+        <button onclick="resetMap()">Reset to Default</button>
+    </div>
+    
+    <div class="map-container">
+        <iframe id="map" width="100%" height="100%" style="border:0;" 
+                title="Test Map">
+        </iframe>
+    </div>
+    
+    <div id="status" style="padding: 10px; background: #e3f2fd; border-radius: 4px;">
+        Status: Ready
+    </div>
+    
+    <script>
+        function updateStatus(message, type = 'info') {
+            const status = document.getElementById('status');
+            status.textContent = 'Status: ' + message;
+            status.style.background = type === 'error' ? '#ffebee' : '#e3f2fd';
+            console.log('Status:', message);
+        }
+        
+        function updateMap() {
+            const lat = parseFloat(document.getElementById('lat').value);
+            const lng = parseFloat(document.getElementById('lng').value);
+            
+            if (isNaN(lat) || isNaN(lng)) {
+                updateStatus('Invalid coordinates', 'error');
+                return;
+            }
+            
+            updateStatus('Loading map with coordinates...');
+            
+            const offset = 0.01;
+            const bbox = `${lng - offset},${lat - offset},${lng + offset},${lat + offset}`;
+            const mapUrl = `https://www.openstreetmap.org/export/embed.html?bbox=${bbox}&layer=mapnik&marker=${lat},${lng}`;
+            
+            console.log('Loading map URL:', mapUrl);
+            document.getElementById('map').src = mapUrl;
+            
+            setTimeout(() => {
+                updateStatus(`Map loaded for coordinates: ${lat}, ${lng}`);
+            }, 2000);
+        }
+        
+        function resetMap() {
+            updateStatus('Loading default map view...');
+            
+            const defaultBbox = "32.5,35.0,34.5,37.0";
+            const mapUrl = `https://www.openstreetmap.org/export/embed.html?bbox=${defaultBbox}&layer=mapnik`;
+            
+            console.log('Loading default map URL:', mapUrl);
+            document.getElementById('map').src = mapUrl;
+            
+            setTimeout(() => {
+                updateStatus('Default map view loaded');
+            }, 2000);
+        }
+        
+        // Initialize with default view
+        window.onload = function() {
+            updateStatus('Initializing...');
+            resetMap();
+        };
+    </script>
+</body>
+</html>
