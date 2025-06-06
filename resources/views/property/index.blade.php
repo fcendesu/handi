@@ -69,11 +69,10 @@
                                                 </td>
                                                 <td class="px-6 py-4 whitespace-nowrap">
                                                     <div class="text-sm text-gray-900">{{ $property->owner_name }}</div>
-                                                </td>
-                                                <td class="px-6 py-4">
-                                                    <div class="text-sm text-gray-900">{{ $property->address }}</div>
-                                                    @if($property->neighborhood)
-                                                        <div class="text-sm text-gray-500">{{ $property->neighborhood }}</div>
+                                                </td>                                                <td class="px-6 py-4">
+                                                    <div class="text-sm text-gray-900">{{ $property->full_address }}</div>
+                                                    @if($property->district)
+                                                        <div class="text-sm text-gray-500">{{ $property->district }}</div>
                                                     @endif
                                                 </td>
                                                 <td class="px-6 py-4 whitespace-nowrap">
