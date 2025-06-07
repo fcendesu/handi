@@ -12,16 +12,17 @@ return new class extends Migration {
     {
         Schema::create('properties', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('company_id')->constrained('companies')->onDelete('cascade');
+            $table->foreignId('company_id')->nullable()->constrained('companies')->onDelete('cascade'); // Made nullable for solo handymen
+            $table->foreignId('user_id')->nullable()->constrained('users')->onDelete('cascade'); // Added for solo handyman ownership
             $table->string('name'); // User-given name for this property/address
 
             // Hierarchical address structure
             $table->string('city'); // Lefkoşa, Girne, Mağusa, İskele, Güzelyurt, Lefke
-            $table->string('neighborhood');
+            $table->string('district'); // Changed from neighborhood to district
             $table->string('site_name')->nullable(); // Optional
             $table->string('building_name')->nullable(); // Optional
-            $table->string('street'); // Required
-            $table->string('door_apartment_no'); // Required
+            $table->string('street')->nullable(); // Made nullable as optional in new schema
+            $table->string('door_apartment_no')->nullable(); // Made nullable as optional in new schema
 
             // Map location (optional)
             $table->decimal('latitude', 10, 8)->nullable();
@@ -33,9 +34,15 @@ return new class extends Migration {
 
             $table->timestamps();
 
-            // Index for better performance
-            $table->index(['company_id', 'city', 'neighborhood']);
+            // Updated indexes to use 'district' instead of 'neighborhood'
+            $table->index(['company_id', 'city', 'district']);
             $table->index(['company_id', 'is_active']);
+            $table->index(['user_id', 'is_active']); // Added index for solo handymen
+        });
+
+        // Add foreign key constraint to discoveries table for property_id
+        Schema::table('discoveries', function (Blueprint $table) {
+            $table->foreign('property_id')->references('id')->on('properties')->onDelete('set null');
         });
     }
 
@@ -44,6 +51,10 @@ return new class extends Migration {
      */
     public function down(): void
     {
+        Schema::table('discoveries', function (Blueprint $table) {
+            $table->dropForeign(['property_id']);
+        });
+        
         Schema::dropIfExists('properties');
     }
 };

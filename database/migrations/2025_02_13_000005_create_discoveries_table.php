@@ -16,6 +16,7 @@ return new class extends Migration {
             $table->foreignId('assignee_id')->nullable()->constrained('users')->onDelete('set null');
             $table->foreignId('company_id')->nullable()->constrained('companies')->onDelete('cascade');
             $table->foreignId('work_group_id')->nullable()->constrained('work_groups')->onDelete('set null');
+            $table->foreignId('property_id')->nullable(); // Will add constraint after properties table is created
             $table->string('share_token', 64)->nullable()->unique();
             $table->string('customer_name');
             $table->string('customer_phone');
@@ -26,6 +27,7 @@ return new class extends Migration {
             $table->text('note_to_customer')->nullable();
             $table->text('note_to_handi')->nullable();
             $table->string('status')->default('pending');
+            $table->tinyInteger('priority')->default(1)->comment('Priority: 1=least urgent, 2=medium, 3=highest/urgent'); // Added priority field
             $table->integer('completion_time')->nullable();
             $table->date('offer_valid_until')->nullable();
             $table->decimal('service_cost', 10, 2)->default(0);

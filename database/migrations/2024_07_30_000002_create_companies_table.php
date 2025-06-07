@@ -16,7 +16,7 @@ return new class extends Migration
             $table->string('address')->nullable();
             $table->string('phone')->nullable();
             $table->string('email')->unique();
-            $table->foreignId('admin_id')->constrained('users')->onDelete('cascade'); // Company admin
+            $table->foreignId('admin_id')->nullable()->constrained('users')->onDelete('set null'); // Company admin (nullable for multiple admins)
             $table->timestamps();
         });
 

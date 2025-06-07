@@ -14,6 +14,7 @@ return new class extends Migration {
             $table->id();
             $table->string('item');
             $table->string('brand');
+            $table->string('firm')->nullable(); // Added firm field
             $table->decimal('price', 8, 2);
             $table->timestamps();
         });

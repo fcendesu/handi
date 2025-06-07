@@ -26,10 +26,15 @@ return new class extends Migration {
             $table->string('performed_by_identifier')->nullable(); // email for customer actions
             $table->timestamps();
 
+            // Enhanced indexes for better filtering performance
             $table->index(['discovery_id', 'created_at']);
             $table->index(['user_id', 'created_at']);
-            $table->index(['action', 'created_at']);
+            $table->index(['action', 'created_at'], 'idx_action_created');
             $table->index(['entity_type', 'entity_id']);
+            $table->index(['entity_type', 'created_at'], 'idx_entity_type_created');
+            $table->index(['performed_by_type', 'created_at'], 'idx_performer_created');
+            $table->index(['user_id', 'entity_type', 'created_at'], 'idx_user_entity_created');
+            $table->index('created_at', 'idx_created_at_cleanup'); // Index for cleanup operations
         });
     }
 
