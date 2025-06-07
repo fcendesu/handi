@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
@@ -11,6 +12,7 @@ use Illuminate\Support\Str;
 
 class Discovery extends Model
 {
+    use HasFactory;
     /**
      * The table associated with the model.
      *
@@ -38,6 +40,7 @@ class Discovery extends Model
         'note_to_customer',
         'note_to_handi',
         'status',
+        'priority',
         'completion_time',
         'offer_valid_until',
         'service_cost',
@@ -69,6 +72,10 @@ class Discovery extends Model
     const STATUS_COMPLETED = 'completed';
     const STATUS_CANCELLED = 'cancelled';
 
+    const PRIORITY_LOW = 1;
+    const PRIORITY_MEDIUM = 2;
+    const PRIORITY_HIGH = 3;
+
     public static function getStatuses(): array
     {
         return [
@@ -80,6 +87,24 @@ class Discovery extends Model
         ];
     }
 
+    public static function getPriorities(): array
+    {
+        return [
+            self::PRIORITY_LOW => 'Low',
+            self::PRIORITY_MEDIUM => 'Medium',
+            self::PRIORITY_HIGH => 'High',
+        ];
+    }
+
+    public static function getPriorityLabels(): array
+    {
+        return [
+            self::PRIORITY_LOW => 'Low (Default)',
+            self::PRIORITY_MEDIUM => 'Medium',
+            self::PRIORITY_HIGH => 'High (Urgent)',
+        ];
+    }
+
     protected static function boot()
     {
         parent::boot();
@@ -87,6 +112,9 @@ class Discovery extends Model
         static::creating(function (self $discovery) {
             if (!$discovery->status) {
                 $discovery->status = self::STATUS_PENDING;
+            }
+            if (!$discovery->priority) {
+                $discovery->priority = self::PRIORITY_LOW;
             }
             if (!$discovery->share_token) {
                 $discovery->share_token = Str::random(64);
