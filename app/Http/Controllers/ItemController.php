@@ -40,12 +40,14 @@ class ItemController extends Controller
         $request->validate([
             "item" => "required",
             "brand" => "required",
+            "firm" => "required",
             "price" => "required|numeric",
         ]);
 
         $item = Item::create([
             'item' => $request->item,
             'brand' => $request->brand,
+            'firm' => $request->firm,
             'price' => $request->price,
         ]);
 
@@ -63,6 +65,7 @@ class ItemController extends Controller
         $request->validate([
             "item" => "required",
             "brand" => "required",
+            "firm" => "required",
             "price" => "required|numeric",
         ]);
 
@@ -80,6 +83,7 @@ class ItemController extends Controller
         $newValues = [
             'item' => $request->item,
             'brand' => $request->brand,
+            'firm' => $request->firm,
             'price' => $request->price,
         ];
 
@@ -126,7 +130,8 @@ class ItemController extends Controller
         $query = $request->get('query');
         $items = Item::when($query, function ($q) use ($query) {
             return $q->where('item', 'like', "%{$query}%")
-                ->orWhere('brand', 'like', "%{$query}%");
+                ->orWhere('brand', 'like', "%{$query}%")
+                ->orWhere('firm', 'like', "%{$query}%");
         })
             ->orderBy('created_at', 'desc')
             ->get();
@@ -141,6 +146,7 @@ class ItemController extends Controller
         $validated = $request->validate([
             "item" => "required",
             "brand" => "required",
+            "firm" => "required",
             "price" => "required|numeric",
         ]);
 
@@ -162,6 +168,7 @@ class ItemController extends Controller
         $validated = $request->validate([
             "item" => "required",
             "brand" => "required",
+            "firm" => "required",
             "price" => "required|numeric",
         ]);
 
@@ -169,6 +176,7 @@ class ItemController extends Controller
         $originalValues = [
             'item' => $item->item,
             'brand' => $item->brand,
+            'firm' => $item->firm,
             'price' => $item->price,
         ];
 
@@ -203,7 +211,8 @@ class ItemController extends Controller
         session(['last_search_query' => $query]);
 
         $items = Item::where('item', 'like', "%{$query}%")
-
+            ->orWhere('brand', 'like', "%{$query}%")
+            ->orWhere('firm', 'like', "%{$query}%")
             ->orderBy('created_at', 'desc')
             ->get();
 
@@ -217,6 +226,7 @@ class ItemController extends Controller
 
         $items = Item::where('item', 'like', "%{$query}%")
             ->orWhere('brand', 'like', "%{$query}%")
+            ->orWhere('firm', 'like', "%{$query}%")
             ->get();
 
         return response()->json([

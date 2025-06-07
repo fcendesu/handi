@@ -12,7 +12,7 @@ class Item extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['item', 'brand', 'price'];
+    protected $fillable = ['item', 'brand', 'firm', 'price'];
 
     protected $casts = [
         'price' => 'decimal:2',
