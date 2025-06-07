@@ -17,17 +17,17 @@ class PropertyFactory extends Factory
     public function definition(): array
     {
         $cities = ['Lefkoşa', 'Girne', 'Mağusa', 'İskele', 'Güzelyurt', 'Lefke'];
-        $neighborhoods = ['Dereboyu', 'Köşklüçiftlik', 'Küçük Kaymaklı', 'Hamitköy', 'Ortaköy'];
+        $districts = ['Dereboyu', 'Köşklüçiftlik', 'Küçük Kaymaklı', 'Hamitköy', 'Ortaköy'];
 
         return [
-            'company_id' => \App\Models\Company::factory(),
+            'user_id' => \App\Models\User::factory(),
             'name' => fake()->words(3, true),
             'city' => fake()->randomElement($cities),
-            'neighborhood' => fake()->randomElement($neighborhoods),
+            'district' => fake()->randomElement($districts),
             'site_name' => fake()->optional()->words(2, true),
             'building_name' => fake()->optional()->words(2, true),
-            'street' => fake()->streetAddress(),
-            'door_apartment_no' => fake()->bothify('##-#'),
+            'street' => fake()->optional()->streetAddress(),
+            'door_apartment_no' => fake()->optional()->bothify('##-#'),
             'latitude' => fake()->latitude(35.0, 35.5),
             'longitude' => fake()->longitude(33.0, 34.0),
             'notes' => fake()->optional()->sentence(),

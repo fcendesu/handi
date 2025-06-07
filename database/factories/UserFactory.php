@@ -41,4 +41,35 @@ class UserFactory extends Factory
             'email_verified_at' => null,
         ]);
     }
+
+    /**
+     * Create a solo handyman user.
+     */
+    public function soloHandyman(): static
+    {
+        return $this->state(fn (array $attributes) => [
+            'user_type' => \App\Models\User::TYPE_SOLO_HANDYMAN,
+            'company_id' => null,
+        ]);
+    }
+
+    /**
+     * Create a company admin user.
+     */
+    public function companyAdmin(): static
+    {
+        return $this->state(fn (array $attributes) => [
+            'user_type' => \App\Models\User::TYPE_COMPANY_ADMIN,
+        ]);
+    }
+
+    /**
+     * Create a company employee user.
+     */
+    public function companyEmployee(): static
+    {
+        return $this->state(fn (array $attributes) => [
+            'user_type' => \App\Models\User::TYPE_COMPANY_EMPLOYEE,
+        ]);
+    }
 }

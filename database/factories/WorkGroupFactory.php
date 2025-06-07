@@ -28,7 +28,11 @@ class WorkGroupFactory extends Factory
         return [
             'company_id' => Company::factory(),
             'name' => $this->faker->words(2, true) . ' Team',
-            'description' => $this->faker->optional()->sentence(),
+            'creator_id' => function (array $attributes) {
+                // If company_id is provided, use a user from that company
+                // Otherwise create a new user
+                return \App\Models\User::factory();
+            },
         ];
     }
 }
