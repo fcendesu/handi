@@ -7,6 +7,7 @@ use App\Models\Discovery;
 use App\Models\User;
 use App\Models\Item;
 use App\Models\Property;
+use App\Models\PaymentMethod;
 use App\Models\WorkGroup;
 use App\Models\Company;
 use Illuminate\Http\Request;
@@ -410,6 +411,81 @@ class TransactionLogService
             'metadata' => [
                 'property_name' => $property->name,
                 'company_id' => $property->company_id,
+            ]
+        ]);
+    }
+
+    /**
+     * ========================================
+     * PAYMENT METHOD LOGGING METHODS
+     * ========================================
+     */
+
+    public static function logPaymentMethodCreated(PaymentMethod $paymentMethod, ?User $user = null): void
+    {
+        self::createLog([
+            'user_id' => $user?->id ?? Auth::id(),
+            'entity_type' => TransactionLog::ENTITY_PAYMENT_METHOD,
+            'entity_id' => $paymentMethod->id,
+            'action' => TransactionLog::ACTION_CREATED,
+            'new_values' => [
+                'name' => $paymentMethod->name,
+                'description' => $paymentMethod->description,
+            ],
+            'metadata' => [
+                'payment_method_name' => $paymentMethod->name,
+                'owner_type' => $paymentMethod->user_id ? 'user' : 'company',
+                'owner_id' => $paymentMethod->user_id ?: $paymentMethod->company_id,
+            ]
+        ]);
+    }
+
+    public static function logPaymentMethodUpdated(PaymentMethod $paymentMethod, array $changes, ?User $user = null): void
+    {
+        $oldValues = [];
+        $newValues = [];
+
+        foreach ($changes as $field => $value) {
+            if ($paymentMethod->isDirty($field)) {
+                $oldValues[$field] = $paymentMethod->getOriginal($field);
+                $newValues[$field] = $value;
+            }
+        }
+
+        if (!empty($oldValues) || !empty($newValues)) {
+            self::createLog([
+                'user_id' => $user?->id ?? Auth::id(),
+                'entity_type' => TransactionLog::ENTITY_PAYMENT_METHOD,
+                'entity_id' => $paymentMethod->id,
+                'action' => TransactionLog::ACTION_UPDATED,
+                'old_values' => $oldValues,
+                'new_values' => $newValues,
+                'metadata' => [
+                    'payment_method_name' => $paymentMethod->name,
+                    'owner_type' => $paymentMethod->user_id ? 'user' : 'company',
+                    'owner_id' => $paymentMethod->user_id ?: $paymentMethod->company_id,
+                    'updated_fields' => array_keys($changes),
+                ]
+            ]);
+        }
+    }
+
+    public static function logPaymentMethodDeleted(PaymentMethod $paymentMethod, ?User $user = null): void
+    {
+        self::createLog([
+            'user_id' => $user?->id ?? Auth::id(),
+            'entity_type' => TransactionLog::ENTITY_PAYMENT_METHOD,
+            'entity_id' => $paymentMethod->id,
+            'action' => TransactionLog::ACTION_DELETED,
+            'old_values' => [
+                'name' => $paymentMethod->name,
+                'description' => $paymentMethod->description,
+            ],
+            'metadata' => [
+                'payment_method_name' => $paymentMethod->name,
+                'owner_type' => $paymentMethod->user_id ? 'user' : 'company',
+                'owner_id' => $paymentMethod->user_id ?: $paymentMethod->company_id,
+                'deletion_timestamp' => now()->toISOString(),
             ]
         ]);
     }

@@ -69,7 +69,7 @@ class DiscoveryController extends Controller
             'extra_fee' => 'nullable|numeric|min:0',
             'discount_rate' => 'nullable|numeric|min:0|max:100',
             'discount_amount' => 'nullable|numeric|min:0',
-            'payment_method' => 'nullable|string',
+            'payment_method_id' => 'nullable|exists:payment_methods,id',
             'work_group_id' => 'nullable|exists:work_groups,id',
             'images.*' => 'nullable|image|mimes:jpeg,png,jpg|max:2048',
             'items' => 'nullable|array',
@@ -176,7 +176,7 @@ class DiscoveryController extends Controller
             'extra_fee' => 'nullable|numeric|min:0',
             'discount_rate' => 'nullable|numeric|min:0|max:100',
             'discount_amount' => 'nullable|numeric|min:0',
-            'payment_method' => 'nullable|string',
+            'payment_method_id' => 'nullable|exists:payment_methods,id',
             'images.*' => 'nullable|image|mimes:jpeg,png,jpg|max:2048',
             'remove_images' => 'nullable|array',
             'remove_images.*' => 'string',
@@ -313,7 +313,7 @@ class DiscoveryController extends Controller
                 'extra_fee' => 'nullable|numeric|min:0',
                 'discount_rate' => 'nullable|numeric|min:0|max:100',
                 'discount_amount' => 'nullable|numeric|min:0',
-                'payment_method' => 'nullable|string',
+                'payment_method_id' => 'nullable|exists:payment_methods,id',
                 'work_group_id' => 'nullable|exists:work_groups,id',
                 'images' => 'nullable|array',
                 'images.*' => 'image|mimes:jpeg,png,jpg|max:2048',
@@ -560,8 +560,8 @@ class DiscoveryController extends Controller
     public function apiShow(Discovery $discovery): JsonResponse
     {
         try {
-            // Load the items relationship
-            $discovery->load('items');
+            // Load the items and paymentMethod relationships
+            $discovery->load('items', 'paymentMethod');
 
             $detailedDiscovery = [
                 'id' => $discovery->id,
@@ -588,7 +588,12 @@ class DiscoveryController extends Controller
                     'amount' => $discovery->discount_amount,
                     'rate_amount' => $discovery->discount_rate_amount,
                 ],
-                'payment_method' => $discovery->payment_method,
+                'payment_method' => $discovery->payment_method, // For backward compatibility
+                'payment_method_details' => $discovery->paymentMethod ? [
+                    'id' => $discovery->paymentMethod->id,
+                    'name' => $discovery->paymentMethod->name,
+                    'description' => $discovery->paymentMethod->description
+                ] : null,
                 'items' => $discovery->items->map(function ($item) {
                     return [
                         'id' => $item->id,
@@ -641,7 +646,7 @@ class DiscoveryController extends Controller
                 'extra_fee' => 'nullable|numeric|min:0',
                 'discount_rate' => 'nullable|numeric|min:0|max:100',
                 'discount_amount' => 'nullable|numeric|min:0',
-                'payment_method' => 'nullable|string',
+                'payment_method_id' => 'nullable|exists:payment_methods,id',
                 'status' => ['sometimes', 'string', Rule::in(Discovery::getStatuses())],
                 'items' => 'nullable|array',
                 'items.*.id' => 'required|exists:items,id',

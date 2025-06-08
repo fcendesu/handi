@@ -3,6 +3,7 @@
 use App\Http\Controllers\Auth\AuthenticationController;
 use App\Http\Controllers\DiscoveryController;
 use App\Http\Controllers\ItemController;
+use App\Http\Controllers\PaymentMethodController;
 use App\Http\Controllers\PostController;
 use App\Http\Controllers\WorkGroupController;
 use App\Http\Controllers\CompanyController;
@@ -44,6 +45,9 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/discoveries/{discovery}/assign', [DiscoveryController::class, 'assignToSelf']);
     Route::delete('/discoveries/{discovery}/assign', [DiscoveryController::class, 'unassignFromSelf']);
     Route::get('/discoveries/{discovery}/share', [DiscoveryController::class, 'apiGetShareUrl']);
+
+    // Payment Methods API routes
+    Route::get('/payment-methods/accessible', [PaymentMethodController::class, 'getAccessiblePaymentMethods']);
 
     // Work Group API routes
     Route::get('/work-groups', [WorkGroupController::class, 'apiList']);

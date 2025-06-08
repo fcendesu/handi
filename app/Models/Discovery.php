@@ -50,6 +50,7 @@ class Discovery extends Model
         'discount_rate',
         'discount_amount',
         'payment_method',
+        'payment_method_id',
         'images',
         'share_token',
     ];
@@ -145,6 +146,11 @@ class Discovery extends Model
     public function property(): BelongsTo
     {
         return $this->belongsTo(Property::class);
+    }
+
+    public function paymentMethod(): BelongsTo
+    {
+        return $this->belongsTo(PaymentMethod::class);
     }
 
     public function items(): BelongsToMany

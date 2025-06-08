@@ -51,6 +51,7 @@ class TransactionLog extends Model
     const ENTITY_DISCOVERY = 'discovery';
     const ENTITY_ITEM = 'item';
     const ENTITY_PROPERTY = 'property';
+    const ENTITY_PAYMENT_METHOD = 'payment_method';
     const ENTITY_USER = 'user';
     const ENTITY_COMPANY = 'company';
     const ENTITY_WORKGROUP = 'workgroup';
@@ -80,6 +81,11 @@ class TransactionLog extends Model
         return $this->belongsTo(Property::class, 'entity_id')->where('entity_type', self::ENTITY_PROPERTY);
     }
 
+    public function paymentMethod(): BelongsTo
+    {
+        return $this->belongsTo(PaymentMethod::class, 'entity_id')->where('entity_type', self::ENTITY_PAYMENT_METHOD);
+    }
+
     public function workgroup(): BelongsTo
     {
         return $this->belongsTo(WorkGroup::class, 'entity_id')->where('entity_type', self::ENTITY_WORKGROUP);
@@ -104,6 +110,8 @@ class TransactionLog extends Model
                 return $this->item;
             case self::ENTITY_PROPERTY:
                 return $this->property;
+            case self::ENTITY_PAYMENT_METHOD:
+                return $this->paymentMethod;
             case self::ENTITY_WORKGROUP:
                 return $this->workgroup;
             case self::ENTITY_USER:
@@ -148,6 +156,7 @@ class TransactionLog extends Model
             self::ENTITY_DISCOVERY => 'Keşif',
             self::ENTITY_ITEM => 'Malzeme',
             self::ENTITY_PROPERTY => 'Mülk',
+            self::ENTITY_PAYMENT_METHOD => 'Ödeme Yöntemi',
             self::ENTITY_USER => 'Kullanıcı',
             self::ENTITY_COMPANY => 'Şirket',
             self::ENTITY_WORKGROUP => 'Çalışma Grubu',

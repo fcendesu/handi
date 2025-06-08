@@ -4,6 +4,7 @@ use App\Http\Controllers\Auth\AuthenticationController;
 use App\Http\Controllers\DiscoveryController;
 use App\Http\Controllers\ItemController;
 use App\Http\Controllers\PropertyController;
+use App\Http\Controllers\PaymentMethodController;
 use App\Http\Controllers\WorkGroupController;
 use App\Http\Controllers\CompanyController;
 use App\Http\Controllers\InvitationController;
@@ -105,6 +106,10 @@ Route::middleware(['auth', 'restrict.employee.dashboard'])->group(function () {
     Route::get('/api/districts', [PropertyController::class, 'getDistricts'])->name('api.districts');
     Route::get('/api/neighborhoods', [PropertyController::class, 'getNeighborhoods'])->name('api.neighborhoods'); // Deprecated
     Route::get('/api/company-properties', [PropertyController::class, 'getCompanyProperties'])->name('api.company-properties');
+
+    // Payment Method Management Routes
+    Route::resource('payment-methods', PaymentMethodController::class);
+    Route::get('/api/payment-methods', [PaymentMethodController::class, 'getAccessiblePaymentMethods'])->name('api.payment-methods');
 
     // Transaction Logs Routes (for admins to view activity)
     Route::get('/transaction-logs', [DiscoveryController::class, 'transactionLogs'])->name('transaction-logs');

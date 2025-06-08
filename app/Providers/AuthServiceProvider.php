@@ -3,9 +3,11 @@
 namespace App\Providers;
 
 use App\Models\Company;
+use App\Models\PaymentMethod;
 use App\Models\Property;
 use App\Models\WorkGroup;
 use App\Policies\CompanyPolicy;
+use App\Policies\PaymentMethodPolicy;
 use App\Policies\PropertyPolicy;
 use App\Policies\WorkGroupPolicy;
 use Illuminate\Foundation\Support\Providers\AuthServiceProvider as ServiceProvider;
@@ -21,6 +23,7 @@ class AuthServiceProvider extends ServiceProvider
         WorkGroup::class => WorkGroupPolicy::class,
         Company::class => CompanyPolicy::class,
         Property::class => PropertyPolicy::class,
+        PaymentMethod::class => PaymentMethodPolicy::class,
     ];
 
     /**

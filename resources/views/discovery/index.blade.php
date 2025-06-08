@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
+
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -10,6 +11,7 @@
     @vite(['resources/css/app.css', 'resources/js/app.js'])
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
 </head>
+
 <body class="bg-gray-100">
     <x-navigation />
 
@@ -17,19 +19,21 @@
     @if (session('success'))
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8 mt-4">
             <div class="mb-4 bg-green-100 border-l-4 border-green-500 text-green-700 p-4 rounded shadow-sm"
-                 x-data="{ show: true }"
-                 x-show="show"
-                 x-init="setTimeout(() => show = false, 3000)">
+                x-data="{ show: true }" x-show="show" x-init="setTimeout(() => show = false, 3000)">
                 <div class="flex justify-between items-center">
                     <div class="flex items-center">
                         <svg class="h-5 w-5 mr-2" fill="currentColor" viewBox="0 0 20 20">
-                            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 00-1.414 1.414l2 2a1 1 001.414 0l4-4z" clip-rule="evenodd"/>
+                            <path fill-rule="evenodd"
+                                d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 00-1.414 1.414l2 2a1 1 001.414 0l4-4z"
+                                clip-rule="evenodd" />
                         </svg>
                         {{ session('success') }}
                     </div>
                     <button @click="show = false" class="text-green-700 hover:text-green-500">
                         <svg class="h-5 w-5" fill="currentColor" viewBox="0 0 20 20">
-                            <path fill-rule="evenodd" d="M4.293 4.293a1 1 011.414 0L10 8.586l4.293-4.293a1 1 111.414 1.414L11.414 10l4.293 4.293a1 1 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"/>
+                            <path fill-rule="evenodd"
+                                d="M4.293 4.293a1 1 011.414 0L10 8.586l4.293-4.293a1 1 111.414 1.414L11.414 10l4.293 4.293a1 1 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z"
+                                clip-rule="evenodd" />
                         </svg>
                     </button>
                 </div>
@@ -50,37 +54,41 @@
 
                     </div>
 
-                    <form action="{{ route('discovery.store') }}" method="POST" enctype="multipart/form-data" class="space-y-8">
+                    <form action="{{ route('discovery.store') }}" method="POST" enctype="multipart/form-data"
+                        class="space-y-8">
                         @csrf
 
                         <div class="space-y-8">
                             <!-- Customer Information -->
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                                 <div>
-                                    <label for="customer_name" class="block text-sm font-medium text-gray-700 mb-2">Müşteri Adı</label>
+                                    <label for="customer_name"
+                                        class="block text-sm font-medium text-gray-700 mb-2">Müşteri Adı</label>
                                     <input type="text" name="customer_name" id="customer_name"
-                                           class="bg-gray-100 mt-1 block w-full rounded-md border-2 border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 px-4 py-2"
-                                           value="{{ old('customer_name') }}" required>
+                                        class="bg-gray-100 mt-1 block w-full rounded-md border-2 border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 px-4 py-2"
+                                        value="{{ old('customer_name') }}" required>
                                     @error('customer_name')
                                         <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
                                     @enderror
                                 </div>
 
                                 <div>
-                                    <label for="customer_phone" class="block text-sm font-medium text-gray-700 mb-2">Telefon Numarası</label>
+                                    <label for="customer_phone"
+                                        class="block text-sm font-medium text-gray-700 mb-2">Telefon Numarası</label>
                                     <input type="text" name="customer_phone" id="customer_phone"
-                                           class="bg-gray-100 mt-1 block w-full rounded-md border-2 border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 px-4 py-2"
-                                           value="{{ old('customer_phone') }}" required>
+                                        class="bg-gray-100 mt-1 block w-full rounded-md border-2 border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 px-4 py-2"
+                                        value="{{ old('customer_phone') }}" required>
                                     @error('customer_phone')
                                         <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
                                     @enderror
                                 </div>
 
                                 <div>
-                                    <label for="customer_email" class="block text-sm font-medium text-gray-700 mb-2">Email</label>
+                                    <label for="customer_email"
+                                        class="block text-sm font-medium text-gray-700 mb-2">Email</label>
                                     <input type="email" name="customer_email" id="customer_email"
-                                           class="bg-gray-100 mt-1 block w-full rounded-md border-2 border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 px-4 py-2"
-                                           value="{{ old('customer_email') }}" required>
+                                        class="bg-gray-100 mt-1 block w-full rounded-md border-2 border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 px-4 py-2"
+                                        value="{{ old('customer_email') }}" required>
                                     @error('customer_email')
                                         <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
                                     @enderror
@@ -88,39 +96,50 @@
 
                                 <div class="col-span-full">
                                     <label class="block text-sm font-medium text-gray-700 mb-2">Adres</label>
-                                    
+
                                     <!-- Property Selection -->
                                     <div x-data="propertySelector()" class="space-y-4">
                                         <!-- Option selector -->
                                         <div class="flex space-x-4">
                                             <label class="flex items-center">
-                                                <input type="radio" name="address_type" value="property" x-model="addressType" class="mr-2">
+                                                <input type="radio" name="address_type" value="property"
+                                                    x-model="addressType" class="mr-2">
                                                 <span class="text-sm text-gray-700">Kayıtlı Mülk Seç</span>
                                             </label>
                                             <label class="flex items-center">
-                                                <input type="radio" name="address_type" value="manual" x-model="addressType" class="mr-2">
+                                                <input type="radio" name="address_type" value="manual"
+                                                    x-model="addressType" class="mr-2">
                                                 <span class="text-sm text-gray-700">Manuel Adres Gir</span>
                                             </label>
                                         </div>
 
                                         <!-- Property Selection -->
                                         <div x-show="addressType === 'property'" class="space-y-3">
-                                            <select name="property_id" x-model="selectedPropertyId" @change="onPropertyChange()"
-                                                    class="bg-gray-100 mt-1 block w-full rounded-md border-2 border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 px-4 py-2">
+                                            <select name="property_id" x-model="selectedPropertyId"
+                                                @change="onPropertyChange()"
+                                                class="bg-gray-100 mt-1 block w-full rounded-md border-2 border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 px-4 py-2">
                                                 <option value="">Bir mülk seçin</option>
                                                 <template x-for="property in properties" :key="property.id">
-                                                    <option :value="property.id" x-text="property.name + ' - ' + property.full_address"></option>
+                                                    <option :value="property.id"
+                                                        x-text="property.name + ' - ' + property.full_address"></option>
                                                 </template>
                                             </select>
-                                            
+
                                             <!-- Selected property preview -->
-                                            <div x-show="selectedProperty" class="p-3 bg-blue-50 rounded-md border border-blue-200">
-                                                <div class="text-sm font-medium text-blue-900" x-text="selectedProperty ? selectedProperty.name : ''"></div>
-                                                <div class="text-sm text-blue-700" x-text="selectedProperty ? selectedProperty.full_address : ''"></div>
-                                                <div x-show="selectedProperty && selectedProperty.has_map_location" class="mt-2">
-                                                    <a :href="'https://www.google.com/maps?q=' + (selectedProperty ? selectedProperty.latitude : '') + ',' + (selectedProperty ? selectedProperty.longitude : '')" 
-                                                       target="_blank" 
-                                                       class="text-blue-600 hover:text-blue-800 text-sm">
+                                            <div x-show="selectedProperty"
+                                                class="p-3 bg-blue-50 rounded-md border border-blue-200">
+                                                <div class="text-sm font-medium text-blue-900"
+                                                    x-text="selectedProperty ? selectedProperty.name : ''"></div>
+                                                <div class="text-sm text-blue-700"
+                                                    x-text="selectedProperty ? selectedProperty.full_address : ''">
+                                                </div>
+                                                <div x-show="selectedProperty && selectedProperty.has_map_location"
+                                                    class="mt-2">
+                                                    <a :href="'https://www.google.com/maps?q=' + (selectedProperty ?
+                                                        selectedProperty.latitude : '') + ',' + (selectedProperty ?
+                                                        selectedProperty.longitude : '')"
+                                                        target="_blank"
+                                                        class="text-blue-600 hover:text-blue-800 text-sm">
                                                         Haritada Görüntüle →
                                                     </a>
                                                 </div>
@@ -128,9 +147,8 @@
 
                                             <!-- Link to add new property -->
                                             <div class="text-center py-2">
-                                                <a href="{{ route('properties.create') }}" 
-                                                   target="_blank"
-                                                   class="text-blue-600 hover:text-blue-800 text-sm">
+                                                <a href="{{ route('properties.create') }}" target="_blank"
+                                                    class="text-blue-600 hover:text-blue-800 text-sm">
                                                     + Yeni Mülk Ekle
                                                 </a>
                                             </div>
@@ -139,11 +157,10 @@
                                         <!-- Manual Address Input -->
                                         <div x-show="addressType === 'manual'">
                                             <textarea name="address" id="address" rows="3"
-                                                      class="bg-gray-100 mt-1 block w-full rounded-md border-2 border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 px-4 py-2"
-                                                      >{{ old('address') }}</textarea>
+                                                class="bg-gray-100 mt-1 block w-full rounded-md border-2 border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 px-4 py-2">{{ old('address') }}</textarea>
                                         </div>
                                     </div>
-                                    
+
                                     @error('address')
                                         <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
                                     @enderror
@@ -155,19 +172,21 @@
 
                             <!-- Discovery Details -->
                             <div>
-                                <label for="discovery" class="block text-sm font-medium text-gray-700 mb-2">Keşif Detayı</label>
+                                <label for="discovery" class="block text-sm font-medium text-gray-700 mb-2">Keşif
+                                    Detayı</label>
                                 <textarea name="discovery" id="discovery" rows="4"
-                                          class="bg-gray-100 mt-1 block w-full rounded-md border-2 border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 px-4 py-2"
-                                          required>{{ old('discovery') }}</textarea>
+                                    class="bg-gray-100 mt-1 block w-full rounded-md border-2 border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 px-4 py-2"
+                                    required>{{ old('discovery') }}</textarea>
                                 @error('discovery')
                                     <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
                                 @enderror
                             </div>
 
                             <div>
-                                <label for="todo_list" class="block text-sm font-medium text-gray-700 mb-2">Yapılacaklar Listesi</label>
+                                <label for="todo_list"
+                                    class="block text-sm font-medium text-gray-700 mb-2">Yapılacaklar Listesi</label>
                                 <textarea name="todo_list" id="todo_list" rows="4"
-                                          class="bg-gray-100 mt-1 block w-full rounded-md border-2 border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 px-4 py-2">{{ old('todo_list') }}</textarea>
+                                    class="bg-gray-100 mt-1 block w-full rounded-md border-2 border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 px-4 py-2">{{ old('todo_list') }}</textarea>
                                 @error('todo_list')
                                     <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
                                 @enderror
@@ -178,22 +197,22 @@
                                 <div class="flex justify-between items-center">
                                     <label class="block text-sm font-medium text-gray-700 mb-2">Malzeme Ekle</label>
                                     <div class="relative w-64">
-                                        <input type="text"
-                                               x-model="searchQuery"
-                                               @input.debounce.300ms="searchItems()"
-                                               placeholder="Malzeme Arama."
-                                               class="bg-gray-100 w-full rounded-md border-2 border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 px-4 py-2">
+                                        <input type="text" x-model="searchQuery"
+                                            @input.debounce.300ms="searchItems()" placeholder="Malzeme Arama."
+                                            class="bg-gray-100 w-full rounded-md border-2 border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 px-4 py-2">
 
                                         <!-- Search Results Dropdown -->
                                         <div x-show="searchResults.length > 0"
-                                             class="absolute z-50 w-full mt-1 bg-white rounded-md shadow-lg border border-gray-200">
+                                            class="absolute z-50 w-full mt-1 bg-white rounded-md shadow-lg border border-gray-200">
                                             <ul class="max-h-60 overflow-auto">
                                                 <template x-for="item in searchResults" :key="item.id">
-                                                    <li class="p-3 hover:bg-gray-50 cursor-pointer" @click="addItem(item)">
+                                                    <li class="p-3 hover:bg-gray-50 cursor-pointer"
+                                                        @click="addItem(item)">
                                                         <div class="flex justify-between items-center">
                                                             <div>
                                                                 <span x-text="item.item" class="font-medium"></span>
-                                                                <span class="text-sm text-gray-500" x-text="' - ' + item.brand"></span>
+                                                                <span class="text-sm text-gray-500"
+                                                                    x-text="' - ' + item.brand"></span>
                                                             </div>
                                                             <span class="text-gray-600" x-text="item.price"></span>
                                                         </div>
@@ -217,29 +236,36 @@
                                                             <p class="font-medium" x-text="item.price"></p>
                                                         </div>
                                                         <div class="col-span-2">
-                                                            <label class="block text-xs text-gray-500 mb-1">Miktar</label>
-                                                            <input type="number"
-                                                                   x-model="item.quantity"
-                                                                   min="1"
-                                                                   class="bg-gray-100 w-20 rounded-md border-2 border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 px-2 py-1">
-                                                            <input type="hidden" x-bind:name="'items[' + index + '][id]'" x-bind:value="item.id">
-                                                            <input type="hidden" x-bind:name="'items[' + index + '][quantity]'" x-bind:value="item.quantity">
+                                                            <label
+                                                                class="block text-xs text-gray-500 mb-1">Miktar</label>
+                                                            <input type="number" x-model="item.quantity"
+                                                                min="1"
+                                                                class="bg-gray-100 w-20 rounded-md border-2 border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 px-2 py-1">
+                                                            <input type="hidden"
+                                                                x-bind:name="'items[' + index + '][id]'"
+                                                                x-bind:value="item.id">
+                                                            <input type="hidden"
+                                                                x-bind:name="'items[' + index + '][quantity]'"
+                                                                x-bind:value="item.quantity">
                                                         </div>
                                                         <div class="col-span-4">
-                                                            <label class="block text-xs text-gray-500 mb-1">Farklı Fiyat (opsiyonel)</label>
-                                                            <input type="number"
-                                                                   x-model="item.custom_price"
-                                                                   placeholder="Malzeme Fiyatı"
-                                                                   step="0.01"
-                                                                   class="bg-gray-100 w-32 rounded-md border-2 border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 px-2 py-1">
-                                                            <input type="hidden" x-bind:name="'items[' + index + '][custom_price]'" x-bind:value="item.custom_price">
+                                                            <label class="block text-xs text-gray-500 mb-1">Farklı
+                                                                Fiyat (opsiyonel)</label>
+                                                            <input type="number" x-model="item.custom_price"
+                                                                placeholder="Malzeme Fiyatı" step="0.01"
+                                                                class="bg-gray-100 w-32 rounded-md border-2 border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 px-2 py-1">
+                                                            <input type="hidden"
+                                                                x-bind:name="'items[' + index + '][custom_price]'"
+                                                                x-bind:value="item.custom_price">
                                                         </div>
                                                         <div class="col-span-1 text-right">
-                                                            <button type="button"
-                                                                    @click="removeItem(index)"
-                                                                    class="text-red-600 hover:text-red-800">
-                                                                <svg class="h-5 w-5" fill="currentColor" viewBox="0 0 20 20">
-                                                                    <path fill-rule="evenodd" d="M4.293 4.293a1 1 011.414 0L10 8.586l4.293-4.293a1 1 111.414 1.414L11.414 10l4.293 4.293a1 1 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"/>
+                                                            <button type="button" @click="removeItem(index)"
+                                                                class="text-red-600 hover:text-red-800">
+                                                                <svg class="h-5 w-5" fill="currentColor"
+                                                                    viewBox="0 0 20 20">
+                                                                    <path fill-rule="evenodd"
+                                                                        d="M4.293 4.293a1 1 011.414 0L10 8.586l4.293-4.293a1 1 111.414 1.414L11.414 10l4.293 4.293a1 1 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z"
+                                                                        clip-rule="evenodd" />
                                                                 </svg>
                                                             </button>
                                                         </div>
@@ -254,80 +280,91 @@
                             <!-- Cost Information -->
                             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                                 <div>
-                                    <label for="completion_time" class="block text-sm font-medium text-gray-700 mb-2">Tamamlanma Süresi (gün)</label>
+                                    <label for="completion_time"
+                                        class="block text-sm font-medium text-gray-700 mb-2">Tamamlanma Süresi
+                                        (gün)</label>
                                     <input type="number" name="completion_time" id="completion_time"
-                                           class="bg-gray-100 mt-1 block w-full rounded-md border-2 border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 px-4 py-2"
-                                           min="1" value="{{ old('completion_time') }}">
+                                        class="bg-gray-100 mt-1 block w-full rounded-md border-2 border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 px-4 py-2"
+                                        min="1" value="{{ old('completion_time') }}">
                                     @error('completion_time')
                                         <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
                                     @enderror
                                 </div>
 
                                 <div>
-                                    <label for="offer_valid_until" class="block text-sm font-medium text-gray-700 mb-2">Teklif Geçerlilik Tarihi</label>
+                                    <label for="offer_valid_until"
+                                        class="block text-sm font-medium text-gray-700 mb-2">Teklif Geçerlilik
+                                        Tarihi</label>
                                     <input type="date" name="offer_valid_until" id="offer_valid_until"
-                                           class="bg-gray-100 mt-1 block w-full rounded-md border-2 border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 px-4 py-2"
-                                           value="{{ old('offer_valid_until') }}">
+                                        class="bg-gray-100 mt-1 block w-full rounded-md border-2 border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 px-4 py-2"
+                                        value="{{ old('offer_valid_until') }}">
                                     @error('offer_valid_until')
                                         <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
                                     @enderror
                                 </div>
 
                                 <div>
-                                    <label for="service_cost" class="block text-sm font-medium text-gray-700 mb-2">Servis Masrafı</label>
+                                    <label for="service_cost"
+                                        class="block text-sm font-medium text-gray-700 mb-2">Servis Masrafı</label>
                                     <input type="number" name="service_cost" id="service_cost"
-                                           class="bg-gray-100 mt-1 block w-full rounded-md border-2 border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 px-4 py-2"
-                                           min="0" step="0.01" value="{{ old('service_cost', 0) }}">
+                                        class="bg-gray-100 mt-1 block w-full rounded-md border-2 border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 px-4 py-2"
+                                        min="0" step="0.01" value="{{ old('service_cost', 0) }}">
                                     @error('service_cost')
                                         <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
                                     @enderror
                                 </div>
 
                                 <div>
-                                    <label for="transportation_cost" class="block text-sm font-medium text-gray-700 mb-2">Ulaşım Masrafı</label>
+                                    <label for="transportation_cost"
+                                        class="block text-sm font-medium text-gray-700 mb-2">Ulaşım Masrafı</label>
                                     <input type="number" name="transportation_cost" id="transportation_cost"
-                                           class="bg-gray-100 mt-1 block w-full rounded-md border-2 border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 px-4 py-2"
-                                           min="0" step="0.01" value="{{ old('transportation_cost', 0) }}">
+                                        class="bg-gray-100 mt-1 block w-full rounded-md border-2 border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 px-4 py-2"
+                                        min="0" step="0.01" value="{{ old('transportation_cost', 0) }}">
                                     @error('transportation_cost')
                                         <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
                                     @enderror
                                 </div>
 
                                 <div>
-                                    <label for="labor_cost" class="block text-sm font-medium text-gray-700 mb-2">İşçilik Masrafı</label>
+                                    <label for="labor_cost"
+                                        class="block text-sm font-medium text-gray-700 mb-2">İşçilik Masrafı</label>
                                     <input type="number" name="labor_cost" id="labor_cost"
-                                           class="bg-gray-100 mt-1 block w-full rounded-md border-2 border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 px-4 py-2"
-                                           min="0" step="0.01" value="{{ old('labor_cost', 0) }}">
+                                        class="bg-gray-100 mt-1 block w-full rounded-md border-2 border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 px-4 py-2"
+                                        min="0" step="0.01" value="{{ old('labor_cost', 0) }}">
                                     @error('labor_cost')
                                         <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
                                     @enderror
                                 </div>
 
                                 <div>
-                                    <label for="extra_fee" class="block text-sm font-medium text-gray-700 mb-2">Ekstra Masraflar</label>
+                                    <label for="extra_fee" class="block text-sm font-medium text-gray-700 mb-2">Ekstra
+                                        Masraflar</label>
                                     <input type="number" name="extra_fee" id="extra_fee"
-                                           class="bg-gray-100 mt-1 block w-full rounded-md border-2 border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 px-4 py-2"
-                                           min="0" step="0.01" value="{{ old('extra_fee', 0) }}">
+                                        class="bg-gray-100 mt-1 block w-full rounded-md border-2 border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 px-4 py-2"
+                                        min="0" step="0.01" value="{{ old('extra_fee', 0) }}">
                                     @error('extra_fee')
                                         <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
                                     @enderror
                                 </div>
 
                                 <div>
-                                    <label for="discount_rate" class="block text-sm font-medium text-gray-700 mb-2">İndirim Oranı (%)</label>
+                                    <label for="discount_rate"
+                                        class="block text-sm font-medium text-gray-700 mb-2">İndirim Oranı (%)</label>
                                     <input type="number" name="discount_rate" id="discount_rate"
-                                           class="bg-gray-100 mt-1 block w-full rounded-md border-2 border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 px-4 py-2"
-                                           min="0" max="100" step="0.01" value="{{ old('discount_rate', 0) }}">
+                                        class="bg-gray-100 mt-1 block w-full rounded-md border-2 border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 px-4 py-2"
+                                        min="0" max="100" step="0.01"
+                                        value="{{ old('discount_rate', 0) }}">
                                     @error('discount_rate')
                                         <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
                                     @enderror
                                 </div>
 
                                 <div>
-                                    <label for="discount_amount" class="block text-sm font-medium text-gray-700 mb-2">İndirim Miktarı</label>
+                                    <label for="discount_amount"
+                                        class="block text-sm font-medium text-gray-700 mb-2">İndirim Miktarı</label>
                                     <input type="number" name="discount_amount" id="discount_amount"
-                                           class="bg-gray-100 mt-1 block w-full rounded-md border-2 border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 px-4 py-2"
-                                           min="0" step="0.01" value="{{ old('discount_amount', 0) }}">
+                                        class="bg-gray-100 mt-1 block w-full rounded-md border-2 border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 px-4 py-2"
+                                        min="0" step="0.01" value="{{ old('discount_amount', 0) }}">
                                     @error('discount_amount')
                                         <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
                                     @enderror
@@ -336,24 +373,33 @@
 
                             <!-- Notes -->
                             <div>
-                                <label for="note_to_customer" class="block text-sm font-medium text-gray-700 mb-2">Müşteriye Not</label>
+                                <label for="note_to_customer"
+                                    class="block text-sm font-medium text-gray-700 mb-2">Müşteriye Not</label>
                                 <textarea name="note_to_customer" id="note_to_customer" rows="3"
-                                          class="bg-gray-100 mt-1 block w-full rounded-md border-2 border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 px-4 py-2">{{ old('note_to_customer') }}</textarea>
+                                    class="bg-gray-100 mt-1 block w-full rounded-md border-2 border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 px-4 py-2">{{ old('note_to_customer') }}</textarea>
                             </div>
 
                             <div>
-                                <label for="note_to_handi" class="block text-sm font-medium text-gray-700 mb-2">Özel Not</label>
+                                <label for="note_to_handi" class="block text-sm font-medium text-gray-700 mb-2">Özel
+                                    Not</label>
                                 <textarea name="note_to_handi" id="note_to_handi" rows="3"
-                                          class="bg-gray-100 mt-1 block w-full rounded-md border-2 border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 px-4 py-2">{{ old('note_to_handi') }}</textarea>
+                                    class="bg-gray-100 mt-1 block w-full rounded-md border-2 border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 px-4 py-2">{{ old('note_to_handi') }}</textarea>
                             </div>
 
                             <!-- Payment Method -->
-                            <div>
-                                <label for="payment_method" class="block text-sm font-medium text-gray-700 mb-2">Ödemek Şekli</label>
-                                <input type="text" name="payment_method" id="payment_method"
-                                       class="bg-gray-100 mt-1 block w-full rounded-md border-2 border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 px-4 py-2"
-                                       value="{{ old('payment_method') }}">
-                                @error('payment_method')
+                            <div x-data="paymentMethodSelector()" x-init="loadPaymentMethods()">
+                                <label for="payment_method_id"
+                                    class="block text-sm font-medium text-gray-700 mb-2">Ödeme Şekli</label>
+                                <select name="payment_method_id" id="payment_method_id"
+                                    x-model="selectedPaymentMethodId"
+                                    class="bg-gray-100 mt-1 block w-full rounded-md border-2 border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 px-4 py-2">
+                                    <option value="">Ödeme şekli seçin (opsiyonel)</option>
+                                    <template x-for="paymentMethod in paymentMethods" :key="paymentMethod.id">
+                                        <option :value="paymentMethod.id" x-text="paymentMethod.name"
+                                            :selected="paymentMethod.id == '{{ old('payment_method_id') }}'"></option>
+                                    </template>
+                                </select>
+                                @error('payment_method_id')
                                     <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
                                 @enderror
                             </div>
@@ -361,35 +407,32 @@
                             <!-- Image Upload with Preview -->
                             <div x-data="imageUploader()">
                                 <div class="flex justify-between items-center mb-2">
-                                    <label for="images" class="block text-sm font-medium text-gray-700">Resimler</label>
-                                    <button type="button"
-                                            @click="clearAllImages()"
-                                            x-show="previews.length > 0"
-                                            class="text-sm text-red-600 hover:text-red-800">
+                                    <label for="images"
+                                        class="block text-sm font-medium text-gray-700">Resimler</label>
+                                    <button type="button" @click="clearAllImages()" x-show="previews.length > 0"
+                                        class="text-sm text-red-600 hover:text-red-800">
                                         Clear All
                                     </button>
                                 </div>
-                                <input type="file"
-                                       name="images[]"
-                                       id="images"
-                                       multiple
-                                       accept="image/*"
-                                       @change="previewImages($event)"
-                                       class="bg-gray-100 mt-1 block w-full rounded-md border-2 border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 px-4 py-2">
+                                <input type="file" name="images[]" id="images" multiple accept="image/*"
+                                    @change="previewImages($event)"
+                                    class="bg-gray-100 mt-1 block w-full rounded-md border-2 border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 px-4 py-2">
                                 @error('images.*')
                                     <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
                                 @enderror
 
                                 <!-- Image Preview Grid -->
-                                <div x-show="previews.length > 0" class="mt-4 grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+                                <div x-show="previews.length > 0"
+                                    class="mt-4 grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
                                     <template x-for="(preview, index) in previews" :key="index">
                                         <div class="relative">
                                             <img :src="preview" class="h-40 w-full object-cover rounded-lg">
-                                            <button type="button"
-                                                    @click="removeImage(index)"
-                                                    class="absolute top-2 right-2 bg-red-600 text-red-500 rounded-full p-2 shadow-xl hover:bg-gray-900 hover:text-red-600 border-2 border-red-500">
-                                                <svg class="h-2 w-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M6 18L18 6M6 6l12 12"/>
+                                            <button type="button" @click="removeImage(index)"
+                                                class="absolute top-2 right-2 bg-red-600 text-red-500 rounded-full p-2 shadow-xl hover:bg-gray-900 hover:text-red-600 border-2 border-red-500">
+                                                <svg class="h-2 w-2" fill="none" stroke="currentColor"
+                                                    viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round"
+                                                        stroke-width="3" d="M6 18L18 6M6 6l12 12" />
                                                 </svg>
                                             </button>
                                         </div>
@@ -400,7 +443,7 @@
                             <!-- Submit Button -->
                             <div class="flex justify-end space-x-3">
                                 <button type="submit"
-                                        class="bg-blue-500 text-white px-6 py-3 rounded-md hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 text-lg font-medium">
+                                    class="bg-blue-500 text-white px-6 py-3 rounded-md hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 text-lg font-medium">
                                     Keşif Oluştur
                                 </button>
                             </div>
@@ -412,119 +455,138 @@
     </div>
 
     <script>
-    function itemSelector() {
-        return {
-            searchQuery: '',
-            searchResults: [],
-            selectedItems: [],
+        function itemSelector() {
+            return {
+                searchQuery: '',
+                searchResults: [],
+                selectedItems: [],
 
-            async searchItems() {
-                if (this.searchQuery.length < 2) {
-                    this.searchResults = [];
-                    return;
-                }
-
-                try {
-                    const response = await fetch(`/items/search-for-discovery?query=${encodeURIComponent(this.searchQuery)}`);
-                    const data = await response.json();
-                    this.searchResults = data.items;
-                } catch (error) {
-                    console.error('Error searching items:', error);
-                    this.searchResults = [];
-                }
-            },
-
-            addItem(item) {
-                if (!this.selectedItems.find(i => i.id === item.id)) {
-                    this.selectedItems.push({
-                        ...item,
-                        quantity: 1,
-                        custom_price: null
-                    });
-                }
-                this.searchQuery = '';
-                this.searchResults = [];
-            },
-
-            removeItem(index) {
-                this.selectedItems.splice(index, 1);
-            }
-        }
-    }
-
-    function propertySelector() {
-        return {
-            addressType: '{{ old("property_id") ? "property" : (old("address") ? "manual" : "property") }}',
-            properties: [],
-            selectedPropertyId: '{{ old("property_id") }}',
-            selectedProperty: null,
-
-            async init() {
-                await this.loadProperties();
-                if (this.selectedPropertyId) {
-                    this.onPropertyChange();
-                }
-            },
-
-            async loadProperties() {
-                try {
-                    const response = await fetch('/api/company-properties');
-                    const data = await response.json();
-                    this.properties = data;
-                } catch (error) {
-                    console.error('Error loading properties:', error);
-                }
-            },
-
-            onPropertyChange() {
-                this.selectedProperty = this.properties.find(p => p.id == this.selectedPropertyId) || null;
-            }
-        }
-    }
-
-    function imageUploader() {
-        return {
-            previews: [],
-            fileInput: null,
-
-            previewImages(event) {
-                this.fileInput = event.target;
-                this.previews = [];
-
-                Array.from(event.target.files).forEach(file => {
-                    if (file.type.startsWith('image/')) {
-                        const reader = new FileReader();
-                        reader.onload = (e) => {
-                            this.previews.push(e.target.result);
-                        };
-                        reader.readAsDataURL(file);
+                async searchItems() {
+                    if (this.searchQuery.length < 2) {
+                        this.searchResults = [];
+                        return;
                     }
-                });
-            },
 
-            removeImage(index) {
-                // Remove from previews array
-                this.previews.splice(index, 1);
+                    try {
+                        const response = await fetch(
+                            `/items/search-for-discovery?query=${encodeURIComponent(this.searchQuery)}`);
+                        const data = await response.json();
+                        this.searchResults = data.items;
+                    } catch (error) {
+                        console.error('Error searching items:', error);
+                        this.searchResults = [];
+                    }
+                },
 
-                // Remove from file input
-                const dt = new DataTransfer();
-                const files = Array.from(this.fileInput.files);
-                files.splice(index, 1);
-                files.forEach(file => dt.items.add(file));
-                this.fileInput.files = dt.files;
+                addItem(item) {
+                    if (!this.selectedItems.find(i => i.id === item.id)) {
+                        this.selectedItems.push({
+                            ...item,
+                            quantity: 1,
+                            custom_price: null
+                        });
+                    }
+                    this.searchQuery = '';
+                    this.searchResults = [];
+                },
 
-                // Clear input if no files left
-                if (files.length === 0) {
+                removeItem(index) {
+                    this.selectedItems.splice(index, 1);
+                }
+            }
+        }
+
+        function paymentMethodSelector() {
+            return {
+                paymentMethods: [],
+                selectedPaymentMethodId: '{{ old('payment_method_id') }}',
+                async loadPaymentMethods() {
+                    try {
+                        const response = await fetch('/api/payment-methods');
+                        const data = await response.json();
+                        this.paymentMethods = data;
+                    } catch (error) {
+                        console.error('Error loading payment methods:', error);
+                        this.paymentMethods = [];
+                    }
+                }
+            }
+        }
+
+        function propertySelector() {
+            return {
+                addressType: '{{ old('property_id') ? 'property' : (old('address') ? 'manual' : 'property') }}',
+                properties: [],
+                selectedPropertyId: '{{ old('property_id') }}',
+                selectedProperty: null,
+
+                async init() {
+                    await this.loadProperties();
+                    if (this.selectedPropertyId) {
+                        this.onPropertyChange();
+                    }
+                },
+
+                async loadProperties() {
+                    try {
+                        const response = await fetch('/api/company-properties');
+                        const data = await response.json();
+                        this.properties = data;
+                    } catch (error) {
+                        console.error('Error loading properties:', error);
+                    }
+                },
+
+                onPropertyChange() {
+                    this.selectedProperty = this.properties.find(p => p.id == this.selectedPropertyId) || null;
+                }
+            }
+        }
+
+        function imageUploader() {
+            return {
+                previews: [],
+                fileInput: null,
+
+                previewImages(event) {
+                    this.fileInput = event.target;
+                    this.previews = [];
+
+                    Array.from(event.target.files).forEach(file => {
+                        if (file.type.startsWith('image/')) {
+                            const reader = new FileReader();
+                            reader.onload = (e) => {
+                                this.previews.push(e.target.result);
+                            };
+                            reader.readAsDataURL(file);
+                        }
+                    });
+                },
+
+                removeImage(index) {
+                    // Remove from previews array
+                    this.previews.splice(index, 1);
+
+                    // Remove from file input
+                    const dt = new DataTransfer();
+                    const files = Array.from(this.fileInput.files);
+                    files.splice(index, 1);
+                    files.forEach(file => dt.items.add(file));
+                    this.fileInput.files = dt.files;
+
+                    // Clear input if no files left
+                    if (files.length === 0) {
+                        this.fileInput.value = '';
+                    }
+                },
+
+                clearAllImages() {
+                    this.previews = [];
                     this.fileInput.value = '';
                 }
-            },
-
-            clearAllImages() {
-                this.previews = [];
-                this.fileInput.value = '';
             }
         }
-    }
     </script>
 </body>
+
 </html>

@@ -90,6 +90,11 @@ class User extends Authenticatable
         return $this->hasMany(Discovery::class, 'assignee_id');
     }
 
+    public function paymentMethods(): HasMany
+    {
+        return $this->hasMany(PaymentMethod::class);
+    }
+
     // Helper methods for user type
     public function isSoloHandyman(): bool
     {
