@@ -297,7 +297,14 @@
                                     Seviyesi</label>
                                 <select name="priority" id="priority"
                                     class="bg-gray-100 mt-1 block w-full rounded-md border-2 border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 px-4 py-2">
-                                    @foreach (\App\Models\Discovery::getPriorityLabels() as $value => $label)
+                                    @php
+                                        $turkishPriorityLabels = [
+                                            \App\Models\Discovery::PRIORITY_LOW => 'Yok',
+                                            \App\Models\Discovery::PRIORITY_MEDIUM => 'Var', 
+                                            \App\Models\Discovery::PRIORITY_HIGH => 'Acil',
+                                        ];
+                                    @endphp
+                                    @foreach ($turkishPriorityLabels as $value => $label)
                                         <option value="{{ $value }}"
                                             {{ old('priority', \App\Models\Discovery::PRIORITY_LOW) == $value ? 'selected' : '' }}>
                                             {{ $label }}
