@@ -250,7 +250,7 @@
                         <div class="bg-white border border-gray-200 rounded-lg p-6">
                             <div class="flex justify-between items-center mb-4">
                                 <h3 class="text-lg font-semibold text-gray-800">Son Keşifler</h3>
-                                <a href="{{ route('discovery.index') }}" 
+                                <a href="{{ route('discovery') }}" 
                                    class="bg-blue-500 hover:bg-blue-700 text-white text-sm py-1 px-3 rounded">
                                     Tümünü Gör
                                 </a>
