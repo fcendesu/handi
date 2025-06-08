@@ -291,6 +291,24 @@
                                 @enderror
                             </div>
 
+                            <!-- Priority Selection -->
+                            <div>
+                                <label for="priority" class="block text-sm font-medium text-gray-700 mb-2">Öncelik
+                                    Seviyesi</label>
+                                <select name="priority" id="priority"
+                                    class="bg-gray-100 mt-1 block w-full rounded-md border-2 border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 px-4 py-2">
+                                    @foreach (\App\Models\Discovery::getPriorityLabels() as $value => $label)
+                                        <option value="{{ $value }}"
+                                            {{ old('priority', \App\Models\Discovery::PRIORITY_LOW) == $value ? 'selected' : '' }}>
+                                            {{ $label }}
+                                        </option>
+                                    @endforeach
+                                </select>
+                                @error('priority')
+                                    <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                                @enderror
+                            </div>
+
                             <!-- Item Selection -->
                             <div x-data="itemSelector()" class="space-y-4 pt-3">
                                 <div class="flex justify-between items-center">
