@@ -6,6 +6,7 @@ use App\Models\Discovery;
 use App\Models\Item;
 use App\Models\Property;
 use App\Models\User;
+use App\Data\AddressData;
 use App\Services\TransactionLogService;
 use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
@@ -37,7 +38,12 @@ class DiscoveryController extends Controller
         }
 
         $discoveries = $query->latest()->paginate(12);
-        return view('discovery.index', compact('discoveries'));
+        
+        // Get address data for manual address dropdowns
+        $cities = AddressData::getCities();
+        $districts = AddressData::getAllDistricts();
+        
+        return view('discovery.index', compact('discoveries', 'cities', 'districts'));
     }
 
 
@@ -57,6 +63,12 @@ class DiscoveryController extends Controller
             'address_type' => 'required|in:property,manual',
             'property_id' => 'nullable|exists:properties,id|required_if:address_type,property',
             'address' => 'nullable|string|max:1000|required_if:address_type,manual',
+            // Manual address fields
+            'manual_city' => 'nullable|string|max:255|required_if:address_type,manual',
+            'manual_district' => 'nullable|string|max:255|required_if:address_type,manual',
+            'address_details' => 'nullable|string|max:1000',
+            'manual_latitude' => 'nullable|numeric|between:-90,90',
+            'manual_longitude' => 'nullable|numeric|between:-180,180',
             'discovery' => 'required|string',
             'todo_list' => 'nullable|string',
             'note_to_customer' => 'nullable|string',
@@ -86,7 +98,34 @@ class DiscoveryController extends Controller
             }
         }
 
+        // Additional validation for manual address - ensure city is valid
+        if ($request->address_type === 'manual' && $request->manual_city) {
+            if (!in_array($request->manual_city, AddressData::getCities())) {
+                return back()->withErrors(['manual_city' => 'Selected city is not valid.']);
+            }
+            
+            if ($request->manual_district && !in_array($request->manual_district, AddressData::getDistricts($request->manual_city))) {
+                return back()->withErrors(['manual_district' => 'Selected district is not valid for the selected city.']);
+            }
+        }
+
         try {
+            // Process manual address - combine fields into single address field
+            if ($request->address_type === 'manual') {
+                $addressParts = array_filter([
+                    $request->manual_city,
+                    $request->manual_district,
+                    $request->address_details
+                ]);
+                $validated['address'] = implode(', ', $addressParts);
+                
+                // Set coordinates if provided
+                if ($request->manual_latitude && $request->manual_longitude) {
+                    $validated['latitude'] = $request->manual_latitude;
+                    $validated['longitude'] = $request->manual_longitude;
+                }
+            }
+
             // Handle image uploads
             $imagePaths = [];
             if ($request->hasFile('images')) {

@@ -8,8 +8,17 @@
     <title>Keşif Oluşturma - {{ config('app.name', 'Handi') }}</title>
     <link rel="preconnect" href="https://fonts.bunny.net">
     <link href="https://fonts.bunny.net/css?family=figtree:400,500,600&display=swap" rel="stylesheet" />
+
+    <!-- Leaflet CSS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+        integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
+
     @vite(['resources/css/app.css', 'resources/js/app.js'])
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+
+    <!-- Leaflet JS -->
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+        integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
 </head>
 
 <body class="bg-gray-100">
@@ -152,12 +161,102 @@
                                                     + Yeni Mülk Ekle
                                                 </a>
                                             </div>
-                                        </div>
+                                        </div> <!-- Manual Address Input -->
+                                        <div x-show="addressType === 'manual'" x-data="manualAddressSelector()"
+                                            class="space-y-4">
+                                            <!-- City Selection -->
+                                            <div>
+                                                <label for="manual_city"
+                                                    class="block text-sm font-medium text-gray-700 mb-2">Şehir</label>
+                                                <select name="manual_city" id="manual_city" x-model="selectedCity"
+                                                    @change="updateDistricts()"
+                                                    class="bg-gray-100 mt-1 block w-full rounded-md border-2 border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 px-4 py-2">
+                                                    <option value="">Bir şehir seçin</option>
+                                                    @foreach ($cities as $city)
+                                                        <option value="{{ $city }}">{{ $city }}
+                                                        </option>
+                                                    @endforeach
+                                                </select>
+                                                @error('manual_city')
+                                                    <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                                                @enderror
+                                            </div>
 
-                                        <!-- Manual Address Input -->
-                                        <div x-show="addressType === 'manual'">
-                                            <textarea name="address" id="address" rows="3"
-                                                class="bg-gray-100 mt-1 block w-full rounded-md border-2 border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 px-4 py-2">{{ old('address') }}</textarea>
+                                            <!-- District Selection -->
+                                            <div>
+                                                <label for="manual_district"
+                                                    class="block text-sm font-medium text-gray-700 mb-2">İlçe</label>
+                                                <select name="manual_district" id="manual_district"
+                                                    x-model="selectedDistrict"
+                                                    class="bg-gray-100 mt-1 block w-full rounded-md border-2 border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 px-4 py-2">
+                                                    <option value="">Önce şehir seçin</option>
+                                                    <template x-for="district in districts" :key="district">
+                                                        <option :value="district" x-text="district"></option>
+                                                    </template>
+                                                </select>
+                                                @error('manual_district')
+                                                    <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                                                @enderror
+                                            </div>
+
+                                            <!-- Remaining Address Details -->
+                                            <div>
+                                                <label for="address_details"
+                                                    class="block text-sm font-medium text-gray-700 mb-2">Adres
+                                                    Detayları</label>
+                                                <textarea name="address_details" id="address_details" rows="3"
+                                                    placeholder="Site adı, sokak, kapı numarası vb. detayları girin..."
+                                                    class="bg-gray-100 mt-1 block w-full rounded-md border-2 border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 px-4 py-2">{{ old('address_details') }}</textarea>
+                                                @error('address_details')
+                                                    <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                                                @enderror
+                                            </div>
+
+                                            <!-- Map Location Picker -->
+                                            <div class="space-y-3">
+                                                <div class="flex items-center justify-between">
+                                                    <h4 class="text-sm font-medium text-gray-700">Konum Seçici (İsteğe
+                                                        Bağlı)</h4>
+                                                    <button type="button" @click="getCurrentLocation()"
+                                                        :disabled="loadingLocation"
+                                                        class="bg-green-600 hover:bg-green-700 disabled:bg-gray-400 text-white px-3 py-1 rounded text-sm transition duration-200">
+                                                        <span x-show="!loadingLocation">Mevcut Konumu Al</span>
+                                                        <span x-show="loadingLocation">Konum Alınıyor...</span>
+                                                    </button>
+                                                </div>
+
+                                                <!-- Coordinate Display -->
+                                                <div class="grid grid-cols-2 gap-3" x-show="latitude && longitude">
+                                                    <div class="bg-blue-50 border border-blue-200 rounded p-2">
+                                                        <div class="text-xs font-medium text-blue-700">Enlem</div>
+                                                        <div class="text-sm font-mono text-blue-900"
+                                                            x-text="latitude"></div>
+                                                    </div>
+                                                    <div class="bg-blue-50 border border-blue-200 rounded p-2">
+                                                        <div class="text-xs font-medium text-blue-700">Boylam</div>
+                                                        <div class="text-sm font-mono text-blue-900"
+                                                            x-text="longitude"></div>
+                                                    </div>
+                                                </div>
+
+                                                <!-- Error Display -->
+                                                <div x-show="locationError" class="text-sm text-red-600"
+                                                    x-text="locationError"></div>
+
+                                                <!-- Interactive Map -->
+                                                <div class="border border-gray-300 rounded-lg overflow-hidden">
+                                                    <div id="manualAddressMap" style="height: 300px; width: 100%;">
+                                                    </div>
+                                                </div>
+
+                                                <p class="text-xs text-gray-500 text-center">
+                                                    Harita üzerine tıklayarak konum seçebilirsiniz
+                                                </p>
+
+                                                <!-- Hidden coordinate inputs for form submission -->
+                                                <input type="hidden" name="manual_latitude" x-model="latitude">
+                                                <input type="hidden" name="manual_longitude" x-model="longitude">
+                                            </div>
                                         </div>
                                     </div>
 
@@ -583,6 +682,114 @@
                 clearAllImages() {
                     this.previews = [];
                     this.fileInput.value = '';
+                }
+            }
+        }
+
+        function manualAddressSelector() {
+            return {
+                selectedCity: '{{ old('manual_city') }}',
+                selectedDistrict: '{{ old('manual_district') }}',
+                districts: [],
+                cityDistricts: @json($districts),
+                latitude: {{ old('manual_latitude', 'null') }},
+                longitude: {{ old('manual_longitude', 'null') }},
+                loadingLocation: false,
+                locationError: '',
+                map: null,
+                marker: null,
+
+                init() {
+                    this.updateDistricts();
+                    this.initMap();
+
+                    // Watch for coordinate changes
+                    this.$watch('latitude', () => this.updateMapLocation());
+                    this.$watch('longitude', () => this.updateMapLocation());
+                },
+
+                updateDistricts() {
+                    this.districts = this.cityDistricts[this.selectedCity] || [];
+                    if (!this.districts.includes(this.selectedDistrict)) {
+                        this.selectedDistrict = '';
+                    }
+                },
+
+                getCurrentLocation() {
+                    if (!navigator.geolocation) {
+                        this.locationError = 'Tarayıcınız coğrafi konum belirlemeyi desteklemiyor.';
+                        return;
+                    }
+
+                    this.loadingLocation = true;
+                    this.locationError = '';
+
+                    navigator.geolocation.getCurrentPosition(
+                        (position) => {
+                            this.latitude = position.coords.latitude;
+                            this.longitude = position.coords.longitude;
+                            this.updateMapLocation();
+                            this.loadingLocation = false;
+                        },
+                        (error) => {
+                            this.loadingLocation = false;
+                            switch (error.code) {
+                                case error.PERMISSION_DENIED:
+                                    this.locationError = 'Konum erişimi kullanıcı tarafından reddedildi.';
+                                    break;
+                                case error.POSITION_UNAVAILABLE:
+                                    this.locationError = 'Konum bilgisi mevcut değil.';
+                                    break;
+                                case error.TIMEOUT:
+                                    this.locationError = 'Konum isteği zaman aşımına uğradı.';
+                                    break;
+                                default:
+                                    this.locationError = 'Bilinmeyen bir hata oluştu.';
+                                    break;
+                            }
+                        }
+                    );
+                },
+
+                initMap() {
+                    // Default center: Northern Cyprus (approximately Lefkoşa)
+                    const defaultLat = this.latitude || 35.1856;
+                    const defaultLng = this.longitude || 33.3823;
+
+                    // Initialize map
+                    this.map = L.map('manualAddressMap').setView([defaultLat, defaultLng], 10);
+
+                    // Add OpenStreetMap tiles
+                    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                        attribution: '© OpenStreetMap contributors'
+                    }).addTo(this.map);
+
+                    // Add marker if coordinates exist
+                    if (this.latitude && this.longitude) {
+                        this.marker = L.marker([this.latitude, this.longitude]).addTo(this.map);
+                    }
+
+                    // Handle map clicks
+                    this.map.on('click', (e) => {
+                        this.latitude = e.latlng.lat;
+                        this.longitude = e.latlng.lng;
+                        this.updateMapLocation();
+                    });
+                },
+
+                updateMapLocation() {
+                    if (!this.map || !this.latitude || !this.longitude) return;
+
+                    // Remove existing marker
+                    if (this.marker) {
+                        this.map.removeLayer(this.marker);
+                    }
+
+                    // Add new marker
+                    this.marker = L.marker([this.latitude, this.longitude]).addTo(this.map);
+
+                    // Center map on new location
+                    this.map.setView([this.latitude, this.longitude], this.map.getZoom());
                 }
             }
         }

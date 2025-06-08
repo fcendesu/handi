@@ -28,8 +28,8 @@ class TestUserSeeder extends Seeder
         Property::create([
             'name' => 'Test Property',
             'street' => '123 Test Street',
-            'city' => 'GİRNE',
-            'neighborhood' => 'Test Neighborhood',
+            'city' => 'Girne',
+            'district' => 'Test District',
             'site_name' => 'Test Site',
             'building_name' => 'Test Building',
             'door_apartment_no' => '1A',
