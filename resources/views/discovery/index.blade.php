@@ -439,10 +439,16 @@
 
                                                 <!-- Search Results -->
                                                 <div x-show="searchResults.length > 0" class="mb-6">
-                                                    <h4 class="text-sm font-medium text-gray-700 mb-3">Arama Sonuçları
-                                                    </h4>
+                                                    <div class="flex justify-between items-center mb-3">
+                                                        <h4 class="text-sm font-medium text-gray-700">Arama Sonuçları
+                                                        </h4>
+                                                        <span class="text-xs text-gray-500"
+                                                            x-text="searchResults.length + ' sonuç bulundu'"></span>
+                                                    </div>
+
+                                                    <!-- Paginated Results -->
                                                     <div class="grid grid-cols-1 gap-3 max-h-48 overflow-y-auto">
-                                                        <template x-for="item in searchResults"
+                                                        <template x-for="item in paginatedSearchResults"
                                                             :key="item.id">
                                                             <div class="flex justify-between items-center p-3 bg-gray-50 rounded-md hover:bg-gray-100 cursor-pointer"
                                                                 @click="addItemToModal(item)">
@@ -461,6 +467,41 @@
                                                                 </div>
                                                             </div>
                                                         </template>
+                                                    </div>
+
+                                                    <!-- Pagination Controls -->
+                                                    <div x-show="totalPages > 1"
+                                                        class="flex justify-between items-center mt-4 pt-3 border-t border-gray-200">
+                                                        <div class="text-xs text-gray-500">
+                                                            <span
+                                                                x-text="(currentPage - 1) * itemsPerPage + 1"></span>-<span
+                                                                x-text="Math.min(currentPage * itemsPerPage, searchResults.length)"></span>
+                                                            / <span x-text="searchResults.length"></span>
+                                                        </div>
+                                                        <div class="flex space-x-2">
+                                                            <button type="button" @click="previousPage()"
+                                                                :disabled="currentPage === 1"
+                                                                class="px-3 py-1 text-xs bg-gray-200 hover:bg-gray-300 disabled:bg-gray-100 disabled:text-gray-400 rounded transition duration-200">
+                                                                Önceki
+                                                            </button>
+
+                                                            <!-- Page Numbers -->
+                                                            <template x-for="page in visiblePages"
+                                                                :key="page">
+                                                                <button type="button" @click="goToPage(page)"
+                                                                    :class="page === currentPage ? 'bg-blue-500 text-white' :
+                                                                        'bg-gray-200 hover:bg-gray-300'"
+                                                                    class="px-3 py-1 text-xs rounded transition duration-200"
+                                                                    x-text="page">
+                                                                </button>
+                                                            </template>
+
+                                                            <button type="button" @click="nextPage()"
+                                                                :disabled="currentPage === totalPages"
+                                                                class="px-3 py-1 text-xs bg-gray-200 hover:bg-gray-300 disabled:bg-gray-100 disabled:text-gray-400 rounded transition duration-200">
+                                                                Sonraki
+                                                            </button>
+                                                        </div>
                                                     </div>
                                                 </div>
 
@@ -738,6 +779,38 @@
                 showModal: false,
                 modalSelectedItems: [],
 
+                // Pagination properties
+                currentPage: 1,
+                itemsPerPage: 25,
+
+                // Computed properties
+                get totalPages() {
+                    return Math.ceil(this.searchResults.length / this.itemsPerPage);
+                },
+
+                get paginatedSearchResults() {
+                    const start = (this.currentPage - 1) * this.itemsPerPage;
+                    const end = start + this.itemsPerPage;
+                    return this.searchResults.slice(start, end);
+                },
+
+                get visiblePages() {
+                    const pages = [];
+                    const maxVisible = 5;
+                    let start = Math.max(1, this.currentPage - Math.floor(maxVisible / 2));
+                    let end = Math.min(this.totalPages, start + maxVisible - 1);
+
+                    // Adjust start if we're near the end
+                    if (end - start + 1 < maxVisible) {
+                        start = Math.max(1, end - maxVisible + 1);
+                    }
+
+                    for (let i = start; i <= end; i++) {
+                        pages.push(i);
+                    }
+                    return pages;
+                },
+
                 // Modal functions
                 openModal() {
                     this.showModal = true;
@@ -745,12 +818,14 @@
                     this.modalSelectedItems = [...this.selectedItems];
                     this.searchQuery = '';
                     this.searchResults = [];
+                    this.currentPage = 1;
                 },
 
                 closeModal() {
                     this.showModal = false;
                     this.searchQuery = '';
                     this.searchResults = [];
+                    this.currentPage = 1;
                 },
 
                 saveModalItems() {
@@ -758,10 +833,30 @@
                     this.closeModal();
                 },
 
+                // Pagination functions
+                nextPage() {
+                    if (this.currentPage < this.totalPages) {
+                        this.currentPage++;
+                    }
+                },
+
+                previousPage() {
+                    if (this.currentPage > 1) {
+                        this.currentPage--;
+                    }
+                },
+
+                goToPage(page) {
+                    if (page >= 1 && page <= this.totalPages) {
+                        this.currentPage = page;
+                    }
+                },
+
                 // Search functionality
                 async searchItems() {
                     if (this.searchQuery.length < 2) {
                         this.searchResults = [];
+                        this.currentPage = 1;
                         return;
                     }
 
@@ -770,9 +865,11 @@
                             `/items/search-for-discovery?query=${encodeURIComponent(this.searchQuery)}`);
                         const data = await response.json();
                         this.searchResults = data.items;
+                        this.currentPage = 1; // Reset to first page on new search
                     } catch (error) {
                         console.error('Error searching items:', error);
                         this.searchResults = [];
+                        this.currentPage = 1;
                     }
                 },
 
@@ -785,8 +882,7 @@
                             custom_price: null
                         });
                     }
-                    this.searchQuery = '';
-                    this.searchResults = [];
+                    // Don't clear search when adding items, just provide feedback
                 },
 
                 removeItemFromModal(index) {
