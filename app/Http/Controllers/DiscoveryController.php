@@ -160,6 +160,20 @@ class DiscoveryController extends Controller
                 }
             }
 
+            // Process property address - extract address from selected property
+            if ($request->address_type === 'property' && $request->property_id) {
+                $property = Property::findOrFail($request->property_id);
+                
+                // Extract property's full address
+                $validated['address'] = $property->full_address;
+                
+                // Extract property's coordinates if available
+                if ($property->latitude && $property->longitude) {
+                    $validated['latitude'] = $property->latitude;
+                    $validated['longitude'] = $property->longitude;
+                }
+            }
+
             // Handle image uploads
             $imagePaths = [];
             if ($request->hasFile('images')) {
@@ -221,7 +235,7 @@ class DiscoveryController extends Controller
 
     public function show(Discovery $discovery)
     {
-        $discovery->load('items', 'workGroup');
+        $discovery->load('items', 'workGroup', 'paymentMethod');
         return view('discovery.show', compact('discovery'));
     }
 
