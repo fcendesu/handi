@@ -353,8 +353,10 @@
                                                     </div>
                                                     <button type="button" @click="removeItem(index)"
                                                         class="text-gray-600 hover:text-red-600 p-2 transition duration-200 hover:bg-red-50 rounded ml-2 flex-shrink-0">
-                                                        <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                                                        <svg class="h-6 w-6" fill="none" stroke="currentColor"
+                                                            viewBox="0 0 24 24">
+                                                            <path stroke-linecap="round" stroke-linejoin="round"
+                                                                stroke-width="2" d="M6 18L18 6M6 6l12 12" />
                                                         </svg>
                                                     </button>
                                                 </div>
@@ -397,7 +399,7 @@
 
                                         <!-- Modal panel -->
                                         <div
-                                            class="inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-4xl sm:w-full">
+                                            class="inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-4 sm:align-middle sm:max-w-5xl sm:w-full sm:max-h-[90vh]">
                                             <!-- Modal header -->
                                             <div class="bg-white px-6 py-4 border-b border-gray-200">
                                                 <div class="flex justify-between items-center">
@@ -414,14 +416,14 @@
                                             </div>
 
                                             <!-- Modal content -->
-                                            <div class="bg-white px-6 py-4 max-h-96 overflow-y-auto">
+                                            <div class="bg-white px-6 py-4 max-h-[70vh] overflow-y-auto">
                                                 <!-- Selected Items in Modal -->
                                                 <div x-show="modalSelectedItems.length > 0" class="mb-6">
                                                     <h4 class="text-sm font-medium text-gray-700 mb-3">
                                                         Seçili Malzemeler (<span
                                                             x-text="modalSelectedItems.length"></span>)
                                                     </h4>
-                                                    <div class="space-y-3 max-h-64 overflow-y-auto">
+                                                    <div class="space-y-3 max-h-80 overflow-y-auto">
                                                         <template x-for="(item, index) in modalSelectedItems"
                                                             :key="index">
                                                             <div
@@ -454,8 +456,13 @@
                                                                         <button type="button"
                                                                             @click="removeItemFromModal(index)"
                                                                             class="text-gray-600 hover:text-red-600 p-2 transition duration-200 hover:bg-red-50 rounded">
-                                                                            <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                                                                            <svg class="h-6 w-6" fill="none"
+                                                                                stroke="currentColor"
+                                                                                viewBox="0 0 24 24">
+                                                                                <path stroke-linecap="round"
+                                                                                    stroke-linejoin="round"
+                                                                                    stroke-width="2"
+                                                                                    d="M6 18L18 6M6 6l12 12" />
                                                                             </svg>
                                                                         </button>
                                                                     </div>
@@ -497,7 +504,7 @@
                                                     </div>
 
                                                     <!-- Paginated Results -->
-                                                    <div class="grid grid-cols-1 gap-3 max-h-48 overflow-y-auto">
+                                                    <div class="grid grid-cols-1 gap-3 max-h-72 overflow-y-auto">
                                                         <template x-for="item in paginatedSearchResults"
                                                             :key="item.id">
                                                             <div class="flex justify-between items-center p-3 bg-gray-50 rounded-md hover:bg-gray-100 cursor-pointer"
