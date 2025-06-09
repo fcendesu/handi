@@ -417,6 +417,59 @@
 
                                             <!-- Modal content -->
                                             <div class="bg-white px-6 py-4 max-h-96 overflow-y-auto">
+                                                <!-- Selected Items in Modal -->
+                                                <div x-show="modalSelectedItems.length > 0" class="mb-6">
+                                                    <h4 class="text-sm font-medium text-gray-700 mb-3">
+                                                        Seçili Malzemeler (<span
+                                                            x-text="modalSelectedItems.length"></span>)
+                                                    </h4>
+                                                    <div class="space-y-3 max-h-64 overflow-y-auto">
+                                                        <template x-for="(item, index) in modalSelectedItems"
+                                                            :key="index">
+                                                            <div
+                                                                class="p-4 bg-white border border-gray-200 rounded-md">
+                                                                <div class="grid grid-cols-12 gap-4 items-center">
+                                                                    <div class="col-span-5">
+                                                                        <p class="font-medium" x-text="item.item"></p>
+                                                                        <p class="text-sm text-gray-500"
+                                                                            x-text="item.brand"></p>
+                                                                        <p class="text-sm font-medium text-blue-600"
+                                                                            x-text="item.price + ' TL'"></p>
+                                                                    </div>
+                                                                    <div class="col-span-2">
+                                                                        <label
+                                                                            class="block text-xs text-gray-500 mb-1">Miktar</label>
+                                                                        <input type="number" x-model="item.quantity"
+                                                                            min="1"
+                                                                            class="w-full rounded-md border-2 border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 px-2 py-1">
+                                                                    </div>
+                                                                    <div class="col-span-4">
+                                                                        <label
+                                                                            class="block text-xs text-gray-500 mb-1">Özel
+                                                                            Fiyat (opsiyonel)</label>
+                                                                        <input type="number"
+                                                                            x-model="item.custom_price" step="0.01"
+                                                                            placeholder="Farklı fiyat girin"
+                                                                            class="w-full rounded-md border-2 border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 px-2 py-1">
+                                                                    </div>
+                                                                    <div class="col-span-1 text-right">
+                                                                        <button type="button"
+                                                                            @click="removeItemFromModal(index)"
+                                                                            class="text-red-600 hover:text-red-800">
+                                                                            <svg class="h-5 w-5" fill="currentColor"
+                                                                                viewBox="0 0 20 20">
+                                                                                <path fill-rule="evenodd"
+                                                                                    d="M4.293 4.293a1 1 011.414 0L10 8.586l4.293-4.293a1 1 111.414 1.414L11.414 10l4.293 4.293a1 1 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z"
+                                                                                    clip-rule="evenodd" />
+                                                                            </svg>
+                                                                        </button>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                        </template>
+                                                    </div>
+                                                </div>
+
                                                 <!-- Search section -->
                                                 <div class="mb-6">
                                                     <label class="block text-sm font-medium text-gray-700 mb-2">Malzeme
@@ -515,59 +568,6 @@
                                                         </div>
                                                         <span class="ml-3 text-gray-600">Malzemeler
                                                             yükleniyor...</span>
-                                                    </div>
-                                                </div>
-
-                                                <!-- Selected Items in Modal -->
-                                                <div x-show="modalSelectedItems.length > 0">
-                                                    <h4 class="text-sm font-medium text-gray-700 mb-3">
-                                                        Seçili Malzemeler (<span
-                                                            x-text="modalSelectedItems.length"></span>)
-                                                    </h4>
-                                                    <div class="space-y-3 max-h-64 overflow-y-auto">
-                                                        <template x-for="(item, index) in modalSelectedItems"
-                                                            :key="index">
-                                                            <div
-                                                                class="p-4 bg-white border border-gray-200 rounded-md">
-                                                                <div class="grid grid-cols-12 gap-4 items-center">
-                                                                    <div class="col-span-5">
-                                                                        <p class="font-medium" x-text="item.item"></p>
-                                                                        <p class="text-sm text-gray-500"
-                                                                            x-text="item.brand"></p>
-                                                                        <p class="text-sm font-medium text-blue-600"
-                                                                            x-text="item.price + ' TL'"></p>
-                                                                    </div>
-                                                                    <div class="col-span-2">
-                                                                        <label
-                                                                            class="block text-xs text-gray-500 mb-1">Miktar</label>
-                                                                        <input type="number" x-model="item.quantity"
-                                                                            min="1"
-                                                                            class="w-full rounded-md border-2 border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 px-2 py-1">
-                                                                    </div>
-                                                                    <div class="col-span-4">
-                                                                        <label
-                                                                            class="block text-xs text-gray-500 mb-1">Özel
-                                                                            Fiyat (opsiyonel)</label>
-                                                                        <input type="number"
-                                                                            x-model="item.custom_price" step="0.01"
-                                                                            placeholder="Farklı fiyat girin"
-                                                                            class="w-full rounded-md border-2 border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 px-2 py-1">
-                                                                    </div>
-                                                                    <div class="col-span-1 text-right">
-                                                                        <button type="button"
-                                                                            @click="removeItemFromModal(index)"
-                                                                            class="text-red-600 hover:text-red-800">
-                                                                            <svg class="h-5 w-5" fill="currentColor"
-                                                                                viewBox="0 0 20 20">
-                                                                                <path fill-rule="evenodd"
-                                                                                    d="M4.293 4.293a1 1 011.414 0L10 8.586l4.293-4.293a1 1 111.414 1.414L11.414 10l4.293 4.293a1 1 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z"
-                                                                                    clip-rule="evenodd" />
-                                                                            </svg>
-                                                                        </button>
-                                                                    </div>
-                                                                </div>
-                                                            </div>
-                                                        </template>
                                                     </div>
                                                 </div>
 
