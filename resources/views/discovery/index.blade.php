@@ -437,13 +437,15 @@
                                                     </div>
                                                 </div>
 
-                                                <!-- Search Results -->
-                                                <div x-show="searchResults.length > 0" class="mb-6">
+                                                <!-- Items List (All Items or Search Results) -->
+                                                <div x-show="!isLoadingItems && displayItems.length > 0"
+                                                    class="mb-6">
                                                     <div class="flex justify-between items-center mb-3">
-                                                        <h4 class="text-sm font-medium text-gray-700">Arama Sonuçları
+                                                        <h4 class="text-sm font-medium text-gray-700"
+                                                            x-text="searchQuery.length >= 2 ? 'Arama Sonuçları' : 'Tüm Malzemeler'">
                                                         </h4>
                                                         <span class="text-xs text-gray-500"
-                                                            x-text="searchResults.length + ' sonuç bulundu'"></span>
+                                                            x-text="displayItems.length + ' sonuç bulundu'"></span>
                                                     </div>
 
                                                     <!-- Paginated Results -->
@@ -475,8 +477,8 @@
                                                         <div class="text-xs text-gray-500">
                                                             <span
                                                                 x-text="(currentPage - 1) * itemsPerPage + 1"></span>-<span
-                                                                x-text="Math.min(currentPage * itemsPerPage, searchResults.length)"></span>
-                                                            / <span x-text="searchResults.length"></span>
+                                                                x-text="Math.min(currentPage * itemsPerPage, displayItems.length)"></span>
+                                                            / <span x-text="displayItems.length"></span>
                                                         </div>
                                                         <div class="flex space-x-2">
                                                             <button type="button" @click="previousPage()"
@@ -502,6 +504,17 @@
                                                                 Sonraki
                                                             </button>
                                                         </div>
+                                                    </div>
+                                                </div>
+
+                                                <!-- Loading State -->
+                                                <div x-show="isLoadingItems" class="mb-6">
+                                                    <div class="flex justify-center items-center py-8">
+                                                        <div
+                                                            class="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500">
+                                                        </div>
+                                                        <span class="ml-3 text-gray-600">Malzemeler
+                                                            yükleniyor...</span>
                                                     </div>
                                                 </div>
 
@@ -559,16 +572,17 @@
                                                 </div>
 
                                                 <!-- Empty state in modal -->
-                                                <div x-show="modalSelectedItems.length === 0 && searchResults.length === 0"
+                                                <div x-show="!isLoadingItems && modalSelectedItems.length === 0 && displayItems.length === 0"
                                                     class="text-center py-12">
                                                     <svg class="mx-auto h-16 w-16 text-gray-300" fill="none"
                                                         stroke="currentColor" viewBox="0 0 24 24">
                                                         <path stroke-linecap="round" stroke-linejoin="round"
                                                             stroke-width="2"
-                                                            d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                                                            d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2M4 13h2m13-8v6a2 2 0 01-2 2H9a2 2 0 01-2-2V5a2 2 0 012-2h8a2 2 0 012 2z" />
                                                     </svg>
-                                                    <p class="mt-4 text-gray-500">Malzeme aramak için yukarıdaki arama
-                                                        kutusunu kullanın</p>
+                                                    <p class="mt-4 text-gray-500">Hiç malzeme bulunamadı</p>
+                                                    <p class="text-sm text-gray-400">Farklı bir arama terimi deneyin
+                                                    </p>
                                                 </div>
                                             </div>
 
@@ -775,23 +789,30 @@
             return {
                 searchQuery: '',
                 searchResults: [],
+                allItems: [], // Store all items loaded initially
                 selectedItems: [],
                 showModal: false,
                 modalSelectedItems: [],
+                isLoadingItems: false,
 
                 // Pagination properties
                 currentPage: 1,
                 itemsPerPage: 25,
 
                 // Computed properties
+                get displayItems() {
+                    // If there's a search query, return filtered results, otherwise return all items
+                    return this.searchQuery.length >= 2 ? this.searchResults : this.allItems;
+                },
+
                 get totalPages() {
-                    return Math.ceil(this.searchResults.length / this.itemsPerPage);
+                    return Math.ceil(this.displayItems.length / this.itemsPerPage);
                 },
 
                 get paginatedSearchResults() {
                     const start = (this.currentPage - 1) * this.itemsPerPage;
                     const end = start + this.itemsPerPage;
-                    return this.searchResults.slice(start, end);
+                    return this.displayItems.slice(start, end);
                 },
 
                 get visiblePages() {
@@ -812,13 +833,18 @@
                 },
 
                 // Modal functions
-                openModal() {
+                async openModal() {
                     this.showModal = true;
                     // Copy current selected items to modal
                     this.modalSelectedItems = [...this.selectedItems];
                     this.searchQuery = '';
                     this.searchResults = [];
                     this.currentPage = 1;
+
+                    // Load all items if not already loaded
+                    if (this.allItems.length === 0) {
+                        await this.loadAllItems();
+                    }
                 },
 
                 closeModal() {
@@ -831,6 +857,21 @@
                 saveModalItems() {
                     this.selectedItems = [...this.modalSelectedItems];
                     this.closeModal();
+                },
+
+                // Load all items for initial display
+                async loadAllItems() {
+                    this.isLoadingItems = true;
+                    try {
+                        const response = await fetch('/items/search-for-discovery');
+                        const data = await response.json();
+                        this.allItems = data.items || [];
+                    } catch (error) {
+                        console.error('Error loading items:', error);
+                        this.allItems = [];
+                    } finally {
+                        this.isLoadingItems = false;
+                    }
                 },
 
                 // Pagination functions
