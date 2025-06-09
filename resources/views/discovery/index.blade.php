@@ -316,6 +316,39 @@
                                 @enderror
                             </div>
 
+                            <!-- Work Group Selection -->
+                            @if ($workGroups && $workGroups->count() > 0)
+                                <div>
+                                    <label for="work_group_id" class="block text-sm font-medium text-gray-700 mb-2">
+                                        @if (auth()->user()->isSoloHandyman())
+                                            Çalışma Kategorisi
+                                        @else
+                                            Çalışma Grubu
+                                        @endif
+                                        <span class="text-gray-500">(İsteğe Bağlı)</span>
+                                    </label>
+                                    <select name="work_group_id" id="work_group_id"
+                                        class="bg-gray-100 mt-1 block w-full rounded-md border-2 border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 px-4 py-2">
+                                        <option value="">
+                                            @if (auth()->user()->isSoloHandyman())
+                                                Kategori seçin (isteğe bağlı)
+                                            @else
+                                                Çalışma grubu seçin (isteğe bağlı)
+                                            @endif
+                                        </option>
+                                        @foreach ($workGroups as $workGroup)
+                                            <option value="{{ $workGroup->id }}"
+                                                {{ old('work_group_id') == $workGroup->id ? 'selected' : '' }}>
+                                                {{ $workGroup->name }}
+                                            </option>
+                                        @endforeach
+                                    </select>
+                                    @error('work_group_id')
+                                        <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                                    @enderror
+                                </div>
+                            @endif
+
                             <!-- Item Selection -->
                             <div x-data="itemSelector()" class="space-y-4 pt-3">
                                 <div class="flex justify-between items-center">

@@ -43,7 +43,20 @@ class DiscoveryController extends Controller
         $cities = AddressData::getCities();
         $districts = AddressData::getAllDistricts();
         
-        return view('discovery.index', compact('discoveries', 'cities', 'districts'));
+        // Get available work groups for the user
+        $workGroups = collect();
+        if ($user->isSoloHandyman()) {
+            // Solo handyman sees work groups they created
+            $workGroups = $user->createdWorkGroups;
+        } elseif ($user->isCompanyAdmin()) {
+            // Company admin sees all company work groups
+            $workGroups = $user->company->workGroups;
+        } elseif ($user->isCompanyEmployee()) {
+            // Employees see work groups they belong to
+            $workGroups = $user->workGroups;
+        }
+        
+        return view('discovery.index', compact('discoveries', 'cities', 'districts', 'workGroups'));
     }
 
 
@@ -107,6 +120,26 @@ class DiscoveryController extends Controller
             
             if ($request->manual_district && !in_array($request->manual_district, AddressData::getDistricts($request->manual_city))) {
                 return back()->withErrors(['manual_district' => 'Selected district is not valid for the selected city.']);
+            }
+        }
+
+        // Additional validation for work group - ensure user has access to selected work group
+        if ($request->work_group_id) {
+            $hasAccess = false;
+            
+            if ($user->isSoloHandyman()) {
+                // Solo handyman can only select work groups they created
+                $hasAccess = $user->createdWorkGroups()->where('id', $request->work_group_id)->exists();
+            } elseif ($user->isCompanyAdmin()) {
+                // Company admin can select any work group from their company
+                $hasAccess = $user->company->workGroups()->where('id', $request->work_group_id)->exists();
+            } elseif ($user->isCompanyEmployee()) {
+                // Company employee can only select work groups they belong to
+                $hasAccess = $user->workGroups()->where('id', $request->work_group_id)->exists();
+            }
+            
+            if (!$hasAccess) {
+                return back()->withErrors(['work_group_id' => 'Selected work group is not accessible to you.']);
             }
         }
 
@@ -188,7 +221,7 @@ class DiscoveryController extends Controller
 
     public function show(Discovery $discovery)
     {
-        $discovery->load('items');
+        $discovery->load('items', 'workGroup');
         return view('discovery.show', compact('discovery'));
     }
 
@@ -854,7 +887,7 @@ class DiscoveryController extends Controller
     public function sharedView(string $token)
     {
         $discovery = Discovery::where('share_token', $token)
-            ->with('items')
+            ->with('items', 'workGroup')
             ->firstOrFail();
 
         // Log that customer viewed the shared discovery

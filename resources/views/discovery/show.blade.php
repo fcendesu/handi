@@ -322,15 +322,39 @@
                             @php
                                 $turkishPriorityLabels = [
                                     \App\Models\Discovery::PRIORITY_LOW => 'Yok',
-                                    \App\Models\Discovery::PRIORITY_MEDIUM => 'Var', 
+                                    \App\Models\Discovery::PRIORITY_MEDIUM => 'Var',
                                     \App\Models\Discovery::PRIORITY_HIGH => 'Acil',
                                 ];
                                 $priorityLabel = $turkishPriorityLabels[$discovery->priority] ?? 'Yok';
-                                $priorityColor = $discovery->priority == \App\Models\Discovery::PRIORITY_HIGH ? 'text-red-600 font-semibold' : 
-                                               ($discovery->priority == \App\Models\Discovery::PRIORITY_MEDIUM ? 'text-yellow-600 font-medium' : 'text-gray-600');
+                                $priorityColor =
+                                    $discovery->priority == \App\Models\Discovery::PRIORITY_HIGH
+                                        ? 'text-red-600 font-semibold'
+                                        : ($discovery->priority == \App\Models\Discovery::PRIORITY_MEDIUM
+                                            ? 'text-yellow-600 font-medium'
+                                            : 'text-gray-600');
                             @endphp
-                            <div class="bg-gray-100 mt-1 block w-full rounded-md border-2 border-gray-300 px-4 py-2 {{ $priorityColor }}">
+                            <div
+                                class="bg-gray-100 mt-1 block w-full rounded-md border-2 border-gray-300 px-4 py-2 {{ $priorityColor }}">
                                 {{ $priorityLabel }}
+                            </div>
+                        </div>
+
+                        <!-- Work Group Display -->
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">İş Grubu</label>
+                            <div class="bg-gray-100 mt-1 block w-full rounded-md border-2 border-gray-300 px-4 py-2">
+                                @if ($discovery->workGroup)
+                                    <div class="flex items-center">
+                                        <span
+                                            class="font-medium text-gray-900">{{ $discovery->workGroup->name }}</span>
+                                        @if ($discovery->workGroup->description)
+                                            <span class="ml-2 text-sm text-gray-600">-
+                                                {{ $discovery->workGroup->description }}</span>
+                                        @endif
+                                    </div>
+                                @else
+                                    <span class="text-gray-500 italic">Atanmış iş grubu yok</span>
+                                @endif
                             </div>
                         </div>
 
@@ -394,7 +418,8 @@
                                                         <input type="number" x-model.number="item.custom_price"
                                                             step="0.01" :disabled="!editMode"
                                                             class="bg-gray-100 w-32 rounded-md border-2 border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 px-2 py-1">
-                                                        <input type="hidden" :name="'items[' + index + '][custom_price]'"
+                                                        <input type="hidden"
+                                                            :name="'items[' + index + '][custom_price]'"
                                                             :value="item.custom_price">
                                                     </div>
                                                     <div class="col-span-1 text-right">
