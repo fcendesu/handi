@@ -300,7 +300,7 @@
                                     @php
                                         $turkishPriorityLabels = [
                                             \App\Models\Discovery::PRIORITY_LOW => 'Yok',
-                                            \App\Models\Discovery::PRIORITY_MEDIUM => 'Var', 
+                                            \App\Models\Discovery::PRIORITY_MEDIUM => 'Var',
                                             \App\Models\Discovery::PRIORITY_HIGH => 'Acil',
                                         ];
                                     @endphp
@@ -319,84 +319,235 @@
                             <!-- Item Selection -->
                             <div x-data="itemSelector()" class="space-y-4 pt-3">
                                 <div class="flex justify-between items-center">
-                                    <label class="block text-sm font-medium text-gray-700 mb-2">Malzeme Ekle</label>
-                                    <div class="relative w-64">
-                                        <input type="text" x-model="searchQuery"
-                                            @input.debounce.300ms="searchItems()" placeholder="Malzeme Arama."
-                                            class="bg-gray-100 w-full rounded-md border-2 border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 px-4 py-2">
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">Malzemeler</label>
+                                    <button type="button" @click="openModal()"
+                                        class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-md font-medium transition duration-200 flex items-center space-x-2">
+                                        <svg class="h-5 w-5" fill="none" stroke="currentColor"
+                                            viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                                        </svg>
+                                        <span>Malzeme Ekle</span>
+                                    </button>
+                                </div>
 
-                                        <!-- Search Results Dropdown -->
-                                        <div x-show="searchResults.length > 0"
-                                            class="absolute z-50 w-full mt-1 bg-white rounded-md shadow-lg border border-gray-200">
-                                            <ul class="max-h-60 overflow-auto">
-                                                <template x-for="item in searchResults" :key="item.id">
-                                                    <li class="p-3 hover:bg-gray-50 cursor-pointer"
-                                                        @click="addItem(item)">
-                                                        <div class="flex justify-between items-center">
-                                                            <div>
-                                                                <span x-text="item.item" class="font-medium"></span>
-                                                                <span class="text-sm text-gray-500"
-                                                                    x-text="' - ' + item.brand"></span>
-                                                            </div>
-                                                            <span class="text-gray-600" x-text="item.price"></span>
-                                                        </div>
-                                                    </li>
-                                                </template>
-                                            </ul>
-                                        </div>
+                                <!-- Selected Items Preview -->
+                                <div x-show="selectedItems.length > 0" class="bg-gray-50 rounded-lg p-4">
+                                    <div class="flex justify-between items-center mb-3">
+                                        <h4 class="font-medium text-gray-700">Seçili Malzemeler</h4>
+                                        <span class="text-sm text-gray-500"
+                                            x-text="selectedItems.length + ' malzeme'"></span>
+                                    </div>
+                                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+                                        <template x-for="(item, index) in selectedItems" :key="index">
+                                            <div class="bg-white rounded-md p-3 border border-gray-200">
+                                                <div class="flex justify-between items-start">
+                                                    <div class="flex-1">
+                                                        <p class="font-medium text-sm" x-text="item.item"></p>
+                                                        <p class="text-xs text-gray-500" x-text="item.brand"></p>
+                                                        <p class="text-sm font-medium text-blue-600 mt-1">
+                                                            <span x-text="item.quantity"></span> adet
+                                                            <span x-show="item.custom_price" class="text-green-600"
+                                                                x-text="' • ' + item.custom_price + ' TL'"></span>
+                                                        </p>
+                                                    </div>
+                                                    <button type="button" @click="removeItem(index)"
+                                                        class="text-red-500 hover:text-red-700 ml-2">
+                                                        <svg class="h-4 w-4" fill="currentColor" viewBox="0 0 20 20">
+                                                            <path fill-rule="evenodd"
+                                                                d="M4.293 4.293a1 1 011.414 0L10 8.586l4.293-4.293a1 1 111.414 1.414L11.414 10l4.293 4.293a1 1 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z"
+                                                                clip-rule="evenodd" />
+                                                        </svg>
+                                                    </button>
+                                                </div>
+                                                <!-- Hidden inputs for form submission -->
+                                                <input type="hidden" x-bind:name="'items[' + index + '][id]'"
+                                                    x-bind:value="item.id">
+                                                <input type="hidden" x-bind:name="'items[' + index + '][quantity]'"
+                                                    x-bind:value="item.quantity">
+                                                <input type="hidden"
+                                                    x-bind:name="'items[' + index + '][custom_price]'"
+                                                    x-bind:value="item.custom_price">
+                                            </div>
+                                        </template>
                                     </div>
                                 </div>
 
-                                <!-- Selected Items List -->
-                                <div x-show="selectedItems.length > 0" class="mt-4">
-                                    <div class="bg-white rounded-lg border border-gray-200">
-                                        <ul class="divide-y divide-gray-200">
-                                            <template x-for="(item, index) in selectedItems" :key="index">
-                                                <li class="p-4">
-                                                    <div class="grid grid-cols-12 gap-4 items-center">
-                                                        <div class="col-span-5">
-                                                            <p class="font-medium" x-text="item.item"></p>
-                                                            <p class="text-sm text-gray-500" x-text="item.brand"></p>
-                                                            <p class="font-medium" x-text="item.price"></p>
-                                                        </div>
-                                                        <div class="col-span-2">
-                                                            <label
-                                                                class="block text-xs text-gray-500 mb-1">Miktar</label>
-                                                            <input type="number" x-model="item.quantity"
-                                                                min="1"
-                                                                class="bg-gray-100 w-20 rounded-md border-2 border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 px-2 py-1">
-                                                            <input type="hidden"
-                                                                x-bind:name="'items[' + index + '][id]'"
-                                                                x-bind:value="item.id">
-                                                            <input type="hidden"
-                                                                x-bind:name="'items[' + index + '][quantity]'"
-                                                                x-bind:value="item.quantity">
-                                                        </div>
-                                                        <div class="col-span-4">
-                                                            <label class="block text-xs text-gray-500 mb-1">Farklı
-                                                                Fiyat (opsiyonel)</label>
-                                                            <input type="number" x-model="item.custom_price"
-                                                                placeholder="Malzeme Fiyatı" step="0.01"
-                                                                class="bg-gray-100 w-32 rounded-md border-2 border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 px-2 py-1">
-                                                            <input type="hidden"
-                                                                x-bind:name="'items[' + index + '][custom_price]'"
-                                                                x-bind:value="item.custom_price">
-                                                        </div>
-                                                        <div class="col-span-1 text-right">
-                                                            <button type="button" @click="removeItem(index)"
-                                                                class="text-red-600 hover:text-red-800">
-                                                                <svg class="h-5 w-5" fill="currentColor"
-                                                                    viewBox="0 0 20 20">
-                                                                    <path fill-rule="evenodd"
-                                                                        d="M4.293 4.293a1 1 011.414 0L10 8.586l4.293-4.293a1 1 111.414 1.414L11.414 10l4.293 4.293a1 1 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z"
-                                                                        clip-rule="evenodd" />
-                                                                </svg>
-                                                            </button>
+                                <!-- Empty state -->
+                                <div x-show="selectedItems.length === 0"
+                                    class="text-center py-8 bg-gray-50 rounded-lg border-2 border-dashed border-gray-300">
+                                    <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" stroke="currentColor"
+                                        viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                            d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
+                                    </svg>
+                                    <p class="mt-2 text-sm text-gray-500">Henüz malzeme seçilmemiş</p>
+                                    <p class="text-sm text-gray-400">Malzeme eklemek için yukarıdaki butonu kullanın
+                                    </p>
+                                </div>
+
+                                <!-- Item Management Modal -->
+                                <div x-show="showModal" class="fixed inset-0 z-50 overflow-y-auto"
+                                    x-transition:enter="ease-out duration-300" x-transition:enter-start="opacity-0"
+                                    x-transition:enter-end="opacity-100" x-transition:leave="ease-in duration-200"
+                                    x-transition:leave-start="opacity-100" x-transition:leave-end="opacity-0">
+                                    <div
+                                        class="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
+                                        <!-- Modal backdrop -->
+                                        <div class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity"
+                                            @click="closeModal()"></div>
+
+                                        <!-- Modal panel -->
+                                        <div
+                                            class="inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-4xl sm:w-full">
+                                            <!-- Modal header -->
+                                            <div class="bg-white px-6 py-4 border-b border-gray-200">
+                                                <div class="flex justify-between items-center">
+                                                    <h3 class="text-lg font-medium text-gray-900">Malzeme Yönetimi</h3>
+                                                    <button type="button" @click="closeModal()"
+                                                        class="text-gray-400 hover:text-gray-600">
+                                                        <svg class="h-6 w-6" fill="none" stroke="currentColor"
+                                                            viewBox="0 0 24 24">
+                                                            <path stroke-linecap="round" stroke-linejoin="round"
+                                                                stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                                                        </svg>
+                                                    </button>
+                                                </div>
+                                            </div>
+
+                                            <!-- Modal content -->
+                                            <div class="bg-white px-6 py-4 max-h-96 overflow-y-auto">
+                                                <!-- Search section -->
+                                                <div class="mb-6">
+                                                    <label class="block text-sm font-medium text-gray-700 mb-2">Malzeme
+                                                        Ara</label>
+                                                    <div class="relative">
+                                                        <input type="text" x-model="searchQuery"
+                                                            @input.debounce.300ms="searchItems()"
+                                                            placeholder="Malzeme adı veya marka..."
+                                                            class="w-full rounded-md border-2 border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 px-4 py-3">
+                                                        <div class="absolute inset-y-0 right-0 pr-3 flex items-center">
+                                                            <svg class="h-5 w-5 text-gray-400" fill="none"
+                                                                stroke="currentColor" viewBox="0 0 24 24">
+                                                                <path stroke-linecap="round" stroke-linejoin="round"
+                                                                    stroke-width="2"
+                                                                    d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                                                            </svg>
                                                         </div>
                                                     </div>
-                                                </li>
-                                            </template>
-                                        </ul>
+                                                </div>
+
+                                                <!-- Search Results -->
+                                                <div x-show="searchResults.length > 0" class="mb-6">
+                                                    <h4 class="text-sm font-medium text-gray-700 mb-3">Arama Sonuçları
+                                                    </h4>
+                                                    <div class="grid grid-cols-1 gap-3 max-h-48 overflow-y-auto">
+                                                        <template x-for="item in searchResults"
+                                                            :key="item.id">
+                                                            <div class="flex justify-between items-center p-3 bg-gray-50 rounded-md hover:bg-gray-100 cursor-pointer"
+                                                                @click="addItemToModal(item)">
+                                                                <div class="flex-1">
+                                                                    <p class="font-medium" x-text="item.item"></p>
+                                                                    <p class="text-sm text-gray-500"
+                                                                        x-text="item.brand"></p>
+                                                                </div>
+                                                                <div class="text-right">
+                                                                    <p class="font-medium text-blue-600"
+                                                                        x-text="item.price + ' TL'"></p>
+                                                                    <button type="button"
+                                                                        class="mt-1 bg-blue-500 hover:bg-blue-600 text-white px-3 py-1 rounded text-sm">
+                                                                        Ekle
+                                                                    </button>
+                                                                </div>
+                                                            </div>
+                                                        </template>
+                                                    </div>
+                                                </div>
+
+                                                <!-- Selected Items in Modal -->
+                                                <div x-show="modalSelectedItems.length > 0">
+                                                    <h4 class="text-sm font-medium text-gray-700 mb-3">
+                                                        Seçili Malzemeler (<span
+                                                            x-text="modalSelectedItems.length"></span>)
+                                                    </h4>
+                                                    <div class="space-y-3 max-h-64 overflow-y-auto">
+                                                        <template x-for="(item, index) in modalSelectedItems"
+                                                            :key="index">
+                                                            <div
+                                                                class="p-4 bg-white border border-gray-200 rounded-md">
+                                                                <div class="grid grid-cols-12 gap-4 items-center">
+                                                                    <div class="col-span-5">
+                                                                        <p class="font-medium" x-text="item.item"></p>
+                                                                        <p class="text-sm text-gray-500"
+                                                                            x-text="item.brand"></p>
+                                                                        <p class="text-sm font-medium text-blue-600"
+                                                                            x-text="item.price + ' TL'"></p>
+                                                                    </div>
+                                                                    <div class="col-span-2">
+                                                                        <label
+                                                                            class="block text-xs text-gray-500 mb-1">Miktar</label>
+                                                                        <input type="number" x-model="item.quantity"
+                                                                            min="1"
+                                                                            class="w-full rounded-md border-2 border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 px-2 py-1">
+                                                                    </div>
+                                                                    <div class="col-span-4">
+                                                                        <label
+                                                                            class="block text-xs text-gray-500 mb-1">Özel
+                                                                            Fiyat (opsiyonel)</label>
+                                                                        <input type="number"
+                                                                            x-model="item.custom_price" step="0.01"
+                                                                            placeholder="Farklı fiyat girin"
+                                                                            class="w-full rounded-md border-2 border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 px-2 py-1">
+                                                                    </div>
+                                                                    <div class="col-span-1 text-right">
+                                                                        <button type="button"
+                                                                            @click="removeItemFromModal(index)"
+                                                                            class="text-red-600 hover:text-red-800">
+                                                                            <svg class="h-5 w-5" fill="currentColor"
+                                                                                viewBox="0 0 20 20">
+                                                                                <path fill-rule="evenodd"
+                                                                                    d="M4.293 4.293a1 1 011.414 0L10 8.586l4.293-4.293a1 1 111.414 1.414L11.414 10l4.293 4.293a1 1 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z"
+                                                                                    clip-rule="evenodd" />
+                                                                            </svg>
+                                                                        </button>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                        </template>
+                                                    </div>
+                                                </div>
+
+                                                <!-- Empty state in modal -->
+                                                <div x-show="modalSelectedItems.length === 0 && searchResults.length === 0"
+                                                    class="text-center py-12">
+                                                    <svg class="mx-auto h-16 w-16 text-gray-300" fill="none"
+                                                        stroke="currentColor" viewBox="0 0 24 24">
+                                                        <path stroke-linecap="round" stroke-linejoin="round"
+                                                            stroke-width="2"
+                                                            d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                                                    </svg>
+                                                    <p class="mt-4 text-gray-500">Malzeme aramak için yukarıdaki arama
+                                                        kutusunu kullanın</p>
+                                                </div>
+                                            </div>
+
+                                            <!-- Modal footer -->
+                                            <div class="bg-gray-50 px-6 py-4 flex justify-between items-center">
+                                                <div class="text-sm text-gray-500">
+                                                    <span x-text="modalSelectedItems.length"></span> malzeme seçildi
+                                                </div>
+                                                <div class="flex space-x-3">
+                                                    <button type="button" @click="closeModal()"
+                                                        class="bg-gray-300 hover:bg-gray-400 text-gray-800 px-4 py-2 rounded-md font-medium">
+                                                        İptal
+                                                    </button>
+                                                    <button type="button" @click="saveModalItems()"
+                                                        class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-md font-medium">
+                                                        Kaydet
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
@@ -584,7 +735,30 @@
                 searchQuery: '',
                 searchResults: [],
                 selectedItems: [],
+                showModal: false,
+                modalSelectedItems: [],
 
+                // Modal functions
+                openModal() {
+                    this.showModal = true;
+                    // Copy current selected items to modal
+                    this.modalSelectedItems = [...this.selectedItems];
+                    this.searchQuery = '';
+                    this.searchResults = [];
+                },
+
+                closeModal() {
+                    this.showModal = false;
+                    this.searchQuery = '';
+                    this.searchResults = [];
+                },
+
+                saveModalItems() {
+                    this.selectedItems = [...this.modalSelectedItems];
+                    this.closeModal();
+                },
+
+                // Search functionality
                 async searchItems() {
                     if (this.searchQuery.length < 2) {
                         this.searchResults = [];
@@ -602,9 +776,10 @@
                     }
                 },
 
-                addItem(item) {
-                    if (!this.selectedItems.find(i => i.id === item.id)) {
-                        this.selectedItems.push({
+                // Modal item management
+                addItemToModal(item) {
+                    if (!this.modalSelectedItems.find(i => i.id === item.id)) {
+                        this.modalSelectedItems.push({
                             ...item,
                             quantity: 1,
                             custom_price: null
@@ -614,6 +789,11 @@
                     this.searchResults = [];
                 },
 
+                removeItemFromModal(index) {
+                    this.modalSelectedItems.splice(index, 1);
+                },
+
+                // Main list item management
                 removeItem(index) {
                     this.selectedItems.splice(index, 1);
                 }
