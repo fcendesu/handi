@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Address Display Test</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+    <style>
+        [x-cloak] { display: none !important; }
+    </style>
+</head>
+<body class="bg-gray-100 p-8">
+    <div class="max-w-4xl mx-auto">
+        <h1 class="text-2xl font-bold mb-8">Address Display Test</h1>
+        
+        <!-- Test 1: Manual Address with Coordinates -->
+        <div class="bg-white rounded-lg p-6 mb-6 shadow">
+            <h2 class="text-lg font-semibold mb-4">Test 1: Manual Address with Coordinates</h2>
+            <div class="space-y-3">
+                <div class="bg-gray-50 border border-gray-200 rounded-lg p-4">
+                    <div class="flex items-start justify-between">
+                        <div class="flex-1">
+                            <div class="text-gray-900">123 Main Street, Lefkoşa, Kıbrıs</div>
+                            <div class="text-sm text-gray-500 mt-1">Manuel Adres</div>
+                        </div>
+                        <a href="https://www.google.com/maps?q=35.1856,33.3823" 
+                           target="_blank"
+                           class="ml-4 bg-blue-600 hover:bg-blue-700 text-white px-3 py-2 rounded-md text-sm font-medium transition duration-200 flex items-center">
+                            <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path>
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                            </svg>
+                            Google Maps'te Görüntüle
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Test 2: Manual Address without Coordinates -->
+        <div class="bg-white rounded-lg p-6 mb-6 shadow">
+            <h2 class="text-lg font-semibold mb-4">Test 2: Manual Address without Coordinates</h2>
+            <div class="space-y-3">
+                <div class="bg-gray-50 border border-gray-200 rounded-lg p-4">
+                    <div class="flex items-start justify-between">
+                        <div class="flex-1">
+                            <div class="text-gray-900">456 Oak Avenue, Girne</div>
+                            <div class="text-sm text-gray-500 mt-1">Manuel Adres</div>
+                        </div>
+                        <a href="https://www.google.com/maps/search/456%20Oak%20Avenue%2C%20Girne" 
+                           target="_blank"
+                           class="ml-4 bg-blue-600 hover:bg-blue-700 text-white px-3 py-2 rounded-md text-sm font-medium transition duration-200 flex items-center">
+                            <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path>
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                            </svg>
+                            Google Maps'te Ara
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Test 3: Property Address -->
+        <div class="bg-white rounded-lg p-6 mb-6 shadow">
+            <h2 class="text-lg font-semibold mb-4">Test 3: Property Address</h2>
+            <div class="space-y-3">
+                <div class="bg-gray-50 border border-gray-200 rounded-lg p-4">
+                    <div class="flex items-start justify-between">
+                        <div class="flex-1">
+                            <div class="font-medium text-gray-900">Villa Deniz</div>
+                            <div class="text-gray-700 mt-1">Sunset Complex, Building A, Seaside Street, No: 12, Alsancak, Girne</div>
+                            <div class="text-sm text-gray-500 mt-1">Kayıtlı Mülk</div>
+                        </div>
+                        <a href="https://www.google.com/maps?q=35.3394,33.3178" 
+                           target="_blank"
+                           class="ml-4 bg-blue-600 hover:bg-blue-700 text-white px-3 py-2 rounded-md text-sm font-medium transition duration-200 flex items-center">
+                            <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path>
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                            </svg>
+                            Google Maps'te Görüntüle
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Test 4: Edit Mode with Address Change Modal -->
+        <div class="bg-white rounded-lg p-6 mb-6 shadow" x-data="{ editMode: true, ...addressDisplay() }">
+            <h2 class="text-lg font-semibold mb-4">Test 4: Edit Mode with Address Change</h2>
+            <div x-show="editMode" class="space-y-3">
+                <div class="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <div class="font-medium text-yellow-800">Mevcut Adres</div>
+                            <div class="text-yellow-700 text-sm mt-1">123 Main Street, Lefkoşa, Kıbrıs</div>
+                        </div>
+                        <button type="button" @click="showAddressModal = true"
+                            class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md text-sm font-medium transition duration-200">
+                            Adresi Değiştir
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Address Change Modal -->
+                <div x-show="showAddressModal" x-cloak
+                     class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50"
+                     @click.self="showAddressModal = false">
+                    <div class="relative top-20 mx-auto p-5 border w-11/12 md:w-3/4 lg:w-1/2 shadow-lg rounded-md bg-white">
+                        <div class="mt-3">
+                            <h3 class="text-lg font-medium text-gray-900 mb-4">Adres Değiştir</h3>
+                            
+                            <div x-data="testAddressModalData()" class="space-y-4">
+                                <!-- Address Type Selection -->
+                                <div class="flex space-x-4">
+                                    <label class="flex items-center">
+                                        <input type="radio" value="property" x-model="modalAddressType" class="mr-2">
+                                        <span class="text-sm text-gray-700">Kayıtlı Mülk Seç</span>
+                                    </label>
+                                    <label class="flex items-center">
+                                        <input type="radio" value="manual" x-model="modalAddressType" class="mr-2">
+                                        <span class="text-sm text-gray-700">Manuel Adres Gir</span>
+                                    </label>
+                                </div>
+
+                                <!-- Property Selection -->
+                                <div x-show="modalAddressType === 'property'" class="space-y-3">
+                                    <select x-model="selectedPropertyId" @change="onPropertyChange()"
+                                        class="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
+                                        <option value="">Bir mülk seçin</option>
+                                        <option value="1">Villa Deniz - Sunset Complex, Building A, Seaside Street, No: 12, Alsancak, Girne</option>
+                                        <option value="2">Office Building - Business Center, Floor 3, Office 301, Dereboyu, Lefkoşa</option>
+                                    </select>
+
+                                    <div x-show="selectedPropertyId" class="p-3 bg-blue-50 rounded-md border border-blue-200">
+                                        <div class="text-sm font-medium text-blue-900" x-text="selectedPropertyId == '1' ? 'Villa Deniz' : 'Office Building'"></div>
+                                        <div class="text-sm text-blue-700" x-text="selectedPropertyId == '1' ? 'Sunset Complex, Building A, Seaside Street, No: 12, Alsancak, Girne' : 'Business Center, Floor 3, Office 301, Dereboyu, Lefkoşa'"></div>
+                                    </div>
+                                </div>
+
+                                <!-- Manual Address Input -->
+                                <div x-show="modalAddressType === 'manual'" class="space-y-3">
+                                    <textarea x-model="manualAddress" rows="3" placeholder="Adres detaylarını girin..."
+                                        class="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"></textarea>
+                                    
+                                    <div class="grid grid-cols-2 gap-3">
+                                        <input type="number" step="any" x-model="manualLatitude" placeholder="Enlem (opsiyonel)"
+                                            class="rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
+                                        <input type="number" step="any" x-model="manualLongitude" placeholder="Boylam (opsiyonel)"
+                                            class="rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
+                                    </div>
+                                </div>
+
+                                <!-- Modal Actions -->
+                                <div class="flex justify-end space-x-3 pt-4">
+                                    <button type="button" @click="showAddressModal = false"
+                                        class="bg-gray-300 hover:bg-gray-400 text-gray-800 px-4 py-2 rounded-md">
+                                        İptal
+                                    </button>
+                                    <button type="button" @click="saveAddress()"
+                                        class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md">
+                                        Kaydet
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function addressDisplay() {
+            return {
+                showAddressModal: false,
+                address: '123 Main Street, Lefkoşa, Kıbrıs',
+                propertyId: '',
+                latitude: '35.1856',
+                longitude: '33.3823'
+            }
+        }
+
+        function testAddressModalData() {
+            return {
+                modalAddressType: 'manual',
+                selectedPropertyId: '',
+                manualAddress: '123 Main Street, Lefkoşa, Kıbrıs',
+                manualLatitude: '35.1856',
+                manualLongitude: '33.3823',
+
+                onPropertyChange() {
+                    // Mock property data
+                },
+
+                saveAddress() {
+                    alert('Address would be saved here!');
+                    this.$parent.showAddressModal = false;
+                }
+            }
+        }
+    </script>
+</body>
+</html>

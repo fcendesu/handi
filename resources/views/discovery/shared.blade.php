@@ -180,7 +180,60 @@
 
                     <div>
                         <h3 class="text-sm font-medium text-gray-700">Adres</h3>
-                        <p class="mt-2">{{ $discovery->address }}</p>
+                        <div class="mt-2 space-y-2">
+                            @if($discovery->property_id)
+                                <!-- Property Address Display -->
+                                <div class="bg-blue-50 border border-blue-200 rounded-lg p-3">
+                                    <div class="font-medium text-blue-900">{{ $discovery->property->name }}</div>
+                                    <div class="text-blue-700">{{ $discovery->property->full_address }}</div>
+                                    <div class="text-sm text-blue-600 mt-1">Kayıtlı Mülk</div>
+                                    @if($discovery->property->latitude && $discovery->property->longitude)
+                                        <div class="mt-2">
+                                            <a href="https://www.google.com/maps?q={{ $discovery->property->latitude }},{{ $discovery->property->longitude }}" 
+                                               target="_blank"
+                                               class="inline-flex items-center bg-blue-600 hover:bg-blue-700 text-white px-3 py-1 rounded text-sm font-medium transition duration-200">
+                                                <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path>
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                                                </svg>
+                                                Google Maps'te Görüntüle
+                                            </a>
+                                        </div>
+                                    @endif
+                                </div>
+                            @else
+                                <!-- Manual Address Display -->
+                                <div class="bg-gray-50 border border-gray-200 rounded-lg p-3">
+                                    <div class="text-gray-900">{{ $discovery->address ?: 'Adres belirtilmemiş' }}</div>
+                                    <div class="text-sm text-gray-600 mt-1">Manuel Adres</div>
+                                    @if($discovery->latitude && $discovery->longitude)
+                                        <div class="mt-2">
+                                            <a href="https://www.google.com/maps?q={{ $discovery->latitude }},{{ $discovery->longitude }}" 
+                                               target="_blank"
+                                               class="inline-flex items-center bg-blue-600 hover:bg-blue-700 text-white px-3 py-1 rounded text-sm font-medium transition duration-200">
+                                                <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path>
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                                                </svg>
+                                                Google Maps'te Görüntüle
+                                            </a>
+                                        </div>
+                                    @elseif($discovery->address)
+                                        <div class="mt-2">
+                                            <a href="https://www.google.com/maps/search/{{ urlencode($discovery->address) }}" 
+                                               target="_blank"
+                                               class="inline-flex items-center bg-blue-600 hover:bg-blue-700 text-white px-3 py-1 rounded text-sm font-medium transition duration-200">
+                                                <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path>
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                                                </svg>
+                                                Google Maps'te Ara
+                                            </a>
+                                        </div>
+                                    @endif
+                                </div>
+                            @endif
+                        </div>
                     </div>
                 </div>
 

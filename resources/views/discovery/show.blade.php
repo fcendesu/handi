@@ -7,6 +7,9 @@
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>Discovery Details - {{ config('app.name', 'Handi') }}</title>
     @vite(['resources/css/app.css', 'resources/js/app.js'])
+    <style>
+        [x-cloak] { display: none !important; }
+    </style>
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
     <script>
         function itemSelector(existingItems = []) {
@@ -142,6 +145,68 @@
                         console.error('Error loading payment methods:', error);
                         this.paymentMethods = [];
                     }
+                }
+            }
+        }
+
+        function addressDisplay() {
+            return {
+                showAddressModal: false,
+                address: '{{ old('address', $discovery->address) }}',
+                propertyId: '{{ old('property_id', $discovery->property_id) }}',
+                latitude: '{{ old('latitude', $discovery->latitude) }}',
+                longitude: '{{ old('longitude', $discovery->longitude) }}'
+            }
+        }
+
+        function addressModalData() {
+            return {
+                modalAddressType: '{{ $discovery->property_id ? 'property' : 'manual' }}',
+                selectedPropertyId: '{{ $discovery->property_id }}',
+                selectedProperty: null,
+                properties: [],
+                manualAddress: '{{ $discovery->address }}',
+                manualLatitude: '{{ $discovery->latitude }}',
+                manualLongitude: '{{ $discovery->longitude }}',
+
+                async init() {
+                    await this.loadProperties();
+                    if (this.selectedPropertyId) {
+                        this.selectedProperty = this.properties.find(p => p.id == this.selectedPropertyId);
+                    }
+                },
+
+                async loadProperties() {
+                    try {
+                        const response = await fetch('/api/company-properties');
+                        const data = await response.json();
+                        this.properties = data;
+                    } catch (error) {
+                        console.error('Error loading properties:', error);
+                        this.properties = [];
+                    }
+                },
+
+                onPropertyChange() {
+                    this.selectedProperty = this.properties.find(p => p.id == this.selectedPropertyId) || null;
+                },
+
+                saveAddress() {
+                    const addressDisplay = document.querySelector('[x-data*="addressDisplay"]').__x.$data;
+                    
+                    if (this.modalAddressType === 'property' && this.selectedProperty) {
+                        addressDisplay.propertyId = this.selectedProperty.id;
+                        addressDisplay.address = '';
+                        addressDisplay.latitude = this.selectedProperty.latitude || '';
+                        addressDisplay.longitude = this.selectedProperty.longitude || '';
+                    } else if (this.modalAddressType === 'manual') {
+                        addressDisplay.propertyId = '';
+                        addressDisplay.address = this.manualAddress;
+                        addressDisplay.latitude = this.manualLatitude || '';
+                        addressDisplay.longitude = this.manualLongitude || '';
+                    }
+                    
+                    this.$parent.showAddressModal = false;
                 }
             }
         }
@@ -292,11 +357,160 @@
                                 @enderror
                             </div>
 
-                            <div class="col-span-full">
+                            <!-- Address Display/Edit Section -->
+                            <div class="col-span-full" x-data="addressDisplay()">
                                 <label class="block text-sm font-medium text-gray-700 mb-2">Adres</label>
-                                <textarea name="address" rows="3" :disabled="!editMode"
-                                    class="bg-gray-100 mt-1 block w-full rounded-md border-2 border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 px-4 py-2"
-                                    :class="{ 'bg-gray-50': !editMode }">{{ old('address', $discovery->address) }}</textarea>
+                                
+                                <!-- View Mode -->
+                                <div x-show="!editMode" class="space-y-3">
+                                    <div class="bg-gray-50 border border-gray-200 rounded-lg p-4">
+                                        @if($discovery->property_id)
+                                            <!-- Property Address Display -->
+                                            <div class="flex items-start justify-between">
+                                                <div class="flex-1">
+                                                    <div class="font-medium text-gray-900">{{ $discovery->property->name }}</div>
+                                                    <div class="text-gray-700 mt-1">{{ $discovery->property->full_address }}</div>
+                                                    <div class="text-sm text-gray-500 mt-1">Kayıtlı Mülk</div>
+                                                </div>
+                                                @if($discovery->property->latitude && $discovery->property->longitude)
+                                                    <a href="https://www.google.com/maps?q={{ $discovery->property->latitude }},{{ $discovery->property->longitude }}" 
+                                                       target="_blank"
+                                                       class="ml-4 bg-blue-600 hover:bg-blue-700 text-white px-3 py-2 rounded-md text-sm font-medium transition duration-200 flex items-center">
+                                                        <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path>
+                                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                                                        </svg>
+                                                        Google Maps'te Görüntüle
+                                                    </a>
+                                                @endif
+                                            </div>
+                                        @else
+                                            <!-- Manual Address Display -->
+                                            <div class="flex items-start justify-between">
+                                                <div class="flex-1">
+                                                    <div class="text-gray-900">{{ $discovery->address ?: 'Adres belirtilmemiş' }}</div>
+                                                    <div class="text-sm text-gray-500 mt-1">Manuel Adres</div>
+                                                </div>
+                                                @if($discovery->latitude && $discovery->longitude)
+                                                    <a href="https://www.google.com/maps?q={{ $discovery->latitude }},{{ $discovery->longitude }}" 
+                                                       target="_blank"
+                                                       class="ml-4 bg-blue-600 hover:bg-blue-700 text-white px-3 py-2 rounded-md text-sm font-medium transition duration-200 flex items-center">
+                                                        <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path>
+                                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                                                        </svg>
+                                                        Google Maps'te Görüntüle
+                                                    </a>
+                                                @elseif($discovery->address)
+                                                    <a href="https://www.google.com/maps/search/{{ urlencode($discovery->address) }}" 
+                                                       target="_blank"
+                                                       class="ml-4 bg-blue-600 hover:bg-blue-700 text-white px-3 py-2 rounded-md text-sm font-medium transition duration-200 flex items-center">
+                                                        <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path>
+                                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                                                        </svg>
+                                                        Google Maps'te Ara
+                                                    </a>
+                                                @endif
+                                            </div>
+                                        @endif
+                                    </div>
+                                </div>
+
+                                <!-- Edit Mode -->
+                                <div x-show="editMode" class="space-y-3">
+                                    <div class="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
+                                        <div class="flex items-center justify-between">
+                                            <div>
+                                                <div class="font-medium text-yellow-800">Mevcut Adres</div>
+                                                <div class="text-yellow-700 text-sm mt-1">
+                                                    @if($discovery->property_id)
+                                                        {{ $discovery->property->name }} - {{ $discovery->property->full_address }}
+                                                    @else
+                                                        {{ $discovery->address ?: 'Adres belirtilmemiş' }}
+                                                    @endif
+                                                </div>
+                                            </div>
+                                            <button type="button" @click="showAddressModal = true"
+                                                class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md text-sm font-medium transition duration-200">
+                                                Adresi Değiştir
+                                            </button>
+                                        </div>
+                                    </div>
+                                    
+                                    <!-- Hidden inputs for form submission -->
+                                    <input type="hidden" name="address" x-model="address">
+                                    <input type="hidden" name="property_id" x-model="propertyId">
+                                    <input type="hidden" name="latitude" x-model="latitude">
+                                    <input type="hidden" name="longitude" x-model="longitude">
+                                </div>
+
+                                <!-- Address Change Modal -->
+                                <div x-show="showAddressModal" x-cloak
+                                     class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50"
+                                     @click.self="showAddressModal = false">
+                                    <div class="relative top-20 mx-auto p-5 border w-11/12 md:w-3/4 lg:w-1/2 shadow-lg rounded-md bg-white">
+                                        <div class="mt-3">
+                                            <h3 class="text-lg font-medium text-gray-900 mb-4">Adres Değiştir</h3>
+                                            
+                                            <div x-data="addressModalData()" class="space-y-4">
+                                                <!-- Address Type Selection -->
+                                                <div class="flex space-x-4">
+                                                    <label class="flex items-center">
+                                                        <input type="radio" value="property" x-model="modalAddressType" class="mr-2">
+                                                        <span class="text-sm text-gray-700">Kayıtlı Mülk Seç</span>
+                                                    </label>
+                                                    <label class="flex items-center">
+                                                        <input type="radio" value="manual" x-model="modalAddressType" class="mr-2">
+                                                        <span class="text-sm text-gray-700">Manuel Adres Gir</span>
+                                                    </label>
+                                                </div>
+
+                                                <!-- Property Selection -->
+                                                <div x-show="modalAddressType === 'property'" class="space-y-3">
+                                                    <select x-model="selectedPropertyId" @change="onPropertyChange()"
+                                                        class="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
+                                                        <option value="">Bir mülk seçin</option>
+                                                        <template x-for="property in properties" :key="property.id">
+                                                            <option :value="property.id" 
+                                                                x-text="property.name + ' - ' + property.full_address"></option>
+                                                        </template>
+                                                    </select>
+
+                                                    <div x-show="selectedProperty" class="p-3 bg-blue-50 rounded-md border border-blue-200">
+                                                        <div class="text-sm font-medium text-blue-900" x-text="selectedProperty ? selectedProperty.name : ''"></div>
+                                                        <div class="text-sm text-blue-700" x-text="selectedProperty ? selectedProperty.full_address : ''"></div>
+                                                    </div>
+                                                </div>
+
+                                                <!-- Manual Address Input -->
+                                                <div x-show="modalAddressType === 'manual'" class="space-y-3">
+                                                    <textarea x-model="manualAddress" rows="3" placeholder="Adres detaylarını girin..."
+                                                        class="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"></textarea>
+                                                    
+                                                    <div class="grid grid-cols-2 gap-3">
+                                                        <input type="number" step="any" x-model="manualLatitude" placeholder="Enlem (opsiyonel)"
+                                                            class="rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
+                                                        <input type="number" step="any" x-model="manualLongitude" placeholder="Boylam (opsiyonel)"
+                                                            class="rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
+                                                    </div>
+                                                </div>
+
+                                                <!-- Modal Actions -->
+                                                <div class="flex justify-end space-x-3 pt-4">
+                                                    <button type="button" @click="showAddressModal = false"
+                                                        class="bg-gray-300 hover:bg-gray-400 text-gray-800 px-4 py-2 rounded-md">
+                                                        İptal
+                                                    </button>
+                                                    <button type="button" @click="saveAddress()"
+                                                        class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md">
+                                                        Kaydet
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
                         </div>
 
