@@ -197,4 +197,64 @@ class Discovery extends Model
     {
         return route('discovery.shared', $this->share_token);
     }
+
+    /**
+     * Check if the offer has expired
+     */
+    public function isOfferExpired(): bool
+    {
+        if (!$this->offer_valid_until) {
+            return false;
+        }
+
+        return now()->isAfter($this->offer_valid_until->endOfDay());
+    }
+
+    /**
+     * Check if the discovery can be acted upon by customer (approve/reject)
+     */
+    public function canCustomerAct(): bool
+    {
+        return $this->status === self::STATUS_PENDING && !$this->isOfferExpired();
+    }
+
+    /**
+     * Get days until offer expiry (negative if expired)
+     */
+    public function getDaysUntilExpiry(): ?int
+    {
+        if (!$this->offer_valid_until) {
+            return null;
+        }
+
+        return (int) now()->startOfDay()->diffInDays($this->offer_valid_until->startOfDay(), false);
+    }
+
+    /**
+     * Scope to get expired pending discoveries
+     */
+    public function scopeExpiredPending($query)
+    {
+        return $query->where('status', self::STATUS_PENDING)
+            ->whereNotNull('offer_valid_until')
+            ->where('offer_valid_until', '<', now()->startOfDay());
+    }
+
+    /**
+     * Automatically cancel the discovery due to expiry
+     */
+    public function cancelDueToExpiry(): bool
+    {
+        if ($this->status !== self::STATUS_PENDING || !$this->isOfferExpired()) {
+            return false;
+        }
+
+        $this->update([
+            'status' => self::STATUS_CANCELLED,
+            'note_to_handi' => ($this->note_to_handi ? $this->note_to_handi . "\n\n" : '') .
+                'Otomatik iptal: Teklif geçerlilik tarihi (' . $this->offer_valid_until->format('d.m.Y') . ') doldu.'
+        ]);
+
+        return true;
+    }
 }

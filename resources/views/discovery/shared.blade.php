@@ -60,9 +60,37 @@
                                             ? 'Tamamlandı'
                                             : 'İptal Edildi')) }}
                             </span>
+                            
+                            @if ($discovery->status === 'pending' && $discovery->offer_valid_until)
+                                <div class="mt-2">
+                                    @if ($discovery->isOfferExpired())
+                                        <div class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-red-100 text-red-800">
+                                            <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+                                                      d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                            </svg>
+                                            Teklif Süresi Doldu
+                                        </div>
+                                    @else
+                                        @php
+                                            $daysLeft = $discovery->getDaysUntilExpiry();
+                                        @endphp
+                                        @if ($daysLeft !== null)
+                                            <div class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium 
+                                                {{ $daysLeft <= 1 ? 'bg-red-100 text-red-800' : ($daysLeft <= 3 ? 'bg-yellow-100 text-yellow-800' : 'bg-green-100 text-green-800') }}">
+                                                <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+                                                          d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                                </svg>
+                                                {{ $daysLeft === 0 ? 'Bugün sona eriyor' : ($daysLeft === 1 ? '1 gün kaldı' : $daysLeft . ' gün kaldı') }}
+                                            </div>
+                                        @endif
+                                    @endif
+                                </div>
+                            @endif
                         </div>
 
-                        @if ($discovery->status === 'pending')
+                        @if ($discovery->status === 'pending' && !$discovery->isOfferExpired())
                             <div class="flex flex-col sm:flex-row gap-3">
                                 <form action="{{ route('discovery.customer-approve', $discovery->share_token) }}"
                                     method="POST" class="inline">
@@ -93,6 +121,14 @@
                                         Keşifi Reddet
                                     </button>
                                 </form>
+                            </div>
+                        @elseif($discovery->status === 'pending' && $discovery->isOfferExpired())
+                            <div class="text-sm text-red-600">
+                                <svg class="w-5 h-5 inline mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                </svg>
+                                Teklif süresi {{ $discovery->offer_valid_until->format('d.m.Y') }} tarihinde dolmuştur
                             </div>
                         @elseif($discovery->status === 'in_progress')
                             <div class="text-sm text-gray-600">

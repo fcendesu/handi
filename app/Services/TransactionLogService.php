@@ -777,6 +777,31 @@ class TransactionLogService
             ->where('created_at', '<', $cutoffDate)
             ->delete();
     }
+
+    /**
+     * ========================================
+     * SYSTEM ACTION LOGGING METHODS
+     * ========================================
+     */
+
+    public static function logSystemAction(Discovery $discovery, string $action, string $description, array $metadata = []): void
+    {
+        self::createLog([
+            'user_id' => null, // System action, no user
+            'entity_type' => TransactionLog::ENTITY_DISCOVERY,
+            'entity_id' => $discovery->id,
+            'action' => $action,
+            'description' => $description,
+            'performed_by_type' => TransactionLog::PERFORMER_SYSTEM,
+            'metadata' => array_merge([
+                'customer_name' => $discovery->customer_name,
+                'customer_email' => $discovery->customer_email,
+                'discovery_id' => $discovery->id,
+                'offer_valid_until' => $discovery->offer_valid_until?->format('Y-m-d'),
+            ], $metadata)
+        ]);
+    }
+
     private static function createLog(array $data): void
     {
         // Set default values

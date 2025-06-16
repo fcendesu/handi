@@ -942,6 +942,18 @@ class DiscoveryController extends Controller
         try {
             $discovery = Discovery::where('share_token', $token)->firstOrFail();
 
+            // Check if offer has expired
+            if ($discovery->isOfferExpired()) {
+                // Automatically cancel if not already cancelled
+                if ($discovery->status === Discovery::STATUS_PENDING) {
+                    $discovery->cancelDueToExpiry();
+                }
+
+                return redirect()
+                    ->route('discovery.shared', $token)
+                    ->with('error', 'Bu teklif süresi dolmuş (' . $discovery->offer_valid_until->format('d.m.Y') . '). Keşif otomatik olarak iptal edilmiştir.');
+            }
+
             // Only allow approval if discovery is pending
             if ($discovery->status !== Discovery::STATUS_PENDING) {
                 return redirect()
@@ -970,6 +982,18 @@ class DiscoveryController extends Controller
     {
         try {
             $discovery = Discovery::where('share_token', $token)->firstOrFail();
+
+            // Check if offer has expired
+            if ($discovery->isOfferExpired()) {
+                // Automatically cancel if not already cancelled
+                if ($discovery->status === Discovery::STATUS_PENDING) {
+                    $discovery->cancelDueToExpiry();
+                }
+
+                return redirect()
+                    ->route('discovery.shared', $token)
+                    ->with('error', 'Bu teklif süresi dolmuş (' . $discovery->offer_valid_until->format('d.m.Y') . '). Keşif otomatik olarak iptal edilmiştir.');
+            }
 
             // Only allow rejection if discovery is pending
             if ($discovery->status !== Discovery::STATUS_PENDING) {
