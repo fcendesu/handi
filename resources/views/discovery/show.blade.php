@@ -455,8 +455,8 @@
 
                             <div>
                                 <label class="block text-sm font-medium text-gray-700 mb-2">Teklif Geçerlilik
-                                    Tarihi</label>
-                                <input type="date" name="offer_valid_until"
+                                    Tarihi *</label>
+                                <input type="date" name="offer_valid_until" required
                                     value="{{ old('offer_valid_until', optional($discovery->offer_valid_until)->format('Y-m-d')) }}"
                                     :disabled="!editMode"
                                     class="bg-gray-100 mt-1 block w-full rounded-md border-2 border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 px-4 py-2"
