@@ -37,13 +37,29 @@ Route::middleware(['auth', 'restrict.employee.dashboard'])->group(function () {
     Route::get('/dashboard', function () {
         $user = auth()->user();
 
+        // Get available work groups for the user
+        $workGroups = collect();
+        if ($user->isSoloHandyman()) {
+            $workGroups = $user->createdWorkGroups;
+        } elseif ($user->isCompanyAdmin()) {
+            $workGroups = $user->company->workGroups;
+        } elseif ($user->isCompanyEmployee()) {
+            $workGroups = $user->workGroups;
+        }
+
         // Scope discoveries based on user type for dashboard
-        $query = Discovery::query();
+        $query = Discovery::query()->with(['workGroup']);
 
         if ($user->isSoloHandyman()) {
             $query->where('creator_id', $user->id);
         } elseif ($user->isCompanyAdmin()) {
             $query->where('company_id', $user->company_id);
+        }
+
+        // Apply workgroup filter if specified
+        $selectedWorkGroupId = request('work_group_id');
+        if ($selectedWorkGroupId && $selectedWorkGroupId !== 'all') {
+            $query->where('work_group_id', $selectedWorkGroupId);
         }
 
         $discoveries = [
@@ -52,7 +68,8 @@ Route::middleware(['auth', 'restrict.employee.dashboard'])->group(function () {
             'completed' => $query->clone()->where('status', Discovery::STATUS_COMPLETED)->latest()->get(),
             'cancelled' => $query->clone()->where('status', Discovery::STATUS_CANCELLED)->latest()->get(),
         ];
-        return view('dashboard', compact('discoveries'));
+
+        return view('dashboard', compact('discoveries', 'workGroups', 'selectedWorkGroupId'));
     })->name('dashboard');
 
     // Discovery routes

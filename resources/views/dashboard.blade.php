@@ -18,7 +18,28 @@
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
             <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
                 <div class="p-6">
-                    <h2 class="text-2xl font-semibold text-gray-800 mb-6">İşler</h2>
+                    <div class="flex justify-between items-center mb-6">
+                        <h2 class="text-2xl font-semibold text-gray-800">İşler</h2>
+                        
+                        <!-- Work Group Filter -->
+                        @if($workGroups->isNotEmpty())
+                            <div class="flex items-center space-x-2">
+                                <label for="work_group_filter" class="text-sm font-medium text-gray-700">İş Grubu:</label>
+                                <select id="work_group_filter" name="work_group_id" 
+                                        onchange="window.location.href = '{{ route('dashboard') }}?work_group_id=' + this.value"
+                                        class="rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-sm">
+                                    <option value="all" {{ $selectedWorkGroupId === 'all' || !$selectedWorkGroupId ? 'selected' : '' }}>
+                                        Tüm İş Grupları
+                                    </option>
+                                    @foreach($workGroups as $workGroup)
+                                        <option value="{{ $workGroup->id }}" {{ $selectedWorkGroupId == $workGroup->id ? 'selected' : '' }}>
+                                            {{ $workGroup->name }}
+                                        </option>
+                                    @endforeach
+                                </select>
+                            </div>
+                        @endif
+                    </div>
 
                     <!-- Discovery Lists -->
                     <div class="space-y-8">
@@ -36,6 +57,13 @@
                                                 <h4 class="font-medium">{{ $discovery->customer_name }}</h4>
                                                 <span class="text-sm text-gray-500">{{ $discovery->created_at->format('M d, Y') }}</span>
                                             </div>
+                                            @if($discovery->workGroup)
+                                                <div class="mb-2">
+                                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                                                        {{ $discovery->workGroup->name }}
+                                                    </span>
+                                                </div>
+                                            @endif
                                             <p class="text-sm text-gray-600 mb-2">{{ Str::limit($discovery->discovery, 100) }}</p>
                                             <a href="{{ route('discovery.show', $discovery) }}" class="text-blue-600 hover:text-blue-800 text-sm">Ayrıntıları Görüntüle →</a>
                                         </div>
@@ -60,6 +88,13 @@
                                                 <h4 class="font-medium">{{ $discovery->customer_name }}</h4>
                                                 <span class="text-sm text-gray-500">{{ $discovery->created_at->format('M d, Y') }}</span>
                                             </div>
+                                            @if($discovery->workGroup)
+                                                <div class="mb-2">
+                                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                                                        {{ $discovery->workGroup->name }}
+                                                    </span>
+                                                </div>
+                                            @endif
                                             <p class="text-sm text-gray-600 mb-2">{{ Str::limit($discovery->discovery, 100) }}</p>
                                             <a href="{{ route('discovery.show', $discovery) }}" class="text-blue-600 hover:text-blue-800 text-sm">Ayrıntıları Görüntüle →</a>
                                         </div>
@@ -84,6 +119,13 @@
                                                 <h4 class="font-medium">{{ $discovery->customer_name }}</h4>
                                                 <span class="text-sm text-gray-500">{{ $discovery->created_at->format('M d, Y') }}</span>
                                             </div>
+                                            @if($discovery->workGroup)
+                                                <div class="mb-2">
+                                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                                                        {{ $discovery->workGroup->name }}
+                                                    </span>
+                                                </div>
+                                            @endif
                                             <p class="text-sm text-gray-600 mb-2">{{ Str::limit($discovery->discovery, 100) }}</p>
                                             <a href="{{ route('discovery.show', $discovery) }}" class="text-blue-600 hover:text-blue-800 text-sm">Ayrıntıları Görüntüle →</a>
                                         </div>
@@ -108,6 +150,13 @@
                                                 <h4 class="font-medium">{{ $discovery->customer_name }}</h4>
                                                 <span class="text-sm text-gray-500">{{ $discovery->created_at->format('M d, Y') }}</span>
                                             </div>
+                                            @if($discovery->workGroup)
+                                                <div class="mb-2">
+                                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                                                        {{ $discovery->workGroup->name }}
+                                                    </span>
+                                                </div>
+                                            @endif
                                             <p class="text-sm text-gray-600 mb-2">{{ Str::limit($discovery->discovery, 100) }}</p>
                                             <a href="{{ route('discovery.show', $discovery) }}" class="text-blue-600 hover:text-blue-800 text-sm">Ayrıntıları Görüntüle →</a>
                                         </div>
