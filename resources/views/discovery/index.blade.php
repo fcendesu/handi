@@ -420,7 +420,7 @@
                                 </div>
 
                                 <!-- Item Management Modal -->
-                                <div x-show="showModal" class="fixed inset-0 z-50 overflow-y-auto"
+                                <div x-show="showModal" style="display: none;" class="fixed inset-0 z-50 overflow-y-auto"
                                     x-transition:enter="ease-out duration-300" x-transition:enter-start="opacity-0"
                                     x-transition:enter-end="opacity-100" x-transition:leave="ease-in duration-200"
                                     x-transition:leave-start="opacity-100" x-transition:leave-end="opacity-0">
