@@ -8,6 +8,7 @@ use App\Models\Property;
 use App\Models\User;
 use App\Data\AddressData;
 use App\Services\TransactionLogService;
+use App\Services\DiscoveryImageService;
 use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Validation\Rule;
@@ -38,11 +39,11 @@ class DiscoveryController extends Controller
         }
 
         $discoveries = $query->latest()->paginate(12);
-        
+
         // Get address data for manual address dropdowns
         $cities = AddressData::getCities();
         $districts = AddressData::getAllDistricts();
-        
+
         // Get available work groups for the user
         $workGroups = collect();
         if ($user->isSoloHandyman()) {
@@ -55,7 +56,7 @@ class DiscoveryController extends Controller
             // Employees see work groups they belong to
             $workGroups = $user->workGroups;
         }
-        
+
         return view('discovery.index', compact('discoveries', 'cities', 'districts', 'workGroups'));
     }
 
@@ -117,7 +118,7 @@ class DiscoveryController extends Controller
             if (!in_array($request->manual_city, AddressData::getCities())) {
                 return back()->withErrors(['manual_city' => 'Selected city is not valid.']);
             }
-            
+
             if ($request->manual_district && !in_array($request->manual_district, AddressData::getDistricts($request->manual_city))) {
                 return back()->withErrors(['manual_district' => 'Selected district is not valid for the selected city.']);
             }
@@ -126,7 +127,7 @@ class DiscoveryController extends Controller
         // Additional validation for work group - ensure user has access to selected work group
         if ($request->work_group_id) {
             $hasAccess = false;
-            
+
             if ($user->isSoloHandyman()) {
                 // Solo handyman can only select work groups they created
                 $hasAccess = $user->createdWorkGroups()->where('id', $request->work_group_id)->exists();
@@ -137,7 +138,7 @@ class DiscoveryController extends Controller
                 // Company employee can only select work groups they belong to
                 $hasAccess = $user->workGroups()->where('id', $request->work_group_id)->exists();
             }
-            
+
             if (!$hasAccess) {
                 return back()->withErrors(['work_group_id' => 'Selected work group is not accessible to you.']);
             }
@@ -152,7 +153,7 @@ class DiscoveryController extends Controller
                     $request->address_details
                 ]);
                 $validated['address'] = implode(', ', $addressParts);
-                
+
                 // Set coordinates if provided
                 if ($request->manual_latitude && $request->manual_longitude) {
                     $validated['latitude'] = $request->manual_latitude;
@@ -163,10 +164,10 @@ class DiscoveryController extends Controller
             // Process property address - extract address from selected property
             if ($request->address_type === 'property' && $request->property_id) {
                 $property = Property::findOrFail($request->property_id);
-                
+
                 // Extract property's full address
                 $validated['address'] = $property->full_address;
-                
+
                 // Extract property's coordinates if available
                 if ($property->latitude && $property->longitude) {
                     $validated['latitude'] = $property->latitude;
@@ -174,11 +175,11 @@ class DiscoveryController extends Controller
                 }
             }
 
-            // Handle image uploads
+            // Handle image uploads with organized storage
             $imagePaths = [];
             if ($request->hasFile('images')) {
                 foreach ($request->file('images') as $image) {
-                    $path = $image->store('discoveries', 'public');
+                    $path = DiscoveryImageService::storeDiscoveryImage($image, $user);
                     $imagePaths[] = $path;
                 }
             }
@@ -275,16 +276,16 @@ class DiscoveryController extends Controller
         ]);
 
         try {
+            $user = auth()->user();
+
             // Get current images
             $imagePaths = $discovery->images ?? [];
 
             // Handle image removals first
             if ($request->has('remove_images')) {
                 foreach ($request->remove_images as $image) {
-                    // Remove from storage
-                    if (Storage::disk('public')->exists($image)) {
-                        Storage::disk('public')->delete($image);
-                    }
+                    // Remove from storage using service
+                    DiscoveryImageService::deleteDiscoveryImage($image);
                     // Remove from image paths array
                     $imagePaths = array_values(array_filter($imagePaths, function ($img) use ($image) {
                         return $img !== $image;
@@ -295,7 +296,7 @@ class DiscoveryController extends Controller
             // Then handle new image uploads if any
             if ($request->hasFile('images')) {
                 foreach ($request->file('images') as $image) {
-                    $path = $image->store('discoveries', 'public');
+                    $path = DiscoveryImageService::storeDiscoveryImage($image, $user);
                     $imagePaths[] = $path;
                 }
             }
@@ -412,11 +413,13 @@ class DiscoveryController extends Controller
                 'items.*.custom_price' => 'nullable|numeric|min:0'
             ]);
 
-            // Handle image uploads
+            $user = auth()->user();
+
+            // Handle image uploads with organized storage
             $imagePaths = [];
             if ($request->hasFile('images')) {
                 foreach ($request->file('images') as $image) {
-                    $path = $image->store('discoveries', 'public');
+                    $path = DiscoveryImageService::storeDiscoveryImage($image, $user);
                     $imagePaths[] = $path;
                 }
             }
