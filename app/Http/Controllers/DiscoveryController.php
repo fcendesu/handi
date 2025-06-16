@@ -76,10 +76,10 @@ class DiscoveryController extends Controller
             'customer_email' => 'required|email|max:255',
             'address_type' => 'required|in:property,manual',
             'property_id' => 'nullable|exists:properties,id|required_if:address_type,property',
-            'address' => 'nullable|string|max:1000|required_if:address_type,manual',
+            'address' => 'nullable|string|max:1000', // Remove required_if since manual address is built from components
             // Manual address fields
-            'manual_city' => 'nullable|string|max:255|required_if:address_type,manual',
-            'manual_district' => 'nullable|string|max:255|required_if:address_type,manual',
+            'manual_city' => 'nullable|string|max:255',
+            'manual_district' => 'nullable|string|max:255',
             'address_details' => 'nullable|string|max:1000',
             'manual_latitude' => 'nullable|numeric|between:-90,90',
             'manual_longitude' => 'nullable|numeric|between:-180,180',
@@ -121,6 +121,13 @@ class DiscoveryController extends Controller
 
             if ($request->manual_district && !in_array($request->manual_district, AddressData::getDistricts($request->manual_city))) {
                 return back()->withErrors(['manual_district' => 'Selected district is not valid for the selected city.']);
+            }
+        }
+
+        // Additional validation - ensure manual address has at least some address information
+        if ($request->address_type === 'manual') {
+            if (empty($request->manual_city) && empty($request->address_details)) {
+                return back()->withErrors(['manual_city' => 'At least city or address details must be provided for manual address.']);
             }
         }
 
