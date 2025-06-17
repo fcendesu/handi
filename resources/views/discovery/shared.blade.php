@@ -286,6 +286,16 @@
                     </div>
                 @endif
 
+                <!-- Customer Notes -->
+                @if ($discovery->note_to_customer)
+                    <div class="mb-8">
+                        <h3 class="text-sm font-medium text-gray-700 mb-2">Müşteri Notu</h3>
+                        <div class="bg-gray-50 p-6 rounded-lg">
+                            {!! nl2br(e($discovery->note_to_customer)) !!}
+                        </div>
+                    </div>
+                @endif
+
                 <!-- Work Group Display -->
                 @if ($discovery->workGroup)
                     <div class="mb-8">
@@ -311,6 +321,19 @@
                         </div>
                     </div>
                 @endif
+
+                <!-- Additional Information -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+                    <div>
+                        <h3 class="text-sm font-medium text-gray-700">Tamamlanma Süresi</h3>
+                        <p class="mt-2">{{ $discovery->completion_time }} gün</p>
+                    </div>
+
+                    <div>
+                        <h3 class="text-sm font-medium text-gray-700">Teklif Geçerlilik Tarihi</h3>
+                        <p class="mt-2">{{ $discovery->offer_valid_until?->format('d.m.Y') }}</p>
+                    </div>
+                </div>
 
                 <!-- Selected Items List -->
                 @if ($discovery->items->isNotEmpty())
@@ -402,31 +425,6 @@
                             </div>
                         </div>
                     </div>
-                </div>
-
-                <!-- Additional Information -->
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
-                    <div>
-                        <h3 class="text-sm font-medium text-gray-700">Tamamlanma Süresi</h3>
-                        <p class="mt-2">{{ $discovery->completion_time }} gün</p>
-                    </div>
-
-                    <div>
-                        <h3 class="text-sm font-medium text-gray-700">Teklif Geçerlilik Tarihi</h3>
-                        <p class="mt-2">{{ $discovery->offer_valid_until?->format('d.m.Y') }}</p>
-                    </div>
-                </div>
-
-                <!-- Move Notes section to a better location and include both notes -->
-                <div class="mb-8">
-                    @if ($discovery->note_to_customer)
-                        <div class="mb-6">
-                            <h3 class="text-sm font-medium text-gray-700 mb-2">Müşteri Notu</h3>
-                            <div class="bg-gray-50 p-6 rounded-lg">
-                                {!! nl2br(e($discovery->note_to_customer)) !!}
-                            </div>
-                        </div>
-                    @endif
                 </div>
 
                 <!-- Images -->
