@@ -1129,8 +1129,9 @@
                                                     <p class="text-xs text-gray-500" x-text="item.brand"></p>
                                                     <p class="text-sm font-medium text-blue-600 mt-1">
                                                         <span x-text="item.quantity"></span> adet
-                                                        <span x-show="item.custom_price" class="text-green-600"
-                                                            x-text="' • ' + item.custom_price + ' TL'"></span>
+                                                        <span x-text="' • ' + item.price + ' TL'"></span>
+                                                        <span x-show="item.custom_price && item.custom_price !== item.price" class="text-green-600"
+                                                            x-text="' → ' + item.custom_price + ' TL'"></span>
                                                     </p>
                                                 </div>
                                                 <button type="button" @click="removeItem(index)" x-show="editMode"
