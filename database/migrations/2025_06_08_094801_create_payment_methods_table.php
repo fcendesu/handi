@@ -4,8 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-return new class extends Migration
-{
+return new class extends Migration {
     /**
      * Run the migrations.
      */
@@ -17,13 +16,12 @@ return new class extends Migration
             $table->foreignId('user_id')->nullable()->constrained('users')->onDelete('cascade'); // For solo handyman payment methods
             $table->string('name'); // Payment method name (e.g., "Nakit", "Kredi Kartı", "Banka Transferi")
             $table->text('description')->nullable(); // Optional description
-            $table->boolean('is_active')->default(true); // Soft delete capability
             $table->timestamps();
 
             // Indexes for performance
-            $table->index(['company_id', 'is_active']);
-            $table->index(['user_id', 'is_active']);
-            
+            $table->index(['company_id']);
+            $table->index(['user_id']);
+
             // Ensure name uniqueness within the same owner (company or user)
             $table->unique(['company_id', 'name'], 'unique_company_payment_method');
             $table->unique(['user_id', 'name'], 'unique_user_payment_method');

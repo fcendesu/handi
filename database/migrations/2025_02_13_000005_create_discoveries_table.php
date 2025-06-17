@@ -22,6 +22,10 @@ return new class extends Migration {
             $table->string('customer_phone');
             $table->string('customer_email');
             $table->text('address')->nullable();
+            $table->string('city')->nullable();
+            $table->string('district')->nullable();
+            $table->decimal('latitude', 10, 8)->nullable();
+            $table->decimal('longitude', 11, 8)->nullable();
             $table->text('discovery');
             $table->text('todo_list');
             $table->text('note_to_customer')->nullable();
@@ -36,7 +40,7 @@ return new class extends Migration {
             $table->decimal('extra_fee', 10, 2)->default(0);
             $table->decimal('discount_rate', 5, 2)->default(0);
             $table->decimal('discount_amount', 10, 2)->default(0);
-            $table->text('payment_method')->nullable();
+            $table->foreignId('payment_method_id')->nullable()->constrained('payment_methods')->onDelete('set null');
             $table->json('images')->nullable();
             $table->timestamps();
         });
