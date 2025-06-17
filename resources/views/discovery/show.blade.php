@@ -202,7 +202,13 @@
                         }, 100);
                     }
                     
-                    // Initialize map after a short delay to ensure DOM is ready
+                    // Check if Leaflet is available
+                    if (typeof L === 'undefined') {
+                        this.locationError = 'Harita kütüphanesi yüklenemedi';
+                        return;
+                    }
+                    
+                    // Initialize map after a delay to ensure DOM is ready
                     setTimeout(() => {
                         if (document.getElementById('addressModalMap')) {
                             this.initMap();
@@ -268,8 +274,14 @@
                         // Check if map container exists
                         const mapContainer = document.getElementById('addressModalMap');
                         if (!mapContainer) {
-                            console.warn('Map container not found, retrying...');
                             setTimeout(() => this.initMap(), 500);
+                            return;
+                        }
+
+                        // Check if container is visible (important for timing)
+                        const containerRect = mapContainer.getBoundingClientRect();
+                        if (containerRect.width === 0 || containerRect.height === 0) {
+                            setTimeout(() => this.initMap(), 300);
                             return;
                         }
 
@@ -313,7 +325,6 @@
                         }, 100);
 
                     } catch (error) {
-                        console.error('Error initializing map:', error);
                         this.locationError = 'Harita yüklenemedi.';
                     }
                 },
@@ -654,7 +665,21 @@
                                                      if (value) { 
                                                          updateDistricts();
                                                          setTimeout(() => updateDistricts(), 50); 
+                                                         // Initialize map when modal opens and we're in manual mode
+                                                         setTimeout(() => {
+                                                             if (modalAddressType === 'manual') {
+                                                                 initMap();
+                                                             }
+                                                         }, 500);
                                                      } 
+                                                 });
+                                                 $watch('modalAddressType', value => {
+                                                     if (value === 'manual') {
+                                                         // Wait for the DOM to update and become visible
+                                                         setTimeout(() => {
+                                                             initMap();
+                                                         }, 200);
+                                                     }
                                                  })" 
                                                  class="space-y-4">
                                                 <!-- Address Type Selection -->
