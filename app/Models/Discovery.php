@@ -35,6 +35,8 @@ class Discovery extends Model
         'customer_phone',
         'customer_email',
         'address',
+        'city',
+        'district',
         'latitude',
         'longitude',
         'discovery',

@@ -76,8 +76,10 @@ class DiscoveryController extends Controller
             'customer_email' => 'required|email|max:255',
             'address_type' => 'required|in:property,manual',
             'property_id' => 'nullable|exists:properties,id|required_if:address_type,property',
-            'address' => 'nullable|string|max:1000', // Remove required_if since manual address is built from components
-            // Manual address fields
+            'address' => 'nullable|string|max:1000', // This becomes address details/description
+            'city' => 'nullable|string|max:255',
+            'district' => 'nullable|string|max:255',
+            // Manual address fields (kept for backwards compatibility)
             'manual_city' => 'nullable|string|max:255',
             'manual_district' => 'nullable|string|max:255',
             'address_details' => 'nullable|string|max:1000',
@@ -152,28 +154,32 @@ class DiscoveryController extends Controller
         }
 
         try {
-            // Process manual address - combine fields into single address field
+            // Process manual address - store city, district, and address details separately
             if ($request->address_type === 'manual') {
-                $addressParts = array_filter([
-                    $request->manual_city,
-                    $request->manual_district,
-                    $request->address_details
-                ]);
-                $validated['address'] = implode(', ', $addressParts);
+                // Use the manual_city and manual_district for backwards compatibility
+                // or the new city/district fields if they exist
+                $validated['city'] = $request->manual_city ?? $request->city;
+                $validated['district'] = $request->manual_district ?? $request->district;
+                $validated['address'] = $request->address_details ?? $request->address;
 
                 // Set coordinates if provided
                 if ($request->manual_latitude && $request->manual_longitude) {
                     $validated['latitude'] = $request->manual_latitude;
                     $validated['longitude'] = $request->manual_longitude;
                 }
+                
+                // Clear property_id for manual addresses
+                $validated['property_id'] = null;
             }
 
             // Process property address - extract address from selected property
             if ($request->address_type === 'property' && $request->property_id) {
                 $property = Property::findOrFail($request->property_id);
 
-                // Extract property's full address
-                $validated['address'] = $property->full_address;
+                // Extract property's address components
+                $validated['city'] = $property->city ?? null;
+                $validated['district'] = $property->district ?? null;
+                $validated['address'] = $property->address ?? $property->full_address;
 
                 // Extract property's coordinates if available
                 if ($property->latitude && $property->longitude) {
@@ -259,6 +265,11 @@ class DiscoveryController extends Controller
             'customer_phone' => 'required|string|max:255',
             'customer_email' => 'required|email|max:255',
             'address' => 'nullable|string|max:1000',
+            'city' => 'nullable|string|max:255',
+            'district' => 'nullable|string|max:255',
+            'property_id' => 'nullable|exists:properties,id',
+            'latitude' => 'nullable|numeric',
+            'longitude' => 'nullable|numeric',
             'discovery' => 'required|string',
             'todo_list' => 'nullable|string',
             'note_to_customer' => 'nullable|string',
@@ -281,6 +292,11 @@ class DiscoveryController extends Controller
             'items.*.quantity' => 'required|integer|min:1',
             'items.*.custom_price' => 'nullable|numeric|min:0'
         ]);
+
+        // Validate address logic - ensure we have either property_id or address
+        if (empty($validated['property_id']) && empty($validated['address'])) {
+            return back()->withErrors(['address' => 'Either property address or manual address must be provided.']);
+        }
 
         try {
             $user = auth()->user();
