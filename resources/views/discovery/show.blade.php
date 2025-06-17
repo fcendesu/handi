@@ -1111,7 +1111,7 @@
 
                                 <div>
                                     <label class="block text-sm font-medium text-gray-700 mb-2">İndirim Oranı
-                                        (%)</label>
+                                    %</label>
                                     <input type="number" name="discount_rate"
                                         value="{{ old('discount_rate', $discovery->discount_rate) }}"
                                         :disabled="!editMode" min="0" max="100" step="0.01"
