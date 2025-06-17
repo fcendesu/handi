@@ -6,6 +6,37 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Keşif Detayları - {{ $discovery->customer_name }}</title>
     @vite(['resources/css/app.css'])
+    <style>
+        [x-cloak] { display: none !important; }
+    </style>
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+    <script>
+        function imageViewer() {
+            return {
+                showImageModal: false,
+                selectedImage: null,
+
+                init() {
+                    // Add keyboard event listener for ESC key
+                    document.addEventListener('keydown', (e) => {
+                        if (e.key === 'Escape' && this.showImageModal) {
+                            this.closeImageModal();
+                        }
+                    });
+                },
+
+                viewImage(imageSrc) {
+                    this.selectedImage = imageSrc;
+                    this.showImageModal = true;
+                },
+
+                closeImageModal() {
+                    this.showImageModal = false;
+                    this.selectedImage = null;
+                }
+            }
+        }
+    </script>
 </head>
 
 <body class="bg-gray-100">
@@ -423,15 +454,42 @@
 
                 <!-- Images -->
                 @if ($discovery->images)
-                    <div class="mb-8">
+                    <div class="mb-8" x-data="imageViewer()" x-init="init()">
                         <h3 class="text-sm font-medium text-gray-700 mb-2">Fotoğraflar</h3>
                         <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
                             @foreach ($discovery->images as $image)
-                                <div>
+                                <div class="relative group cursor-pointer" @click="viewImage('{{ asset('storage/' . $image) }}')">
                                     <img src="{{ asset('storage/' . $image) }}"
-                                        class="w-full h-40 object-cover rounded-lg shadow-sm">
+                                        class="w-full h-40 object-cover rounded-lg shadow-sm hover:shadow-md transition-shadow duration-200">
+                                    <!-- Hover overlay -->
+                                    <div class="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-10 transition-all duration-200 rounded-lg flex items-center justify-center">
+                                        <svg class="w-8 h-8 text-white opacity-0 group-hover:opacity-100 transition-opacity duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM10 7v3m0 0v3m0-3h3m-3 0H7"></path>
+                                        </svg>
+                                    </div>
                                 </div>
                             @endforeach
+                        </div>
+
+                        <!-- Image Modal -->
+                        <div x-show="showImageModal" 
+                             x-cloak
+                             @click.away="closeImageModal()"
+                             class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-75 p-4">
+                            <div class="relative max-w-7xl max-h-full">
+                                <!-- Close button -->
+                                <button @click="closeImageModal()" 
+                                        class="absolute -top-4 -right-4 z-10 bg-white rounded-full p-2 shadow-lg hover:bg-gray-100 transition-colors">
+                                    <svg class="w-6 h-6 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                                    </svg>
+                                </button>
+                                
+                                <!-- Image -->
+                                <img :src="selectedImage" 
+                                     class="max-w-full max-h-full object-contain rounded-lg shadow-2xl"
+                                     @click.stop>
+                            </div>
                         </div>
                     </div>
                 @endif
