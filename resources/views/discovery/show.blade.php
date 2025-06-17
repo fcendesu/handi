@@ -663,7 +663,7 @@
                                                     <div class="text-gray-700 mt-1" x-text="getPropertyDisplayAddress()"></div>
                                                     <div class="text-sm text-gray-500 mt-1">Kayıtlı Mülk</div>
                                                 </div>
-                                                @if($discovery->property->latitude && $discovery->property->longitude)
+                                                @if($discovery->property && $discovery->property->latitude && $discovery->property->longitude)
                                                     <a href="https://www.google.com/maps?q={{ $discovery->property->latitude }},{{ $discovery->property->longitude }}" 
                                                        target="_blank"
                                                        class="ml-4 bg-blue-600 hover:bg-blue-700 text-white px-3 py-2 rounded-md text-sm font-medium transition duration-200 flex items-center">
