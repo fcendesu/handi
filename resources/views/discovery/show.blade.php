@@ -259,6 +259,15 @@
                         const response = await fetch('/api/payment-methods');
                         const data = await response.json();
                         this.paymentMethods = data;
+                        
+                        // Set the selected payment method after loading the options
+                        // This ensures the dropdown shows the correct selected value
+                        this.$nextTick(() => {
+                            const selectElement = this.$el.querySelector('select');
+                            if (selectElement && this.selectedPaymentMethodId) {
+                                selectElement.value = this.selectedPaymentMethodId;
+                            }
+                        });
                     } catch (error) {
                         console.error('Error loading payment methods:', error);
                         this.paymentMethods = [];
@@ -1557,12 +1566,13 @@
 
                             <!-- Edit Mode Select -->
                             <select name="payment_method_id" id="payment_method_id" x-show="editMode"
-                                x-data="paymentMethodSelector()" x-init="loadPaymentMethods();
-                                selectedPaymentMethodId = '{{ old('payment_method_id', $discovery->payment_method_id) }}'" x-model="selectedPaymentMethodId"
+                                x-data="paymentMethodSelector()" 
+                                x-init="selectedPaymentMethodId = '{{ old('payment_method_id', $discovery->payment_method_id) }}'; loadPaymentMethods();" 
+                                x-model="selectedPaymentMethodId"
                                 class="bg-gray-100 mt-1 block w-full rounded-md border-2 border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 px-4 py-2">
                                 <option value="">Ödeme şekli seçin (opsiyonel)</option>
                                 <template x-for="paymentMethod in paymentMethods" :key="paymentMethod.id">
-                                    <option :value="paymentMethod.id" x-text="paymentMethod.name"></option>
+                                    <option :value="paymentMethod.id" x-text="paymentMethod.name" :selected="paymentMethod.id == selectedPaymentMethodId"></option>
                                 </template>
                             </select>
                             @error('payment_method_id')
