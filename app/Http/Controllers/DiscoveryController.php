@@ -161,7 +161,7 @@ class DiscoveryController extends Controller
                     $validated['latitude'] = $request->latitude;
                     $validated['longitude'] = $request->longitude;
                 }
-                
+
                 // Clear property_id for manual addresses
                 $validated['property_id'] = null;
             }

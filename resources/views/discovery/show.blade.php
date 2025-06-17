@@ -178,12 +178,12 @@
                 properties: [],
                 
                 // Manual address fields - use separate city/district fields
-                selectedCity: '{{ $discovery->city }}',
-                selectedDistrict: '{{ $discovery->district }}',
-                addressDetails: '{{ $discovery->address }}',
+                selectedCity: @json($discovery->city ?? ''),
+                selectedDistrict: @json($discovery->district ?? ''),
+                addressDetails: @json($discovery->address ?? ''),
                 districts: [],
-                latitude: '{{ $discovery->latitude }}',
-                longitude: '{{ $discovery->longitude }}',
+                latitude: @json($discovery->latitude ?? ''),
+                longitude: @json($discovery->longitude ?? ''),
                 loadingLocation: false,
                 locationError: '',
                 map: null,
@@ -195,35 +195,43 @@
                         this.selectedProperty = this.properties.find(p => p.id == this.selectedPropertyId);
                     }
                     
-                    // Parse existing address if available
-                    this.parseExistingAddress();
+                    // Initialize districts for the selected city if available
+                    if (this.selectedCity) {
+                        setTimeout(() => {
+                            this.updateDistricts();
+                        }, 100);
+                    }
                     
                     // Initialize map after a short delay to ensure DOM is ready
                     setTimeout(() => {
-                        this.initMap();
+                        if (document.getElementById('addressModalMap')) {
+                            this.initMap();
+                        }
                     }, 200);
-                },
-
-                parseExistingAddress() {
-                    // Initialize districts for the selected city if available
-                    if (this.selectedCity) {
-                        this.updateDistricts();
-                    }
                 },
 
                 updateDistricts() {
                     const cityDistrictMap = @json(\App\Data\AddressData::getAllDistricts());
-                    console.log('Selected city:', this.selectedCity);
-                    console.log('Available districts for city:', cityDistrictMap[this.selectedCity]);
+                    
+                    // Store current district before update
+                    const currentDistrict = this.selectedDistrict;
                     
                     this.districts = cityDistrictMap[this.selectedCity] || [];
                     
-                    // Clear district selection if current district is not in new city
-                    if (this.selectedDistrict && !this.districts.includes(this.selectedDistrict)) {
-                        this.selectedDistrict = '';
+                    // Check if current district is valid for this city
+                    if (currentDistrict && this.districts.length > 0) {
+                        const isDistrictValid = this.districts.includes(currentDistrict);
+                        
+                        if (isDistrictValid) {
+                            // Force re-assignment to trigger reactivity
+                            this.selectedDistrict = '';
+                            this.$nextTick(() => {
+                                this.selectedDistrict = currentDistrict;
+                            });
+                        } else {
+                            this.selectedDistrict = '';
+                        }
                     }
-                    
-                    console.log('Districts updated to:', this.districts);
                 },
 
                 async getCurrentLocation() {
@@ -605,7 +613,15 @@
                                                     @if($discovery->property_id)
                                                         {{ $discovery->property->name }} - {{ $discovery->property->full_address }}
                                                     @else
-                                                        {{ $discovery->address ?: 'Adres belirtilmemiş' }}
+                                                        @php
+                                                            $currentAddressParts = array_filter([
+                                                                $discovery->city,
+                                                                $discovery->district,
+                                                                $discovery->address
+                                                            ]);
+                                                            $currentFullAddress = implode(', ', $currentAddressParts) ?: 'Adres belirtilmemiş';
+                                                        @endphp
+                                                        {{ $currentFullAddress }}
                                                     @endif
                                                 </div>
                                             </div>
@@ -633,7 +649,14 @@
                                         <div class="mt-3">
                                             <h3 class="text-lg font-medium text-gray-900 mb-4">Adres Değiştir</h3>
                                             
-                                            <div x-data="addressModalData()" class="space-y-4">
+                                            <div x-data="addressModalData()" 
+                                                 x-init="$watch('$parent.showAddressModal', value => { 
+                                                     if (value) { 
+                                                         updateDistricts();
+                                                         setTimeout(() => updateDistricts(), 50); 
+                                                     } 
+                                                 })" 
+                                                 class="space-y-4">
                                                 <!-- Address Type Selection -->
                                                 <div class="flex space-x-4">
                                                     <label class="flex items-center">
@@ -682,11 +705,11 @@
                                                         <label class="block text-sm font-medium text-gray-700 mb-2">İlçe</label>
                                                         <select x-model="selectedDistrict"
                                                             class="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
-                                                            <option value="">
-                                                                <span x-text="selectedCity ? 'Bir ilçe seçin' : 'Önce şehir seçin'"></span>
-                                                            </option>
-                                                            <template x-for="district in districts" :key="district">
-                                                                <option :value="district" x-text="district"></option>
+                                                            <option value="">Bir ilçe seçin</option>
+                                                            <template x-for="district in districts" :key="`${selectedCity}-${district}`">
+                                                                <option :value="district" 
+                                                                        x-text="district"
+                                                                        :selected="district === selectedDistrict"></option>
                                                             </template>
                                                         </select>
                                                     </div>
