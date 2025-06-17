@@ -166,9 +166,9 @@
                                             class="space-y-4">
                                             <!-- City Selection -->
                                             <div>
-                                                <label for="manual_city"
+                                                <label for="city"
                                                     class="block text-sm font-medium text-gray-700 mb-2">Şehir</label>
-                                                <select name="manual_city" id="manual_city" x-model="selectedCity"
+                                                <select name="city" id="city" x-model="selectedCity"
                                                     @change="updateDistricts()"
                                                     class="bg-gray-100 mt-1 block w-full rounded-md border-2 border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 px-4 py-2">
                                                     <option value="">Bir şehir seçin</option>
@@ -177,16 +177,16 @@
                                                         </option>
                                                     @endforeach
                                                 </select>
-                                                @error('manual_city')
+                                                @error('city')
                                                     <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
                                                 @enderror
                                             </div>
 
                                             <!-- District Selection -->
                                             <div>
-                                                <label for="manual_district"
+                                                <label for="district"
                                                     class="block text-sm font-medium text-gray-700 mb-2">İlçe</label>
-                                                <select name="manual_district" id="manual_district"
+                                                <select name="district" id="district"
                                                     x-model="selectedDistrict"
                                                     class="bg-gray-100 mt-1 block w-full rounded-md border-2 border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 px-4 py-2">
                                                     <option value="">Önce şehir seçin</option>
@@ -194,20 +194,20 @@
                                                         <option :value="district" x-text="district"></option>
                                                     </template>
                                                 </select>
-                                                @error('manual_district')
+                                                @error('district')
                                                     <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
                                                 @enderror
                                             </div>
 
                                             <!-- Remaining Address Details -->
                                             <div>
-                                                <label for="address_details"
+                                                <label for="address"
                                                     class="block text-sm font-medium text-gray-700 mb-2">Adres
                                                     Detayları</label>
-                                                <textarea name="address_details" id="address_details" rows="3"
+                                                <textarea name="address" id="address" rows="3"
                                                     placeholder="Site adı, sokak, kapı numarası vb. detayları girin..."
-                                                    class="bg-gray-100 mt-1 block w-full rounded-md border-2 border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 px-4 py-2">{{ old('address_details') }}</textarea>
-                                                @error('address_details')
+                                                    class="bg-gray-100 mt-1 block w-full rounded-md border-2 border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 px-4 py-2">{{ old('address') }}</textarea>
+                                                @error('address')
                                                     <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
                                                 @enderror
                                             </div>
@@ -254,8 +254,8 @@
                                                 </p>
 
                                                 <!-- Hidden coordinate inputs for form submission -->
-                                                <input type="hidden" name="manual_latitude" x-model="latitude">
-                                                <input type="hidden" name="manual_longitude" x-model="longitude">
+                                                <input type="hidden" name="latitude" x-model="latitude">
+                                                <input type="hidden" name="longitude" x-model="longitude">
                                             </div>
                                         </div>
                                     </div>
@@ -991,7 +991,7 @@
 
         function propertySelector() {
             return {
-                addressType: '{{ old('property_id') ? 'property' : (old('address') ? 'manual' : 'property') }}',
+                addressType: '{{ old('property_id') ? 'property' : (old('address') || old('city') || old('district') ? 'manual' : 'property') }}',
                 properties: [],
                 selectedPropertyId: '{{ old('property_id') }}',
                 selectedProperty: null,
@@ -1065,12 +1065,12 @@
 
         function manualAddressSelector() {
             return {
-                selectedCity: '{{ old('manual_city') }}',
-                selectedDistrict: '{{ old('manual_district') }}',
+                selectedCity: '{{ old('city') ?: old('manual_city') }}',
+                selectedDistrict: '{{ old('district') ?: old('manual_district') }}',
                 districts: [],
                 cityDistricts: @json($districts),
-                latitude: {{ old('manual_latitude', 'null') }},
-                longitude: {{ old('manual_longitude', 'null') }},
+                latitude: {{ old('latitude', old('manual_latitude', 'null')) }},
+                longitude: {{ old('longitude', old('manual_longitude', 'null')) }},
                 loadingLocation: false,
                 locationError: '',
                 map: null,

@@ -76,15 +76,11 @@ class DiscoveryController extends Controller
             'customer_email' => 'required|email|max:255',
             'address_type' => 'required|in:property,manual',
             'property_id' => 'nullable|exists:properties,id|required_if:address_type,property',
-            'address' => 'nullable|string|max:1000', // This becomes address details/description
+            'address' => 'nullable|string|max:1000',
             'city' => 'nullable|string|max:255',
             'district' => 'nullable|string|max:255',
-            // Manual address fields (kept for backwards compatibility)
-            'manual_city' => 'nullable|string|max:255',
-            'manual_district' => 'nullable|string|max:255',
-            'address_details' => 'nullable|string|max:1000',
-            'manual_latitude' => 'nullable|numeric|between:-90,90',
-            'manual_longitude' => 'nullable|numeric|between:-180,180',
+            'latitude' => 'nullable|numeric|between:-90,90',
+            'longitude' => 'nullable|numeric|between:-180,180',
             'discovery' => 'required|string',
             'todo_list' => 'nullable|string',
             'note_to_customer' => 'nullable|string',
@@ -116,20 +112,20 @@ class DiscoveryController extends Controller
         }
 
         // Additional validation for manual address - ensure city is valid
-        if ($request->address_type === 'manual' && $request->manual_city) {
-            if (!in_array($request->manual_city, AddressData::getCities())) {
-                return back()->withErrors(['manual_city' => 'Selected city is not valid.']);
+        if ($request->address_type === 'manual' && $request->city) {
+            if (!in_array($request->city, AddressData::getCities())) {
+                return back()->withErrors(['city' => 'Selected city is not valid.']);
             }
 
-            if ($request->manual_district && !in_array($request->manual_district, AddressData::getDistricts($request->manual_city))) {
-                return back()->withErrors(['manual_district' => 'Selected district is not valid for the selected city.']);
+            if ($request->district && !in_array($request->district, AddressData::getDistricts($request->city))) {
+                return back()->withErrors(['district' => 'Selected district is not valid for the selected city.']);
             }
         }
 
         // Additional validation - ensure manual address has at least some address information
         if ($request->address_type === 'manual') {
-            if (empty($request->manual_city) && empty($request->address_details)) {
-                return back()->withErrors(['manual_city' => 'At least city or address details must be provided for manual address.']);
+            if (empty($request->city) && empty($request->address)) {
+                return back()->withErrors(['city' => 'At least city or address details must be provided for manual address.']);
             }
         }
 
@@ -156,16 +152,14 @@ class DiscoveryController extends Controller
         try {
             // Process manual address - store city, district, and address details separately
             if ($request->address_type === 'manual') {
-                // Use the manual_city and manual_district for backwards compatibility
-                // or the new city/district fields if they exist
-                $validated['city'] = $request->manual_city ?? $request->city;
-                $validated['district'] = $request->manual_district ?? $request->district;
-                $validated['address'] = $request->address_details ?? $request->address;
+                $validated['city'] = $request->city;
+                $validated['district'] = $request->district;
+                $validated['address'] = $request->address;
 
                 // Set coordinates if provided
-                if ($request->manual_latitude && $request->manual_longitude) {
-                    $validated['latitude'] = $request->manual_latitude;
-                    $validated['longitude'] = $request->manual_longitude;
+                if ($request->latitude && $request->longitude) {
+                    $validated['latitude'] = $request->latitude;
+                    $validated['longitude'] = $request->longitude;
                 }
                 
                 // Clear property_id for manual addresses
