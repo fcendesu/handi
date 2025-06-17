@@ -53,7 +53,6 @@ class Discovery extends Model
         'extra_fee',
         'discount_rate',
         'discount_amount',
-        'payment_method',
         'payment_method_id',
         'images',
         'share_token',
