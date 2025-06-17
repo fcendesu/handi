@@ -286,29 +286,6 @@
                     </div>
                 @endif
 
-                <!-- Priority Display -->
-                <div class="mb-8">
-                    <h3 class="text-sm font-medium text-gray-700 mb-2">Öncelik Seviyesi</h3>
-                    @php
-                        $turkishPriorityLabels = [
-                            \App\Models\Discovery::PRIORITY_LOW => 'Yok',
-                            \App\Models\Discovery::PRIORITY_MEDIUM => 'Var',
-                            \App\Models\Discovery::PRIORITY_HIGH => 'Acil',
-                        ];
-                        $priorityLabel = $turkishPriorityLabels[$discovery->priority] ?? 'Yok';
-                        $priorityBadgeClass =
-                            $discovery->priority == \App\Models\Discovery::PRIORITY_HIGH
-                                ? 'bg-red-100 text-red-800'
-                                : ($discovery->priority == \App\Models\Discovery::PRIORITY_MEDIUM
-                                    ? 'bg-yellow-100 text-yellow-800'
-                                    : 'bg-gray-100 text-gray-800');
-                    @endphp
-                    <div
-                        class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium {{ $priorityBadgeClass }}">
-                        {{ $priorityLabel }}
-                    </div>
-                </div>
-
                 <!-- Work Group Display -->
                 @if ($discovery->workGroup)
                     <div class="mb-8">
