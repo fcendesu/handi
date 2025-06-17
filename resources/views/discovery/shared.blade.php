@@ -245,6 +245,16 @@
                     </div>
                 </div>
 
+                <!-- Todo List section -->
+                @if ($discovery->todo_list)
+                    <div class="mb-8">
+                        <h3 class="text-sm font-medium text-gray-700 mb-2">Yapılacaklar Listesi</h3>
+                        <div class="bg-gray-50 p-6 rounded-lg">
+                            {!! nl2br(e($discovery->todo_list)) !!}
+                        </div>
+                    </div>
+                @endif
+
                 <!-- Priority Display -->
                 <div class="mb-8">
                     <h3 class="text-sm font-medium text-gray-700 mb-2">Öncelik Seviyesi</h3>
@@ -290,16 +300,6 @@
                                     @endif
                                 </div>
                             </div>
-                        </div>
-                    </div>
-                @endif
-
-                <!-- Add Todo List section after Discovery Details -->
-                @if ($discovery->todo_list)
-                    <div class="mb-8">
-                        <h3 class="text-sm font-medium text-gray-700 mb-2">Yapılacaklar Listesi</h3>
-                        <div class="bg-gray-50 p-6 rounded-lg">
-                            {!! nl2br(e($discovery->todo_list)) !!}
                         </div>
                     </div>
                 @endif
