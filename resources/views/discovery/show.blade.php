@@ -758,18 +758,6 @@
                                                             </button>
                                                         </div>
 
-                                                        <!-- Coordinate Display -->
-                                                        <div class="grid grid-cols-2 gap-3" x-show="latitude && longitude">
-                                                            <div class="bg-blue-50 border border-blue-200 rounded p-2">
-                                                                <div class="text-xs font-medium text-blue-700">Enlem</div>
-                                                                <div class="text-sm font-mono text-blue-900" x-text="latitude"></div>
-                                                            </div>
-                                                            <div class="bg-blue-50 border border-blue-200 rounded p-2">
-                                                                <div class="text-xs font-medium text-blue-700">Boylam</div>
-                                                                <div class="text-sm font-mono text-blue-900" x-text="longitude"></div>
-                                                            </div>
-                                                        </div>
-
                                                         <!-- Error Display -->
                                                         <div x-show="locationError" class="text-sm text-red-600" x-text="locationError"></div>
 
