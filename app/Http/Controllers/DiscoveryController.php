@@ -244,7 +244,23 @@ class DiscoveryController extends Controller
     public function show(Discovery $discovery)
     {
         $discovery->load('items', 'workGroup', 'paymentMethod');
-        return view('discovery.show', compact('discovery'));
+
+        $user = auth()->user();
+
+        // Get available work groups for the user
+        $workGroups = collect();
+        if ($user->isSoloHandyman()) {
+            // Solo handyman sees work groups they created
+            $workGroups = $user->createdWorkGroups;
+        } elseif ($user->isCompanyAdmin()) {
+            // Company admin sees all company work groups
+            $workGroups = $user->company->workGroups;
+        } elseif ($user->isCompanyEmployee()) {
+            // Employees see work groups they belong to
+            $workGroups = $user->workGroups;
+        }
+
+        return view('discovery.show', compact('discovery', 'workGroups'));
     }
 
     public function edit(Discovery $discovery)
@@ -278,6 +294,7 @@ class DiscoveryController extends Controller
             'discount_amount' => 'nullable|numeric|min:0',
             'payment_method_id' => 'nullable|exists:payment_methods,id',
             'priority' => ['nullable', 'integer', Rule::in(array_keys(Discovery::getPriorities()))],
+            'work_group_id' => 'nullable|exists:work_groups,id',
             'images.*' => 'nullable|image|mimes:jpeg,png,jpg|max:2048',
             'remove_images' => 'nullable|array',
             'remove_images.*' => 'string',
@@ -290,6 +307,24 @@ class DiscoveryController extends Controller
         // Validate address logic - ensure we have either property_id or address
         if (empty($validated['property_id']) && empty($validated['address'])) {
             return back()->withErrors(['address' => 'Either property address or manual address must be provided.']);
+        }
+
+        // Additional validation for work group - ensure user has access to selected work group
+        if ($request->work_group_id) {
+            $user = auth()->user();
+            $hasAccess = false;
+
+            if ($user->isSoloHandyman()) {
+                $hasAccess = $user->createdWorkGroups()->where('id', $request->work_group_id)->exists();
+            } elseif ($user->isCompanyAdmin()) {
+                $hasAccess = $user->company->workGroups()->where('id', $request->work_group_id)->exists();
+            } elseif ($user->isCompanyEmployee()) {
+                $hasAccess = $user->workGroups()->where('id', $request->work_group_id)->exists();
+            }
+
+            if (!$hasAccess) {
+                return back()->withErrors(['work_group_id' => 'You do not have access to the selected work group.']);
+            }
         }
 
         try {

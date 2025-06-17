@@ -956,20 +956,37 @@
                         <!-- Work Group Display -->
                         <div>
                             <label class="block text-sm font-medium text-gray-700 mb-2">İş Grubu</label>
-                            <div class="bg-gray-100 mt-1 block w-full rounded-md border-2 border-gray-300 px-4 py-2">
+                            
+                            <!-- View Mode -->
+                            <div x-show="!editMode" class="bg-gray-100 mt-1 block w-full rounded-md border-2 border-gray-300 px-4 py-2">
                                 @if ($discovery->workGroup)
                                     <div class="flex items-center">
-                                        <span
-                                            class="font-medium text-gray-900">{{ $discovery->workGroup->name }}</span>
+                                        <span class="font-medium text-gray-900">{{ $discovery->workGroup->name }}</span>
                                         @if ($discovery->workGroup->description)
-                                            <span class="ml-2 text-sm text-gray-600">-
-                                                {{ $discovery->workGroup->description }}</span>
+                                            <span class="ml-2 text-sm text-gray-600">- {{ $discovery->workGroup->description }}</span>
                                         @endif
                                     </div>
                                 @else
                                     <span class="text-gray-500 italic">Atanmış iş grubu yok</span>
                                 @endif
                             </div>
+
+                            <!-- Edit Mode -->
+                            <select name="work_group_id" x-show="editMode"
+                                class="bg-gray-100 mt-1 block w-full rounded-md border-2 border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 px-4 py-2">
+                                <option value="">İş grubu seçin (opsiyonel)</option>
+                                @foreach($workGroups as $workGroup)
+                                    <option value="{{ $workGroup->id }}" 
+                                        {{ old('work_group_id', $discovery->work_group_id) == $workGroup->id ? 'selected' : '' }}>
+                                        {{ $workGroup->name }}
+                                        @if($workGroup->description) - {{ $workGroup->description }}@endif
+                                    </option>
+                                @endforeach
+                            </select>
+                            
+                            @error('work_group_id')
+                                <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                            @enderror
                         </div>
 
                         <!-- Item Selection -->
