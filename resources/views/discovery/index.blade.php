@@ -791,18 +791,60 @@
                                 <div x-show="previews.length > 0"
                                     class="mt-4 grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
                                     <template x-for="(preview, index) in previews" :key="index">
-                                        <div class="relative">
-                                            <img :src="preview" class="h-40 w-full object-cover rounded-lg">
-                                            <button type="button" @click="removeImage(index)"
-                                                class="absolute top-2 right-2 bg-red-600 text-red-500 rounded-full p-2 shadow-xl hover:bg-gray-900 hover:text-red-600 border-2 border-red-500">
-                                                <svg class="h-2 w-2" fill="none" stroke="currentColor"
-                                                    viewBox="0 0 24 24">
-                                                    <path stroke-linecap="round" stroke-linejoin="round"
-                                                        stroke-width="3" d="M6 18L18 6M6 6l12 12" />
+                                        <div class="relative group">
+                                            <!-- Image with click to enlarge -->
+                                            <img :src="preview" 
+                                                 class="h-40 w-full object-cover rounded-lg cursor-pointer hover:opacity-90 transition-opacity"
+                                                 @click="viewImage(preview)">
+                                            
+                                            <!-- Enhanced remove button overlay -->
+                                            <button type="button" 
+                                                    @click="removeImage(index)"
+                                                    class="absolute -top-2 -right-2 w-8 h-8 bg-red-500 hover:bg-red-600 text-white rounded-full flex items-center justify-center shadow-lg opacity-80 hover:opacity-100 transition-all duration-200 hover:scale-110">
+                                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
                                                 </svg>
                                             </button>
                                         </div>
                                     </template>
+                                </div>
+
+                                <!-- Image Preview Modal -->
+                                <div x-show="showImageModal" 
+                                     x-transition:enter="transition ease-out duration-300"
+                                     x-transition:enter-start="opacity-0"
+                                     x-transition:enter-end="opacity-100"
+                                     x-transition:leave="transition ease-in duration-200"
+                                     x-transition:leave-start="opacity-100"
+                                     x-transition:leave-end="opacity-0"
+                                     class="fixed inset-0 z-50 overflow-y-auto"
+                                     style="display: none;"
+                                     @click.self="closeImageModal()">
+                                    
+                                    <!-- Background overlay -->
+                                    <div class="fixed inset-0 bg-black bg-opacity-75 transition-opacity"
+                                         @click.stop="closeImageModal()"></div>
+                                    
+                                    <!-- Modal content -->
+                                    <div class="flex min-h-full items-center justify-center p-4"
+                                         @click.self="closeImageModal()">
+                                        <div class="relative max-w-4xl max-h-full">
+                                            <!-- Close button -->
+                                            <button type="button" 
+                                                    @click.stop="closeImageModal()"
+                                                    class="absolute -top-4 -right-4 z-10 w-10 h-10 bg-white hover:bg-gray-100 text-gray-800 rounded-full flex items-center justify-center shadow-lg transition-all duration-200 hover:scale-110">
+                                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                                                </svg>
+                                            </button>
+                                            
+                                            <!-- Image -->
+                                            <img :src="selectedImage" 
+                                                 alt="Preview" 
+                                                 class="max-w-full max-h-screen object-contain rounded-lg shadow-2xl"
+                                                 @click.stop>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
 
@@ -1024,6 +1066,27 @@
             return {
                 previews: [],
                 fileInput: null,
+                showImageModal: false,
+                selectedImage: null,
+
+                init() {
+                    // Add keyboard event listener for ESC key
+                    document.addEventListener('keydown', (e) => {
+                        if (e.key === 'Escape' && this.showImageModal) {
+                            this.closeImageModal();
+                        }
+                    });
+                },
+
+                viewImage(imageSrc) {
+                    this.selectedImage = imageSrc;
+                    this.showImageModal = true;
+                },
+
+                closeImageModal() {
+                    this.showImageModal = false;
+                    this.selectedImage = null;
+                },
 
                 previewImages(event) {
                     this.fileInput = event.target;

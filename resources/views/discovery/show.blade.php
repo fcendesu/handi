@@ -185,6 +185,8 @@
             return {
                 previews: [],
                 fileInput: null,
+                showImageModal: false,
+                selectedImage: null,
 
                 init() {
                     // Initialize with existing images if any
@@ -192,6 +194,23 @@
                         const existingImages = JSON.parse(this.$el.dataset.existingImages);
                         this.previews = existingImages.map(img => `/storage/${img}`);
                     }
+
+                    // Add keyboard event listener for ESC key
+                    document.addEventListener('keydown', (e) => {
+                        if (e.key === 'Escape' && this.showImageModal) {
+                            this.closeImageModal();
+                        }
+                    });
+                },
+
+                viewImage(imageSrc) {
+                    this.selectedImage = imageSrc;
+                    this.showImageModal = true;
+                },
+
+                closeImageModal() {
+                    this.showImageModal = false;
+                    this.selectedImage = null;
                 },
 
                 previewImages(event) {
@@ -1527,8 +1546,15 @@
                                 <!-- Items Total -->
                                 <div class="flex justify-between">
                                     <span class="text-gray-600">Malzeme Masrafları:</span>
-                                    <span
-                                        class="font-medium">{{ number_format($discovery->items->sum(function ($item) {return ($item->pivot->custom_price ?? $item->price) * $item->pivot->quantity;}),2) }}</span>
+                                    <span class="font-medium">
+                                        @php
+                                            $itemsTotal = 0;
+                                            foreach ($discovery->items as $item) {
+                                                $itemsTotal += ($item->pivot->custom_price ?? $item->price) * $item->pivot->quantity;
+                                            }
+                                        @endphp
+                                        {{ number_format($itemsTotal, 2) }}
+                                    </span>
                                 </div>
 
                                 <!-- Fixed Discount Amount -->
@@ -1596,16 +1622,20 @@
                             <!-- Current Images -->
                             <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 mb-4">
                                 <template x-for="(preview, index) in previews" :key="index">
-                                    <div class="relative">
-                                        <img :src="preview" class="h-40 w-full object-cover rounded-lg">
+                                    <div class="relative group">
+                                        <!-- Image with click to enlarge -->
+                                        <img :src="preview" 
+                                             class="h-40 w-full object-cover rounded-lg cursor-pointer hover:opacity-90 transition-opacity"
+                                             @click="viewImage(preview)">
+                                        
+                                        <!-- Enhanced remove button overlay -->
                                         <button type="button"
                                             @click="removeImage(index, preview.includes('/storage/') ? preview.replace('/storage/', '') : null)"
                                             :disabled="!editMode"
-                                            class="absolute top-2 right-2 bg-red-600 bg-opacity-50 text-white rounded-full p-2 hover:bg-opacity-75">
-                                            <svg class="h-1 w-1" fill="none" stroke="currentColor"
-                                                viewBox="0 0 24 24">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                                    d="M6 18L18 6M6 6l12 12" />
+                                            x-show="editMode"
+                                            class="absolute -top-2 -right-2 w-8 h-8 bg-red-500 hover:bg-red-600 text-white rounded-full flex items-center justify-center shadow-lg opacity-80 hover:opacity-100 transition-all duration-200 hover:scale-110 disabled:opacity-50 disabled:cursor-not-allowed">
+                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
                                             </svg>
                                         </button>
                                     </div>
@@ -1620,6 +1650,44 @@
                             @error('images.*')
                                 <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
                             @enderror
+
+                            <!-- Image Preview Modal -->
+                            <div x-show="showImageModal" 
+                                 x-transition:enter="transition ease-out duration-300"
+                                 x-transition:enter-start="opacity-0"
+                                 x-transition:enter-end="opacity-100"
+                                 x-transition:leave="transition ease-in duration-200"
+                                 x-transition:leave-start="opacity-100"
+                                 x-transition:leave-end="opacity-0"
+                                 class="fixed inset-0 z-50 overflow-y-auto"
+                                 style="display: none;"
+                                 @click.self="closeImageModal()">
+                                
+                                <!-- Background overlay -->
+                                <div class="fixed inset-0 bg-black bg-opacity-75 transition-opacity"
+                                     @click.stop="closeImageModal()"></div>
+                                
+                                <!-- Modal content -->
+                                <div class="flex min-h-full items-center justify-center p-4"
+                                     @click.self="closeImageModal()">
+                                    <div class="relative max-w-4xl max-h-full">
+                                        <!-- Close button -->
+                                        <button type="button" 
+                                                @click.stop="closeImageModal()"
+                                                class="absolute -top-4 -right-4 z-10 w-10 h-10 bg-white hover:bg-gray-100 text-gray-800 rounded-full flex items-center justify-center shadow-lg transition-all duration-200 hover:scale-110">
+                                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                                            </svg>
+                                        </button>
+                                        
+                                        <!-- Image -->
+                                        <img :src="selectedImage" 
+                                             alt="Preview" 
+                                             class="max-w-full max-h-screen object-contain rounded-lg shadow-2xl"
+                                             @click.stop>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
 
                         <!-- Submit Button -->
