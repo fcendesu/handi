@@ -77,6 +77,7 @@ Route::middleware(['auth', 'restrict.employee.dashboard'])->group(function () {
     Route::get('/discovery/{discovery}', [DiscoveryController::class, 'show'])->name('discovery.show');
     Route::post('/discovery', [DiscoveryController::class, 'store'])->name('discovery.store');
     Route::patch('/discovery/{discovery}', [DiscoveryController::class, 'update'])->name('discovery.update');
+    Route::patch('/discovery/{discovery}/address', [DiscoveryController::class, 'updateAddress'])->name('discovery.update-address');
     Route::patch('/discovery/{discovery}/status', [DiscoveryController::class, 'updateStatus'])->name('discovery.update-status');
     Route::delete('/discovery/{discovery}', [DiscoveryController::class, 'destroy'])->name('discovery.destroy');
 

@@ -1229,4 +1229,145 @@ class DiscoveryController extends Controller
             return back()->withErrors(['error' => 'İşlem geçmişi temizleme başarısız: ' . $e->getMessage()]);
         }
     }
+
+    /**
+     * Update only the address fields of a discovery (AJAX endpoint)
+     */
+    public function updateAddress(Request $request, Discovery $discovery): JsonResponse
+    {
+        try {
+            $validated = $request->validate([
+                'address_type' => 'required|in:property,manual',
+                'property_id' => 'nullable|exists:properties,id|required_if:address_type,property',
+                'address' => 'nullable|string|max:1000',
+                'city' => 'nullable|string|max:255',
+                'district' => 'nullable|string|max:255',
+                'latitude' => 'nullable|numeric|between:-90,90',
+                'longitude' => 'nullable|numeric|between:-180,180',
+            ]);
+
+            $user = auth()->user();
+
+            // Check if user can update this discovery
+            if (!$this->canUserUpdateDiscovery($user, $discovery)) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Bu keşif raporunu güncelleme yetkiniz yok.'
+                ], 403);
+            }
+
+            // Prepare update data
+            $updateData = [];
+
+            if ($validated['address_type'] === 'property' && $validated['property_id']) {
+                // Validate property access
+                $property = Property::accessibleBy($user)->find($validated['property_id']);
+                if (!$property) {
+                    return response()->json([
+                        'success' => false,
+                        'message' => 'Bu mülke erişim yetkiniz yok.'
+                    ], 403);
+                }
+
+                $updateData = [
+                    'property_id' => $property->id,
+                    'address' => null,
+                    'city' => null,
+                    'district' => null,
+                    'latitude' => $property->latitude,
+                    'longitude' => $property->longitude,
+                ];
+            } else {
+                // Manual address
+                $updateData = [
+                    'property_id' => null,
+                    'address' => $validated['address'] ?? null,
+                    'city' => $validated['city'] ?? null,
+                    'district' => $validated['district'] ?? null,
+                    'latitude' => $validated['latitude'] ?? null,
+                    'longitude' => $validated['longitude'] ?? null,
+                ];
+            }
+
+            // Update discovery
+            $discovery->update($updateData);
+
+            // Reload the discovery with property relationship for response
+            $discovery->load('property');
+
+            // Prepare response data
+            $responseData = [
+                'property_id' => $discovery->property_id,
+                'address' => $discovery->address,
+                'city' => $discovery->city,
+                'district' => $discovery->district,
+                'latitude' => $discovery->latitude,
+                'longitude' => $discovery->longitude,
+            ];
+
+            if ($discovery->property) {
+                $responseData['property'] = [
+                    'id' => $discovery->property->id,
+                    'name' => $discovery->property->name,
+                    'full_address' => $discovery->property->full_address,
+                    'latitude' => $discovery->property->latitude,
+                    'longitude' => $discovery->property->longitude,
+                ];
+            }
+
+            // Log the address update
+            // TransactionLogService::logDiscoveryUpdated($discovery, $updateData);
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Adres başarıyla güncellendi.',
+                'data' => $responseData
+            ]);
+
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Geçersiz veri.',
+                'errors' => $e->errors()
+            ], 422);
+        } catch (\Exception $e) {
+            \Log::error('Discovery address update failed', [
+                'discovery_id' => $discovery->id,
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ]);
+
+            return response()->json([
+                'success' => false,
+                'message' => 'Adres güncellenirken bir hata oluştu.'
+            ], 500);
+        }
+    }
+
+    /**
+     * Check if user can update a discovery
+     */
+    private function canUserUpdateDiscovery(User $user, Discovery $discovery): bool
+    {
+        // Solo handyman can update their own discoveries
+        if ($user->isSoloHandyman() && $discovery->creator_id === $user->id) {
+            return true;
+        }
+
+        // Company admin can update all company discoveries
+        if ($user->isCompanyAdmin() && $discovery->company_id === $user->company_id) {
+            return true;
+        }
+
+        // Company employee can update discoveries from their work groups or assigned to them
+        if ($user->isCompanyEmployee()) {
+            $workGroupIds = $user->workGroups->pluck('id')->toArray();
+
+            return ($discovery->work_group_id && in_array($discovery->work_group_id, $workGroupIds)) ||
+                $discovery->assignee_id === $user->id ||
+                $discovery->company_id === $user->company_id;
+        }
+
+        return false;
+    }
 }

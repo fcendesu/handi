@@ -166,7 +166,56 @@
                 district: '{{ old('district', $discovery->district) }}',
                 propertyId: '{{ old('property_id', $discovery->property_id) }}',
                 latitude: '{{ old('latitude', $discovery->latitude) }}',
-                longitude: '{{ old('longitude', $discovery->longitude) }}'
+                longitude: '{{ old('longitude', $discovery->longitude) }}',
+                
+                // Property data for display
+                propertyName: @json($discovery->property->name ?? ''),
+                propertyFullAddress: @json($discovery->property->full_address ?? ''),
+                
+                init() {
+                    // Component initialization if needed
+                },
+                
+                getPropertyDisplayName() {
+                    return this.propertyName || 'Kayıtlı Mülk';
+                },
+                
+                getPropertyDisplayAddress() {
+                    return this.propertyFullAddress || 'Adres bilgisi yok';
+                },
+                
+                getManualAddressDisplay() {
+                    const parts = [this.city, this.district, this.address].filter(part => part && part.trim());
+                    return parts.length > 0 ? parts.join(', ') : 'Adres belirtilmemiş';
+                },
+                
+                handleAddressSaved(data) {
+                    // Use saved data from server if available
+                    const savedData = data.savedData || {};
+                    
+                    if (data.modalAddressType === 'property' && data.selectedProperty) {
+                        this.propertyId = savedData.property_id || data.selectedProperty.id;
+                        this.propertyName = savedData.property?.name || data.selectedProperty.name;
+                        this.propertyFullAddress = savedData.property?.full_address || data.selectedProperty.full_address;
+                        this.address = '';
+                        this.city = '';
+                        this.district = '';
+                        this.latitude = savedData.latitude || data.selectedProperty.latitude || '';
+                        this.longitude = savedData.longitude || data.selectedProperty.longitude || '';
+                    } else if (data.modalAddressType === 'manual') {
+                        this.propertyId = '';
+                        this.propertyName = '';
+                        this.propertyFullAddress = '';
+                        this.address = savedData.address || data.addressDetails || '';
+                        this.city = savedData.city || data.selectedCity || '';
+                        this.district = savedData.district || data.selectedDistrict || '';
+                        this.latitude = savedData.latitude || data.latitude || '';
+                        this.longitude = savedData.longitude || data.longitude || '';
+                    }
+                    
+                    // Close the modal
+                    this.showAddressModal = false;
+                }
             }
         }
 
@@ -364,27 +413,92 @@
                     this.selectedProperty = this.properties.find(p => p.id == this.selectedPropertyId) || null;
                 },
 
-                saveAddress() {
-                    const addressDisplay = document.querySelector('[x-data*="addressDisplay"]').__x.$data;
-                    
-                    if (this.modalAddressType === 'property' && this.selectedProperty) {
-                        addressDisplay.propertyId = this.selectedProperty.id;
-                        addressDisplay.address = '';
-                        addressDisplay.latitude = this.selectedProperty.latitude || '';
-                        addressDisplay.longitude = this.selectedProperty.longitude || '';
-                    } else if (this.modalAddressType === 'manual') {
-                        // Save manual address components to hidden form fields
-                        addressDisplay.propertyId = '';
-                        addressDisplay.address = this.addressDetails || '';
-                        addressDisplay.latitude = this.latitude || '';
-                        addressDisplay.longitude = this.longitude || '';
+                async saveAddress() {
+                    try {
+                        // Prepare the data to send
+                        const data = {
+                            address_type: this.modalAddressType,
+                            _token: document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                        };
+
+                        if (this.modalAddressType === 'property' && this.selectedProperty) {
+                            data.property_id = this.selectedProperty.id;
+                        } else if (this.modalAddressType === 'manual') {
+                            data.address = this.addressDetails || '';
+                            data.city = this.selectedCity || '';
+                            data.district = this.selectedDistrict || '';
+                            data.latitude = this.latitude || '';
+                            data.longitude = this.longitude || '';
+                        }
+
+                        // Show loading state
+                        const saveButton = document.querySelector('[x-data*="addressModalData"] button[type="button"]:last-child');
+                        const originalText = saveButton.textContent;
+                        saveButton.textContent = 'Kaydediliyor...';
+                        saveButton.disabled = true;
+
+                        // Make AJAX request
+                        const response = await fetch(`/discovery/{{ $discovery->id }}/address`, {
+                            method: 'PATCH',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'X-CSRF-TOKEN': data._token,
+                                'Accept': 'application/json'
+                            },
+                            body: JSON.stringify(data)
+                        });
+
+                        const result = await response.json();
+
+                        if (result.success) {
+                            // Dispatch event to update the display
+                            this.$dispatch('address-saved', {
+                                modalAddressType: this.modalAddressType,
+                                selectedProperty: this.selectedProperty,
+                                selectedCity: this.selectedCity,
+                                selectedDistrict: this.selectedDistrict,
+                                addressDetails: this.addressDetails,
+                                latitude: this.latitude,
+                                longitude: this.longitude,
+                                savedData: result.data
+                            });
+
+                            // Show success message
+                            this.showNotification('success', result.message || 'Adres başarıyla güncellendi.');
+                        } else {
+                            // Show error message
+                            this.showNotification('error', result.message || 'Adres güncellenirken bir hata oluştu.');
+                        }
+
+                        // Restore button state
+                        saveButton.textContent = originalText;
+                        saveButton.disabled = false;
+
+                    } catch (error) {
+                        console.error('Error saving address:', error);
+                        this.showNotification('error', 'Adres güncellenirken bir hata oluştu.');
                         
-                        // Update the city and district in the parent component
-                        addressDisplay.city = this.selectedCity || '';
-                        addressDisplay.district = this.selectedDistrict || '';
+                        // Restore button state
+                        const saveButton = document.querySelector('[x-data*="addressModalData"] button[type="button"]:last-child');
+                        saveButton.textContent = 'Kaydet';
+                        saveButton.disabled = false;
                     }
+                },
+
+                showNotification(type, message) {
+                    // Create and show a notification
+                    const notification = document.createElement('div');
+                    notification.className = `fixed top-4 right-4 z-50 p-4 rounded-md ${type === 'success' ? 'bg-green-100 border-l-4 border-green-500 text-green-700' : 'bg-red-100 border-l-4 border-red-500 text-red-700'}`;
+                    notification.textContent = message;
                     
-                    this.$parent.showAddressModal = false;
+                    document.body.appendChild(notification);
+                    
+                    // Remove after 5 seconds
+                    setTimeout(() => {
+                        if (notification.parentNode) {
+                            notification.parentNode.removeChild(notification);
+                        }
+                    }, 5000);
                 }
             }
         }
@@ -536,18 +650,17 @@
                             </div>
 
                             <!-- Address Display/Edit Section -->
-                            <div class="col-span-full" x-data="addressDisplay()">
+                            <div class="col-span-full" x-data="addressDisplay()" @address-saved="handleAddressSaved($event.detail)">
                                 <label class="block text-sm font-medium text-gray-700 mb-2">Adres</label>
                                 
                                 <!-- View Mode -->
                                 <div x-show="!editMode" class="space-y-3">
                                     <div class="bg-gray-50 border border-gray-200 rounded-lg p-4">
-                                        @if($discovery->property_id)
-                                            <!-- Property Address Display -->
-                                            <div class="flex items-start justify-between">
+                                        <!-- Property Address Display -->
+                                        <div x-show="propertyId" class="flex items-start justify-between">
                                                 <div class="flex-1">
-                                                    <div class="font-medium text-gray-900">{{ $discovery->property->name }}</div>
-                                                    <div class="text-gray-700 mt-1">{{ $discovery->property->full_address }}</div>
+                                                    <div class="font-medium text-gray-900" x-text="getPropertyDisplayName()"></div>
+                                                    <div class="text-gray-700 mt-1" x-text="getPropertyDisplayAddress()"></div>
                                                     <div class="text-sm text-gray-500 mt-1">Kayıtlı Mülk</div>
                                                 </div>
                                                 @if($discovery->property->latitude && $discovery->property->longitude)
@@ -562,30 +675,23 @@
                                                     </a>
                                                 @endif
                                             </div>
-                                        @else
-                                            <!-- Manual Address Display -->
-                                            <div class="flex items-start justify-between">
+                                        <!-- Manual Address Display -->
+                                        <div x-show="!propertyId" class="flex items-start justify-between">
                                                 <div class="flex-1">
-                                                    @php
-                                                        $addressParts = array_filter([
-                                                            $discovery->city,
-                                                            $discovery->district,
-                                                            $discovery->address
-                                                        ]);
-                                                        $fullAddress = implode(', ', $addressParts) ?: 'Adres belirtilmemiş';
-                                                    @endphp
-                                                    <div class="text-gray-900">{{ $fullAddress }}</div>
-                                                    @if($discovery->city || $discovery->district)
+                                                    <div class="text-gray-900" x-text="getManualAddressDisplay()"></div>
+                                                    <template x-if="city || district">
                                                         <div class="text-sm text-gray-600 mt-1">
-                                                            @if($discovery->city)
-                                                                <span class="font-medium">{{ $discovery->city }}</span>
-                                                            @endif
-                                                            @if($discovery->district)
-                                                                @if($discovery->city), @endif
-                                                                <span>{{ $discovery->district }}</span>
-                                                            @endif
+                                                            <template x-if="city">
+                                                                <span class="font-medium" x-text="city"></span>
+                                                            </template>
+                                                            <template x-if="district">
+                                                                <span>
+                                                                    <template x-if="city">, </template>
+                                                                    <span x-text="district"></span>
+                                                                </span>
+                                                            </template>
                                                         </div>
-                                                    @endif
+                                                    </template>
                                                     <div class="text-sm text-gray-500 mt-1">Manuel Adres</div>
                                                 </div>
                                                 @if($discovery->latitude && $discovery->longitude)
@@ -610,7 +716,6 @@
                                                     </a>
                                                 @endif
                                             </div>
-                                        @endif
                                     </div>
                                 </div>
 
@@ -621,19 +726,14 @@
                                             <div>
                                                 <div class="font-medium text-yellow-800">Mevcut Adres</div>
                                                 <div class="text-yellow-700 text-sm mt-1">
-                                                    @if($discovery->property_id)
-                                                        {{ $discovery->property->name }} - {{ $discovery->property->full_address }}
-                                                    @else
-                                                        @php
-                                                            $currentAddressParts = array_filter([
-                                                                $discovery->city,
-                                                                $discovery->district,
-                                                                $discovery->address
-                                                            ]);
-                                                            $currentFullAddress = implode(', ', $currentAddressParts) ?: 'Adres belirtilmemiş';
-                                                        @endphp
-                                                        {{ $currentFullAddress }}
-                                                    @endif
+                                                    <!-- Property Address Display (Reactive) -->
+                                                    <div x-show="propertyId">
+                                                        <span x-text="getPropertyDisplayName()"></span> - <span x-text="getPropertyDisplayAddress()"></span>
+                                                    </div>
+                                                    <!-- Manual Address Display (Reactive) -->
+                                                    <div x-show="!propertyId">
+                                                        <span x-text="getManualAddressDisplay()"></span>
+                                                    </div>
                                                 </div>
                                             </div>
                                             <button type="button" @click="showAddressModal = true"
