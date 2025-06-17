@@ -187,12 +187,13 @@
                 fileInput: null,
                 showImageModal: false,
                 selectedImage: null,
+                existingImages: [], // Track original image paths from database
 
                 init() {
                     // Initialize with existing images if any
                     if (this.$el.dataset.existingImages) {
-                        const existingImages = JSON.parse(this.$el.dataset.existingImages);
-                        this.previews = existingImages.map(img => `/storage/${img}`);
+                        this.existingImages = JSON.parse(this.$el.dataset.existingImages);
+                        this.previews = this.existingImages.map(img => `/storage/${img}`);
                     }
 
                     // Add keyboard event listener for ESC key
@@ -230,22 +231,37 @@
                 },
 
                 removeImage(index, imagePath = null) {
-                    if (imagePath) {
+                    // Check if this is an existing image (stored in database)
+                    const isExistingImage = index < this.existingImages.length;
+                    
+                    if (isExistingImage) {
+                        // Get the original database path for existing images
+                        const originalPath = this.existingImages[index];
+                        
                         // If it's an existing image, mark it for removal
                         const input = document.createElement('input');
                         input.type = 'hidden';
                         input.name = 'remove_images[]';
-                        input.value = imagePath;
-                        this.$el.appendChild(input);
+                        input.value = originalPath;
+                        // Add to form element, not to the imageUploader div
+                        this.$el.closest('form').appendChild(input);
+                        
+                        // Remove from existingImages array too
+                        this.existingImages.splice(index, 1);
                     } else {
                         // If it's a new image, remove from file input
-                        const dt = new DataTransfer();
-                        const files = Array.from(this.fileInput.files);
-                        files.splice(index - (this.$el.dataset.existingImages ? JSON.parse(this.$el.dataset.existingImages)
-                            .length : 0), 1);
-                        files.forEach(file => dt.items.add(file));
-                        this.fileInput.files = dt.files;
+                        const newImageIndex = index - this.existingImages.length;
+                        
+                        if (this.fileInput && this.fileInput.files.length > 0) {
+                            const dt = new DataTransfer();
+                            const files = Array.from(this.fileInput.files);
+                            files.splice(newImageIndex, 1);
+                            files.forEach(file => dt.items.add(file));
+                            this.fileInput.files = dt.files;
+                        }
                     }
+                    
+                    // Remove from previews array
                     this.previews.splice(index, 1);
                 },
 
@@ -255,15 +271,16 @@
                         this.fileInput.value = '';
                     }
                     // Add hidden inputs to remove all existing images
-                    if (this.$el.dataset.existingImages) {
-                        JSON.parse(this.$el.dataset.existingImages).forEach(img => {
-                            const input = document.createElement('input');
-                            input.type = 'hidden';
-                            input.name = 'remove_images[]';
-                            input.value = img;
-                            this.$el.appendChild(input);
-                        });
-                    }
+                    this.existingImages.forEach(img => {
+                        const input = document.createElement('input');
+                        input.type = 'hidden';
+                        input.name = 'remove_images[]';
+                        input.value = img;
+                        // Add to form element, not to the imageUploader div
+                        this.$el.closest('form').appendChild(input);
+                    });
+                    // Clear the existing images array
+                    this.existingImages = [];
                 }
             }
         }
@@ -1630,7 +1647,7 @@
                                         
                                         <!-- Enhanced remove button overlay -->
                                         <button type="button"
-                                            @click="removeImage(index, preview.includes('/storage/') ? preview.replace('/storage/', '') : null)"
+                                            @click="removeImage(index)"
                                             :disabled="!editMode"
                                             x-show="editMode"
                                             class="absolute -top-2 -right-2 w-8 h-8 bg-red-500 hover:bg-red-600 text-white rounded-full flex items-center justify-center shadow-lg opacity-80 hover:opacity-100 transition-all duration-200 hover:scale-110 disabled:opacity-50 disabled:cursor-not-allowed">
