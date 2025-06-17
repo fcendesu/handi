@@ -909,24 +909,48 @@
                         <!-- Priority Display -->
                         <div>
                             <label class="block text-sm font-medium text-gray-700 mb-2">Öncelik Seviyesi</label>
-                            @php
-                                $turkishPriorityLabels = [
-                                    \App\Models\Discovery::PRIORITY_LOW => 'Yok',
-                                    \App\Models\Discovery::PRIORITY_MEDIUM => 'Var',
-                                    \App\Models\Discovery::PRIORITY_HIGH => 'Acil',
-                                ];
-                                $priorityLabel = $turkishPriorityLabels[$discovery->priority] ?? 'Yok';
-                                $priorityColor =
-                                    $discovery->priority == \App\Models\Discovery::PRIORITY_HIGH
-                                        ? 'text-red-600 font-semibold'
-                                        : ($discovery->priority == \App\Models\Discovery::PRIORITY_MEDIUM
-                                            ? 'text-yellow-600 font-medium'
-                                            : 'text-gray-600');
-                            @endphp
-                            <div
-                                class="bg-gray-100 mt-1 block w-full rounded-md border-2 border-gray-300 px-4 py-2 {{ $priorityColor }}">
-                                {{ $priorityLabel }}
+                            
+                            <!-- View Mode -->
+                            <div x-show="!editMode">
+                                @php
+                                    $turkishPriorityLabels = [
+                                        \App\Models\Discovery::PRIORITY_LOW => 'Yok',
+                                        \App\Models\Discovery::PRIORITY_MEDIUM => 'Var',
+                                        \App\Models\Discovery::PRIORITY_HIGH => 'Acil',
+                                    ];
+                                    $priorityLabel = $turkishPriorityLabels[$discovery->priority] ?? 'Yok';
+                                    $priorityColor =
+                                        $discovery->priority == \App\Models\Discovery::PRIORITY_HIGH
+                                            ? 'text-red-600 font-semibold'
+                                            : ($discovery->priority == \App\Models\Discovery::PRIORITY_MEDIUM
+                                                ? 'text-yellow-600 font-medium'
+                                                : 'text-gray-600');
+                                @endphp
+                                <div class="bg-gray-100 mt-1 block w-full rounded-md border-2 border-gray-300 px-4 py-2 {{ $priorityColor }}">
+                                    {{ $priorityLabel }}
+                                </div>
                             </div>
+
+                            <!-- Edit Mode -->
+                            <select name="priority" x-show="editMode"
+                                class="bg-gray-100 mt-1 block w-full rounded-md border-2 border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 px-4 py-2">
+                                <option value="{{ \App\Models\Discovery::PRIORITY_LOW }}" 
+                                    {{ old('priority', $discovery->priority) == \App\Models\Discovery::PRIORITY_LOW ? 'selected' : '' }}>
+                                    Yok
+                                </option>
+                                <option value="{{ \App\Models\Discovery::PRIORITY_MEDIUM }}" 
+                                    {{ old('priority', $discovery->priority) == \App\Models\Discovery::PRIORITY_MEDIUM ? 'selected' : '' }}>
+                                    Var
+                                </option>
+                                <option value="{{ \App\Models\Discovery::PRIORITY_HIGH }}" 
+                                    {{ old('priority', $discovery->priority) == \App\Models\Discovery::PRIORITY_HIGH ? 'selected' : '' }}>
+                                    Acil
+                                </option>
+                            </select>
+                            
+                            @error('priority')
+                                <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                            @enderror
                         </div>
 
                         <!-- Work Group Display -->
