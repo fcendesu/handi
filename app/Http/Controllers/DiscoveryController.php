@@ -212,7 +212,7 @@ class DiscoveryController extends Controller
             // Attach items with their quantities and custom prices if present
             if (!empty($request->items)) {
                 foreach ($request->items as $item) {
-                    $itemModel = Item::findOrFail($item['id']);
+                    $itemModel = Item::accessibleBy($user)->findOrFail($item['id']);
                     $basePrice = $itemModel->price;
                     $pivotData = [
                         'quantity' => $item['quantity'],
@@ -389,7 +389,7 @@ class DiscoveryController extends Controller
 
                 // Attach new items
                 foreach ($validated['items'] as $item) {
-                    $itemModel = Item::findOrFail($item['id']);
+                    $itemModel = Item::accessibleBy($user)->findOrFail($item['id']);
                     $basePrice = $itemModel->price;
                     $pivotData = [
                         'quantity' => $item['quantity'],
@@ -497,7 +497,7 @@ class DiscoveryController extends Controller
             // Attach items if present
             if (!empty($request->items)) {
                 foreach ($request->items as $item) {
-                    $itemModel = Item::findOrFail($item['id']);
+                    $itemModel = Item::accessibleBy($user)->findOrFail($item['id']);
                     $basePrice = $itemModel->price;
                     $pivotData = [
                         'quantity' => $item['quantity'],
@@ -773,6 +773,7 @@ class DiscoveryController extends Controller
     public function apiUpdate(Request $request, Discovery $discovery): JsonResponse
     {
         try {
+            $user = auth()->user();
             $validated = $request->validate([
                 'customer_name' => 'sometimes|string|max:255',
                 'customer_phone' => 'sometimes|string|max:255',
@@ -861,7 +862,7 @@ class DiscoveryController extends Controller
 
                 // Attach new items
                 foreach ($validated['items'] as $item) {
-                    $itemModel = Item::findOrFail($item['id']);
+                    $itemModel = Item::accessibleBy($user)->findOrFail($item['id']);
                     $basePrice = $itemModel->price;
                     $pivotData = [
                         'quantity' => $item['quantity'],

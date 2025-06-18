@@ -11,7 +11,8 @@ class ItemController extends Controller
 
     public function index()
     {
-        $items = Item::latest()->get();
+        $user = auth()->user();
+        $items = Item::accessibleBy($user)->latest()->get();
 
         return response()->json([
             'items' => $items
@@ -20,10 +21,10 @@ class ItemController extends Controller
 
     public function show($item)
     {
-        $itemFound = Item::where('item', 'like', '%' . $item . '%')->get();
+        $user = auth()->user();
+        $itemFound = Item::accessibleBy($user)->where('item', 'like', '%' . $item . '%')->get();
 
-
-        if (!$itemFound) {
+        if ($itemFound->isEmpty()) {
             return response()->json([
                 'message' => 'Item not found'
             ], 404);
@@ -37,6 +38,8 @@ class ItemController extends Controller
 
     public function store(Request $request)
     {
+        $user = auth()->user();
+
         $request->validate([
             "item" => "required",
             "brand" => "required",
@@ -44,12 +47,26 @@ class ItemController extends Controller
             "price" => "required|numeric",
         ]);
 
-        $item = Item::create([
+        // Create item with automatic ownership assignment
+        $itemData = [
             'item' => $request->item,
             'brand' => $request->brand,
             'firm' => $request->firm,
             'price' => $request->price,
-        ]);
+        ];
+
+        // Set ownership based on user type
+        if ($user->isSoloHandyman()) {
+            $itemData['user_id'] = $user->id;
+        } elseif ($user->isCompanyAdmin() || $user->isCompanyEmployee()) {
+            $itemData['company_id'] = $user->company_id;
+        } else {
+            return response()->json([
+                'message' => 'Unauthorized to create items'
+            ], 403);
+        }
+
+        $item = Item::create($itemData);
 
         // Log item creation
         TransactionLogService::logItemCreated($item);
@@ -62,6 +79,8 @@ class ItemController extends Controller
 
     public function update(Request $request, $id)
     {
+        $user = auth()->user();
+
         $request->validate([
             "item" => "required",
             "brand" => "required",
@@ -69,7 +88,7 @@ class ItemController extends Controller
             "price" => "required|numeric",
         ]);
 
-        $itemFound = Item::where('id', $id)->first();
+        $itemFound = Item::accessibleBy($user)->where('id', $id)->first();
 
         if (!$itemFound) {
             return response()->json([
@@ -106,7 +125,8 @@ class ItemController extends Controller
 
     public function destroy($id)
     {
-        $itemFound = Item::find($id);
+        $user = auth()->user();
+        $itemFound = Item::accessibleBy($user)->find($id);
 
         if (is_null($itemFound)) {
             return response()->json([
@@ -127,12 +147,15 @@ class ItemController extends Controller
 
     public function webIndex(Request $request)
     {
+        $user = auth()->user();
         $query = $request->get('query');
-        $items = Item::when($query, function ($q) use ($query) {
-            return $q->where('item', 'like', "%{$query}%")
-                ->orWhere('brand', 'like', "%{$query}%")
-                ->orWhere('firm', 'like', "%{$query}%");
-        })
+        
+        $items = Item::accessibleBy($user)
+            ->when($query, function ($q) use ($query) {
+                return $q->where('item', 'like', "%{$query}%")
+                    ->orWhere('brand', 'like', "%{$query}%")
+                    ->orWhere('firm', 'like', "%{$query}%");
+            })
             ->orderBy('created_at', 'desc')
             ->get();
 
@@ -143,12 +166,23 @@ class ItemController extends Controller
 
     public function webStore(Request $request)
     {
+        $user = auth()->user();
+
         $validated = $request->validate([
             "item" => "required",
             "brand" => "required",
             "firm" => "required",
             "price" => "required|numeric",
         ]);
+
+        // Set ownership based on user type
+        if ($user->isSoloHandyman()) {
+            $validated['user_id'] = $user->id;
+        } elseif ($user->isCompanyAdmin() || $user->isCompanyEmployee()) {
+            $validated['company_id'] = $user->company_id;
+        } else {
+            return redirect()->back()->withErrors(['error' => 'Unauthorized to create items']);
+        }
 
         $item = Item::create($validated);
 
@@ -160,6 +194,13 @@ class ItemController extends Controller
 
     public function webEdit(Item $item)
     {
+        $user = auth()->user();
+
+        // Check if user can access this item
+        if (!$item->isAccessibleBy($user)) {
+            abort(403, 'You do not have permission to edit this item.');
+        }
+
         return view('items.edit', compact('item'));
     }
 
@@ -207,12 +248,16 @@ class ItemController extends Controller
 
     public function webSearch(Request $request)
     {
+        $user = auth()->user();
         $query = $request->get('query');
         session(['last_search_query' => $query]);
 
-        $items = Item::where('item', 'like', "%{$query}%")
-            ->orWhere('brand', 'like', "%{$query}%")
-            ->orWhere('firm', 'like', "%{$query}%")
+        $items = Item::accessibleBy($user)
+            ->where(function ($q) use ($query) {
+                $q->where('item', 'like', "%{$query}%")
+                  ->orWhere('brand', 'like', "%{$query}%")
+                  ->orWhere('firm', 'like', "%{$query}%");
+            })
             ->orderBy('created_at', 'desc')
             ->get();
 
@@ -222,11 +267,15 @@ class ItemController extends Controller
     // Add this new method
     public function webSearchForDiscovery(Request $request)
     {
+        $user = auth()->user();
         $query = $request->get('query');
 
-        $items = Item::where('item', 'like', "%{$query}%")
-            ->orWhere('brand', 'like', "%{$query}%")
-            ->orWhere('firm', 'like', "%{$query}%")
+        $items = Item::accessibleBy($user)
+            ->where(function ($q) use ($query) {
+                $q->where('item', 'like', "%{$query}%")
+                  ->orWhere('brand', 'like', "%{$query}%")
+                  ->orWhere('firm', 'like', "%{$query}%");
+            })
             ->get();
 
         return response()->json([
