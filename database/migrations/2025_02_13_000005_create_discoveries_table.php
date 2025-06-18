@@ -40,7 +40,7 @@ return new class extends Migration {
             $table->decimal('extra_fee', 10, 2)->default(0);
             $table->decimal('discount_rate', 5, 2)->default(0);
             $table->decimal('discount_amount', 10, 2)->default(0);
-            $table->foreignId('payment_method_id')->nullable()->constrained('payment_methods')->onDelete('set null');
+            $table->foreignId('payment_method_id')->nullable(); // Will add constraint after payment_methods table is created
             $table->json('images')->nullable();
             $table->timestamps();
         });

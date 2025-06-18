@@ -26,6 +26,11 @@ return new class extends Migration {
             $table->unique(['company_id', 'name'], 'unique_company_payment_method');
             $table->unique(['user_id', 'name'], 'unique_user_payment_method');
         });
+
+        // Add foreign key constraint to discoveries table for payment_method_id
+        Schema::table('discoveries', function (Blueprint $table) {
+            $table->foreign('payment_method_id')->references('id')->on('payment_methods')->onDelete('set null');
+        });
     }
 
     /**
@@ -33,6 +38,10 @@ return new class extends Migration {
      */
     public function down(): void
     {
+        Schema::table('discoveries', function (Blueprint $table) {
+            $table->dropForeign(['payment_method_id']);
+        });
+        
         Schema::dropIfExists('payment_methods');
     }
 };
