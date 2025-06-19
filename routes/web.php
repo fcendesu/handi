@@ -47,7 +47,7 @@ Route::middleware(['auth', 'restrict.employee.dashboard'])->group(function () {
         }
 
         // Scope discoveries based on user type for dashboard
-        $query = Discovery::query()->with(['workGroup']);
+        $query = Discovery::query()->with(['workGroup', 'priorityBadge']);
 
         if ($user->isSoloHandyman()) {
             $query->where('creator_id', $user->id);
@@ -67,6 +67,15 @@ Route::middleware(['auth', 'restrict.employee.dashboard'])->group(function () {
             'completed' => $query->clone()->where('status', Discovery::STATUS_COMPLETED)->latest()->get(),
             'cancelled' => $query->clone()->where('status', Discovery::STATUS_CANCELLED)->latest()->get(),
         ];
+
+        // Sort in_progress and pending discoveries by priority level (highest first)
+        $discoveries['in_progress'] = $discoveries['in_progress']->sortByDesc(function ($discovery) {
+            return $discovery->priorityBadge ? $discovery->priorityBadge->level : 0;
+        });
+
+        $discoveries['pending'] = $discoveries['pending']->sortByDesc(function ($discovery) {
+            return $discovery->priorityBadge ? $discovery->priorityBadge->level : 0;
+        });
 
         return view('dashboard', compact('discoveries', 'workGroups', 'selectedWorkGroupId'));
     })->name('dashboard');

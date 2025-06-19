@@ -50,27 +50,17 @@
                                 Sürmekte ({{ $discoveries['in_progress']->count() }})
                             </h3>
                             @if($discoveries['in_progress']->isNotEmpty())
-                                @php
-                                    $sortedInProgress = $discoveries['in_progress']->sortByDesc('priority');
-                                @endphp
                                 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                                    @foreach($sortedInProgress as $discovery)
+                                    @foreach($discoveries['in_progress'] as $discovery)
                                         @php
-                                            $priorityClass = match($discovery->priority) {
-                                                3 => 'bg-red-50 border-red-200',
-                                                2 => 'bg-yellow-50 border-yellow-200',
-                                                default => 'bg-yellow-50'
-                                            };
-                                            $priorityBadge = match($discovery->priority) {
-                                                3 => 'bg-red-100 text-red-800',
-                                                2 => 'bg-yellow-100 text-yellow-800',
-                                                default => ''
-                                            };
-                                            $priorityText = match($discovery->priority) {
-                                                3 => 'ACİL',
-                                                2 => 'ÖNEMLİ',
-                                                default => ''
-                                            };
+                                            $priorityClass = 'bg-yellow-50';
+                                            if ($discovery->priorityBadge) {
+                                                $priorityClass = match($discovery->priorityBadge->level) {
+                                                    ($discovery->priorityBadge->level >= 3) => 'bg-red-50 border-red-200',
+                                                    ($discovery->priorityBadge->level == 2) => 'bg-yellow-50 border-yellow-200', 
+                                                    default => 'bg-yellow-50'
+                                                };
+                                            }
                                         @endphp
                                         <div class="border rounded-lg p-4 {{ $priorityClass }}">
                                             <div class="flex justify-between items-start mb-2">
@@ -83,9 +73,10 @@
                                                         {{ $discovery->workGroup->name }}
                                                     </span>
                                                 @endif
-                                                @if($priorityText)
-                                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium {{ $priorityBadge }}">
-                                                        {{ $priorityText }}
+                                                @if($discovery->priorityBadge)
+                                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium text-white"
+                                                          style="{{ $discovery->priorityBadge->style }}">
+                                                        {{ $discovery->priorityBadge->name }} ({{ $discovery->priorityBadge->level }})
                                                     </span>
                                                 @endif
                                             </div>
@@ -106,27 +97,17 @@
                                 Beklemede ({{ $discoveries['pending']->count() }})
                             </h3>
                             @if($discoveries['pending']->isNotEmpty())
-                                @php
-                                    $sortedPending = $discoveries['pending']->sortByDesc('priority');
-                                @endphp
                                 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                                    @foreach($sortedPending as $discovery)
+                                    @foreach($discoveries['pending'] as $discovery)
                                         @php
-                                            $priorityClass = match($discovery->priority) {
-                                                3 => 'bg-red-50 border-red-200',
-                                                2 => 'bg-yellow-50 border-yellow-200',
-                                                default => 'bg-blue-50'
-                                            };
-                                            $priorityBadge = match($discovery->priority) {
-                                                3 => 'bg-red-100 text-red-800',
-                                                2 => 'bg-yellow-100 text-yellow-800',
-                                                default => ''
-                                            };
-                                            $priorityText = match($discovery->priority) {
-                                                3 => 'ACİL',
-                                                2 => 'ÖNEMLİ',
-                                                default => ''
-                                            };
+                                            $priorityClass = 'bg-blue-50';
+                                            if ($discovery->priorityBadge) {
+                                                $priorityClass = match($discovery->priorityBadge->level) {
+                                                    ($discovery->priorityBadge->level >= 3) => 'bg-red-50 border-red-200',
+                                                    ($discovery->priorityBadge->level == 2) => 'bg-yellow-50 border-yellow-200', 
+                                                    default => 'bg-blue-50'
+                                                };
+                                            }
                                         @endphp
                                         <div class="border rounded-lg p-4 {{ $priorityClass }}">
                                             <div class="flex justify-between items-start mb-2">
@@ -139,9 +120,10 @@
                                                         {{ $discovery->workGroup->name }}
                                                     </span>
                                                 @endif
-                                                @if($priorityText)
-                                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium {{ $priorityBadge }}">
-                                                        {{ $priorityText }}
+                                                @if($discovery->priorityBadge)
+                                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium text-white"
+                                                          style="{{ $discovery->priorityBadge->style }}">
+                                                        {{ $discovery->priorityBadge->name }} ({{ $discovery->priorityBadge->level }})
                                                     </span>
                                                 @endif
                                             </div>
@@ -169,13 +151,19 @@
                                                 <h4 class="font-medium">{{ $discovery->customer_name }}</h4>
                                                 <span class="text-sm text-gray-500">{{ $discovery->created_at->format('M d, Y') }}</span>
                                             </div>
-                                            @if($discovery->workGroup)
-                                                <div class="mb-2">
+                                            <div class="flex flex-wrap gap-2 mb-2">
+                                                @if($discovery->workGroup)
                                                     <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
                                                         {{ $discovery->workGroup->name }}
                                                     </span>
-                                                </div>
-                                            @endif
+                                                @endif
+                                                @if($discovery->priorityBadge)
+                                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium text-white"
+                                                          style="{{ $discovery->priorityBadge->style }}">
+                                                        {{ $discovery->priorityBadge->name }} ({{ $discovery->priorityBadge->level }})
+                                                    </span>
+                                                @endif
+                                            </div>
                                             <p class="text-sm text-gray-600 mb-2">{{ Str::limit($discovery->discovery, 100) }}</p>
                                             <a href="{{ route('discovery.show', $discovery) }}" class="text-blue-600 hover:text-blue-800 text-sm">Ayrıntıları Görüntüle →</a>
                                         </div>
@@ -200,13 +188,19 @@
                                                 <h4 class="font-medium">{{ $discovery->customer_name }}</h4>
                                                 <span class="text-sm text-gray-500">{{ $discovery->created_at->format('M d, Y') }}</span>
                                             </div>
-                                            @if($discovery->workGroup)
-                                                <div class="mb-2">
+                                            <div class="flex flex-wrap gap-2 mb-2">
+                                                @if($discovery->workGroup)
                                                     <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
                                                         {{ $discovery->workGroup->name }}
                                                     </span>
-                                                </div>
-                                            @endif
+                                                @endif
+                                                @if($discovery->priorityBadge)
+                                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium text-white"
+                                                          style="{{ $discovery->priorityBadge->style }}">
+                                                        {{ $discovery->priorityBadge->name }} ({{ $discovery->priorityBadge->level }})
+                                                    </span>
+                                                @endif
+                                            </div>
                                             <p class="text-sm text-gray-600 mb-2">{{ Str::limit($discovery->discovery, 100) }}</p>
                                             <a href="{{ route('discovery.show', $discovery) }}" class="text-blue-600 hover:text-blue-800 text-sm">Ayrıntıları Görüntüle →</a>
                                         </div>
