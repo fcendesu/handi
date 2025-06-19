@@ -50,6 +50,58 @@
                             @error('name')
                                 <p class="mt-2 text-sm text-red-600">{{ $message }}</p>
                             @enderror
+                        </div>
+
+                        <!-- Owner Information -->
+                        <div class="space-y-4">
+                            <h3 class="text-lg font-medium text-gray-900">Mülk Sahibi Bilgileri</h3>
+                            
+                            <div>
+                                <label for="owner_name" class="block text-sm font-medium text-gray-700 mb-2">
+                                    Sahip Adı
+                                </label>
+                                <input type="text" 
+                                       name="owner_name" 
+                                       id="owner_name" 
+                                       value="{{ old('owner_name') }}"
+                                       placeholder="örn., Ahmet Yılmaz"
+                                       class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 @error('owner_name') border-red-500 @enderror">
+                                @error('owner_name')
+                                    <p class="mt-2 text-sm text-red-600">{{ $message }}</p>
+                                @enderror
+                            </div>
+
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div>
+                                    <label for="owner_email" class="block text-sm font-medium text-gray-700 mb-2">
+                                        E-posta
+                                    </label>
+                                    <input type="email" 
+                                           name="owner_email" 
+                                           id="owner_email" 
+                                           value="{{ old('owner_email') }}"
+                                           placeholder="örn., ahmet@example.com"
+                                           class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 @error('owner_email') border-red-500 @enderror">
+                                    @error('owner_email')
+                                        <p class="mt-2 text-sm text-red-600">{{ $message }}</p>
+                                    @enderror
+                                </div>
+
+                                <div>
+                                    <label for="owner_phone" class="block text-sm font-medium text-gray-700 mb-2">
+                                        Telefon
+                                    </label>
+                                    <input type="text" 
+                                           name="owner_phone" 
+                                           id="owner_phone" 
+                                           value="{{ old('owner_phone') }}"
+                                           placeholder="örn., +90 533 123 45 67"
+                                           class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 @error('owner_phone') border-red-500 @enderror">
+                                    @error('owner_phone')
+                                        <p class="mt-2 text-sm text-red-600">{{ $message }}</p>
+                                    @enderror
+                                </div>
+                            </div>
                         </div>                        <!-- Address Components -->
                         <div class="space-y-4">
                             <h3 class="text-lg font-medium text-gray-900">Adres</h3>

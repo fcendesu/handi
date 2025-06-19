@@ -57,6 +57,9 @@ class PropertyController extends Controller
 
         $validated = $request->validate([
             'name' => 'required|string|max:255',
+            'owner_name' => 'nullable|string|max:255',
+            'owner_email' => 'nullable|email|max:255',
+            'owner_phone' => 'nullable|string|max:20',
             'city' => ['required', 'string', Rule::in(AddressData::getCities())],
             'district' => 'required|string|max:255',
             'site_name' => 'nullable|string|max:255',
@@ -120,6 +123,9 @@ class PropertyController extends Controller
 
         $validated = $request->validate([
             'name' => 'required|string|max:255',
+            'owner_name' => 'nullable|string|max:255',
+            'owner_email' => 'nullable|email|max:255',
+            'owner_phone' => 'nullable|string|max:20',
             'city' => ['required', 'string', Rule::in(AddressData::getCities())],
             'district' => 'required|string|max:255',
             'site_name' => 'nullable|string|max:255',

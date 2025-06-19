@@ -42,7 +42,13 @@
                                                 Mülk Adı
                                             </th>
                                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                                Sahibi
+                                                Sahip Adı
+                                            </th>
+                                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                                E-posta
+                                            </th>
+                                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                                Telefon
                                             </th>
                                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                                 Adres
@@ -67,7 +73,19 @@
                                                     @endif
                                                 </td>
                                                 <td class="px-6 py-4 whitespace-nowrap">
-                                                    <div class="text-sm text-gray-900">{{ $property->owner_name }}</div>
+                                                    <div class="text-sm text-gray-900">
+                                                        {{ $property->owner_name ?? 'Belirtilmemiş' }}
+                                                    </div>
+                                                </td>
+                                                <td class="px-6 py-4 whitespace-nowrap">
+                                                    <div class="text-sm text-gray-900">
+                                                        {{ $property->owner_email ?? '-' }}
+                                                    </div>
+                                                </td>
+                                                <td class="px-6 py-4 whitespace-nowrap">
+                                                    <div class="text-sm text-gray-900">
+                                                        {{ $property->owner_phone ?? '-' }}
+                                                    </div>
                                                 </td>                                                <td class="px-6 py-4">
                                                     <div class="text-sm text-gray-900">{{ $property->full_address }}</div>
                                                     @if($property->district)

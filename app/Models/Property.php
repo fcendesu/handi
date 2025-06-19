@@ -22,6 +22,9 @@ class Property extends Model
         'company_id',
         'user_id',
         'name',
+        'owner_name',
+        'owner_email',
+        'owner_phone',
         'city',
         'district',
         'site_name',
@@ -323,9 +326,10 @@ class Property extends Model
     }
 
     /**
-     * Get the owner name (company name or solo handyman name).
+     * Get the property manager name (company name or solo handyman name).
+     * This is different from owner_name which is the actual property owner.
      */
-    public function getOwnerNameAttribute(): string
+    public function getManagerNameAttribute(): string
     {
         if ($this->company_id && $this->company) {
             return $this->company->name;
@@ -333,7 +337,7 @@ class Property extends Model
             return $this->user->name . ' (Solo Handyman)';
         }
 
-        return 'Unknown Owner';
+        return 'Unknown Manager';
     }
 
     /**
