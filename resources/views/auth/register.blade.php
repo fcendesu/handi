@@ -64,68 +64,7 @@
                     @enderror
                 </div>
 
-                <!-- Employee Invitation Section -->
-                <div id="employee_invitation_section" class="mb-6 hidden">
-                    <div class="bg-purple-50 border border-purple-200 rounded-lg p-6">
-                        <h3 class="font-semibold text-purple-900 mb-4 flex items-center">
-                            <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 8h10M7 12h4m1 8l-4-4H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-1l-4 4z"></path>
-                            </svg>
-                            Company Invitation
-                        </h3>
-                        
-                        @if(isset($invitation))
-                            <!-- Pre-filled invitation info -->
-                            <div class="mb-4 p-4 bg-white rounded-lg border">
-                                <h4 class="font-medium text-gray-900">You're invited to join:</h4>
-                                <p class="text-lg font-semibold text-purple-700">{{ $company->name }}</p>
-                                <p class="text-sm text-gray-600">Invited by: {{ $invitation->invitedBy->name }}</p>
-                                @if($invitation->workGroups()->count() > 0)
-                                    <p class="text-sm text-gray-600 mt-1">
-                                        Work Groups: {{ $invitation->workGroups()->pluck('name')->join(', ') }}
-                                    </p>
-                                @endif
-                            </div>
-                            <input type="hidden" name="invitation_code" value="{{ $invitation->code }}">
-                        @else
-                            <!-- Manual invitation code entry -->
-                            <div class="space-y-4">
-                                <div>
-                                    <label for="invitation_code" class="block text-gray-700 text-sm font-bold mb-2">
-                                        Invitation Code <span class="text-red-500">*</span>
-                                    </label>
-                                    <div class="relative">
-                                        <input type="text" name="invitation_code" id="invitation_code"
-                                            class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent uppercase"
-                                            value="{{ old('invitation_code') }}"
-                                            placeholder="Enter 8-character invitation code"
-                                            maxlength="8">
-                                        <button type="button" id="verify_invitation" 
-                                                class="absolute right-2 top-2 px-3 py-1 bg-purple-500 text-white text-sm rounded hover:bg-purple-600">
-                                            Verify
-                                        </button>
-                                    </div>
-                                    @error('invitation_code')
-                                        <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
-                                    @enderror
-                                </div>
-                                
-                                <!-- Invitation verification result -->
-                                <div id="invitation_info" class="hidden p-4 bg-white rounded-lg border">
-                                    <div id="invitation_success" class="hidden">
-                                        <h4 class="font-medium text-gray-900">You're invited to join:</h4>
-                                        <p id="company_name" class="text-lg font-semibold text-purple-700"></p>
-                                        <p id="invited_by" class="text-sm text-gray-600"></p>
-                                        <p id="work_groups" class="text-sm text-gray-600 mt-1"></p>
-                                    </div>
-                                    <div id="invitation_error" class="hidden text-red-600">
-                                        <p id="error_message"></p>
-                                    </div>
-                                </div>
-                            </div>
-                        @endif
-                    </div>
-                </div>
+
 
                 <!-- Personal Information -->
                 <div class="grid md:grid-cols-2 gap-6 mb-6">
@@ -143,8 +82,7 @@
                         <label for="email" class="block text-gray-700 text-sm font-bold mb-2">Email Address</label>
                         <input type="email" name="email" id="email"
                             class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                            value="{{ old('email', $prefilledEmail ?? '') }}" required 
-                            {{ isset($invitation) ? 'readonly' : '' }}>
+                            value="{{ old('email') }}" required>
                         @error('email')
                             <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
                         @enderror
@@ -252,9 +190,6 @@
         document.addEventListener('DOMContentLoaded', function() {
             const userTypeCards = document.querySelectorAll('.user-type-card');
             const adminSection = document.getElementById('admin_company_section');
-            const employeeSection = document.getElementById('employee_invitation_section');
-            const verifyInvitationBtn = document.getElementById('verify_invitation');
-            const invitationCodeInput = document.getElementById('invitation_code');
 
             // Handle user type card selection
             userTypeCards.forEach(card => {
@@ -264,7 +199,7 @@
                     
                     // Update visual selection
                     userTypeCards.forEach(c => {
-                        c.classList.remove('border-blue-500', 'border-green-500', 'border-purple-500', 'bg-blue-50', 'bg-green-50', 'bg-purple-50');
+                        c.classList.remove('border-blue-500', 'border-green-500', 'bg-blue-50', 'bg-green-50');
                         c.classList.add('border-gray-300');
                     });
                     
@@ -275,8 +210,6 @@
                         card.classList.add('border-blue-500', 'bg-blue-50');
                     } else if (type === 'company_admin') {
                         card.classList.add('border-green-500', 'bg-green-50');
-                    } else if (type === 'company_employee') {
-                        card.classList.add('border-purple-500', 'bg-purple-50');
                     }
                     
                     toggleSections();
@@ -288,91 +221,11 @@
                 
                 // Hide all sections first
                 adminSection?.classList.add('hidden');
-                employeeSection?.classList.add('hidden');
 
                 // Show relevant section
                 if (selectedType === 'company_admin') {
                     adminSection?.classList.remove('hidden');
-                } else if (selectedType === 'company_employee') {
-                    employeeSection?.classList.remove('hidden');
                 }
-            }
-
-            // Invitation code verification
-            verifyInvitationBtn?.addEventListener('click', function() {
-                const code = invitationCodeInput.value.trim().toUpperCase();
-                
-                if (code.length !== 8) {
-                    showInvitationError('Please enter a valid 8-character invitation code.');
-                    return;
-                }
-
-                // Show loading state
-                verifyInvitationBtn.textContent = 'Verifying...';
-                verifyInvitationBtn.disabled = true;
-
-                // Make API call to verify invitation
-                fetch('/invitation/validate', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
-                    },
-                    body: JSON.stringify({ code: code })
-                })
-                .then(response => response.json())
-                .then(data => {
-                    if (data.valid) {
-                        showInvitationSuccess(data);
-                    } else {
-                        showInvitationError(data.message);
-                    }
-                })
-                .catch(error => {
-                    showInvitationError('Failed to verify invitation. Please try again.');
-                })
-                .finally(() => {
-                    verifyInvitationBtn.textContent = 'Verify';
-                    verifyInvitationBtn.disabled = false;
-                });
-            });
-
-            // Auto-verify invitation on input change (if 8 characters)
-            invitationCodeInput?.addEventListener('input', function() {
-                this.value = this.value.toUpperCase();
-                if (this.value.length === 8) {
-                    verifyInvitationBtn.click();
-                }
-            });
-
-            function showInvitationSuccess(data) {
-                const infoDiv = document.getElementById('invitation_info');
-                const successDiv = document.getElementById('invitation_success');
-                const errorDiv = document.getElementById('invitation_error');
-
-                document.getElementById('company_name').textContent = data.company_name;
-                document.getElementById('invited_by').textContent = `Invited by: ${data.invited_by}`;
-                
-                const workGroupsText = data.work_groups && data.work_groups.length > 0 
-                    ? `Work Groups: ${data.work_groups.join(', ')}`
-                    : '';
-                document.getElementById('work_groups').textContent = workGroupsText;
-
-                errorDiv.classList.add('hidden');
-                successDiv.classList.remove('hidden');
-                infoDiv.classList.remove('hidden');
-            }
-
-            function showInvitationError(message) {
-                const infoDiv = document.getElementById('invitation_info');
-                const successDiv = document.getElementById('invitation_success');
-                const errorDiv = document.getElementById('invitation_error');
-
-                document.getElementById('error_message').textContent = message;
-
-                successDiv.classList.add('hidden');
-                errorDiv.classList.remove('hidden');
-                infoDiv.classList.remove('hidden');
             }
 
             // Initial setup
@@ -384,8 +237,6 @@
                     checkedCard.classList.add('border-blue-500', 'bg-blue-50');
                 } else if (type === 'company_admin') {
                     checkedCard.classList.add('border-green-500', 'bg-green-50');
-                } else if (type === 'company_employee') {
-                    checkedCard.classList.add('border-purple-500', 'bg-purple-50');
                 }
             }
             

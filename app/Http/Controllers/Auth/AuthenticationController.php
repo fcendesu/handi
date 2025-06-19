@@ -5,7 +5,7 @@ namespace App\Http\Controllers\Auth;
 use App\Http\Controllers\Controller;
 use App\Models\User;
 use App\Models\Company;
-use App\Models\Invitation;
+
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Auth;
@@ -19,7 +19,7 @@ class AuthenticationController extends Controller
             "name" => "required|min:2|max:255",
             "email" => "required|email|unique:users",
             "password" => "required|min:6|max:255",
-            "user_type" => "required|in:solo_handyman,company_admin,company_employee",
+            "user_type" => "required|in:solo_handyman,company_admin",
         ];
 
         // Add company validation for company admins
@@ -28,11 +28,6 @@ class AuthenticationController extends Controller
             $rules['admin_company_address'] = 'required|string|max:500';
             $rules['admin_company_phone'] = 'required|string|max:20';
             $rules['admin_company_email'] = 'nullable|email|max:255';
-        }
-
-        // Add invitation code validation for company employees
-        if ($request->user_type === 'company_employee') {
-            $rules['invitation_code'] = 'required|string|size:8';
         }
 
         $validated = $request->validate($rules);
@@ -48,38 +43,9 @@ class AuthenticationController extends Controller
             ];
 
             $company = null;
-            $invitation = null;
-
-            // Handle company employee registration
-            if ($validated['user_type'] === 'company_employee') {
-                // Find and validate invitation
-                $invitation = Invitation::where('code', $validated['invitation_code'])->first();
-
-                if (!$invitation) {
-                    return response([
-                        'message' => 'Invalid invitation code',
-                    ], 422);
-                }
-
-                if (!$invitation->isValid()) {
-                    return response([
-                        'message' => 'Invitation has expired or is no longer valid',
-                    ], 422);
-                }
-
-                // Verify email matches invitation if specified
-                if ($invitation->email && $invitation->email !== $validated['email']) {
-                    return response([
-                        'message' => 'Email does not match invitation',
-                    ], 422);
-                }
-
-                $company = $invitation->company;
-                $userData['company_id'] = $company->id;
-            }
 
             // Handle company creation for admins
-            elseif ($validated['user_type'] === 'company_admin') {
+            if ($validated['user_type'] === 'company_admin') {
                 // Create company for admin
                 $company = Company::create([
                     'name' => $validated['admin_company_name'],
@@ -97,17 +63,6 @@ class AuthenticationController extends Controller
             // Set admin relationship for company admin
             if ($validated['user_type'] === 'company_admin' && $company) {
                 $company->update(['admin_id' => $user->id]);
-            }
-
-            // Process invitation for company employee
-            if ($validated['user_type'] === 'company_employee' && $invitation) {
-                // Mark invitation as used
-                $invitation->markAsUsed($user);
-
-                // Assign user to work groups from invitation
-                if (!empty($invitation->work_group_ids)) {
-                    $user->workGroups()->attach($invitation->work_group_ids);
-                }
             }
 
             DB::commit();
@@ -188,22 +143,7 @@ class AuthenticationController extends Controller
 
     public function showRegister(Request $request)
     {
-        // Check if there's an invitation code in the URL
-        $invitation = null;
-        $company = null;
-        $prefilledEmail = null;
-
-        if ($request->has('invitation')) {
-            $invitationCode = $request->query('invitation');
-            $invitation = Invitation::where('code', $invitationCode)->first();
-
-            if ($invitation && $invitation->isValid()) {
-                $company = $invitation->company;
-                $prefilledEmail = $invitation->email;
-            }
-        }
-
-        return view('auth.register', compact('invitation', 'company', 'prefilledEmail'));
+        return view('auth.register');
     }
 
     public function webLogin(Request $request)
@@ -240,7 +180,7 @@ class AuthenticationController extends Controller
             'email' => 'required|email|unique:users',
             'password' => 'required|min:6|max:255',
             'password_confirmation' => 'required|same:password',
-            'user_type' => 'required|in:solo_handyman,company_admin,company_employee',
+            'user_type' => 'required|in:solo_handyman,company_admin',
         ];
 
         // Add company validation for company admins
@@ -249,11 +189,6 @@ class AuthenticationController extends Controller
             $rules['admin_company_address'] = 'required|string|max:500';
             $rules['admin_company_phone'] = 'required|string|max:20';
             $rules['admin_company_email'] = 'nullable|email|max:255';
-        }
-
-        // Add invitation code validation for company employees
-        if ($request->user_type === 'company_employee') {
-            $rules['invitation_code'] = 'required|string|size:8';
         }
 
         $validated = $request->validate($rules);
@@ -269,38 +204,9 @@ class AuthenticationController extends Controller
             ];
 
             $company = null;
-            $invitation = null;
-
-            // Handle company employee registration
-            if ($validated['user_type'] === 'company_employee') {
-                // Find and validate invitation
-                $invitation = Invitation::where('code', $validated['invitation_code'])->first();
-
-                if (!$invitation) {
-                    return back()->withErrors([
-                        'invitation_code' => 'Invalid invitation code',
-                    ])->withInput();
-                }
-
-                if (!$invitation->isValid()) {
-                    return back()->withErrors([
-                        'invitation_code' => 'Invitation has expired or is no longer valid',
-                    ])->withInput();
-                }
-
-                // Verify email matches invitation if specified
-                if ($invitation->email && $invitation->email !== $validated['email']) {
-                    return back()->withErrors([
-                        'email' => 'Email does not match invitation',
-                    ])->withInput();
-                }
-
-                $company = $invitation->company;
-                $userData['company_id'] = $company->id;
-            }
 
             // Handle company creation for admins
-            elseif ($validated['user_type'] === 'company_admin') {
+            if ($validated['user_type'] === 'company_admin') {
                 // Create company for admin
                 $company = Company::create([
                     'name' => $validated['admin_company_name'],
@@ -318,17 +224,6 @@ class AuthenticationController extends Controller
             // Set admin relationship for company admin
             if ($validated['user_type'] === 'company_admin' && $company) {
                 $company->update(['admin_id' => $user->id]);
-            }
-
-            // Process invitation for company employee
-            if ($validated['user_type'] === 'company_employee' && $invitation) {
-                // Mark invitation as used
-                $invitation->markAsUsed($user);
-
-                // Assign user to work groups from invitation
-                if (!empty($invitation->work_group_ids)) {
-                    $user->workGroups()->attach($invitation->work_group_ids);
-                }
             }
 
             DB::commit();
