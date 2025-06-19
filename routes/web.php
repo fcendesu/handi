@@ -7,6 +7,7 @@ use App\Http\Controllers\PropertyController;
 use App\Http\Controllers\PaymentMethodController;
 use App\Http\Controllers\WorkGroupController;
 use App\Http\Controllers\CompanyController;
+use App\Http\Controllers\PriorityController;
 
 use Illuminate\Support\Facades\Route;
 use App\Models\Discovery;
@@ -121,6 +122,9 @@ Route::middleware(['auth', 'restrict.employee.dashboard'])->group(function () {
     // Payment Method Management Routes
     Route::resource('payment-methods', PaymentMethodController::class);
     Route::get('/api/payment-methods', [PaymentMethodController::class, 'getAccessiblePaymentMethods'])->name('api.payment-methods');
+
+    // Priority Management Routes
+    Route::resource('priorities', PriorityController::class);
 
     // Transaction Logs Routes (for admins to view activity)
     Route::get('/transaction-logs', [DiscoveryController::class, 'transactionLogs'])->name('transaction-logs');

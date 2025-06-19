@@ -6,6 +6,7 @@ use App\Models\Discovery;
 use App\Models\Item;
 use App\Models\Property;
 use App\Models\User;
+use App\Models\Priority;
 use App\Data\AddressData;
 use App\Services\TransactionLogService;
 use App\Services\DiscoveryImageService;
@@ -57,7 +58,10 @@ class DiscoveryController extends Controller
             $workGroups = $user->workGroups;
         }
 
-        return view('discovery.index', compact('discoveries', 'cities', 'districts', 'workGroups'));
+        // Get all priorities for the dropdown
+        $priorities = Priority::forUser($user)->orderedByLevel()->get();
+
+        return view('discovery.index', compact('discoveries', 'cities', 'districts', 'workGroups', 'priorities'));
     }
 
 
@@ -94,7 +98,7 @@ class DiscoveryController extends Controller
             'discount_rate' => 'nullable|numeric|min:0|max:100',
             'discount_amount' => 'nullable|numeric|min:0',
             'payment_method_id' => 'nullable|exists:payment_methods,id',
-            'priority' => ['nullable', 'integer', Rule::in(array_keys(Discovery::getPriorities()))],
+            'priority_id' => 'nullable|exists:priorities,id',
             'work_group_id' => 'nullable|exists:work_groups,id',
             'images.*' => 'nullable|image|mimes:jpeg,png,jpg|max:2048',
             'items' => 'nullable|array',
@@ -293,7 +297,7 @@ class DiscoveryController extends Controller
             'discount_rate' => 'nullable|numeric|min:0|max:100',
             'discount_amount' => 'nullable|numeric|min:0',
             'payment_method_id' => 'nullable|exists:payment_methods,id',
-            'priority' => ['nullable', 'integer', Rule::in(array_keys(Discovery::getPriorities()))],
+            'priority_id' => 'nullable|exists:priorities,id',
             'work_group_id' => 'nullable|exists:work_groups,id',
             'images.*' => 'nullable|image|mimes:jpeg,png,jpg|max:2048',
             'remove_images' => 'nullable|array',
@@ -455,7 +459,7 @@ class DiscoveryController extends Controller
                 'discount_rate' => 'nullable|numeric|min:0|max:100',
                 'discount_amount' => 'nullable|numeric|min:0',
                 'payment_method_id' => 'nullable|exists:payment_methods,id',
-                'priority' => ['nullable', 'integer', Rule::in(array_keys(Discovery::getPriorities()))],
+                'priority_id' => 'nullable|exists:priorities,id',
                 'work_group_id' => 'nullable|exists:work_groups,id',
                 'images' => 'nullable|array',
                 'images.*' => 'image|mimes:jpeg,png,jpg|max:2048',
@@ -792,7 +796,7 @@ class DiscoveryController extends Controller
                 'discount_rate' => 'nullable|numeric|min:0|max:100',
                 'discount_amount' => 'nullable|numeric|min:0',
                 'payment_method_id' => 'nullable|exists:payment_methods,id',
-                'priority' => ['nullable', 'integer', Rule::in(array_keys(Discovery::getPriorities()))],
+                'priority_id' => 'nullable|exists:priorities,id',
                 'status' => ['sometimes', 'string', Rule::in(Discovery::getStatuses())],
                 'items' => 'nullable|array',
                 'items.*.id' => 'required|exists:items,id',

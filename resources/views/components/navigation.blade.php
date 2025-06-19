@@ -18,7 +18,7 @@
                 @if (auth()->user()->isSoloHandyman() || auth()->user()->isCompanyAdmin())
                     <a href="{{ route('work-groups.index') }}"
                         class="text-gray-700 hover:text-gray-900 font-medium {{ request()->routeIs('work-groups.*') ? 'text-blue-600' : '' }}">
-                        Çalışma Grupları
+                        Grupları
                     </a>
                 @endif
                 @if (auth()->user()->isSoloHandyman() || auth()->user()->isCompanyAdmin())
@@ -31,6 +31,12 @@
                     <a href="{{ route('payment-methods.index') }}"
                         class="text-gray-700 hover:text-gray-900 font-medium {{ request()->routeIs('payment-methods.*') ? 'text-blue-600' : '' }}">
                         Ödeme Yöntemleri
+                    </a>
+                @endif
+                @if (auth()->user()->isSoloHandyman() || auth()->user()->isCompanyAdmin())
+                    <a href="{{ route('priorities.index') }}"
+                        class="text-gray-700 hover:text-gray-900 font-medium {{ request()->routeIs('priorities.*') ? 'text-blue-600' : '' }}">
+                        Öncelikler
                     </a>
                 @endif
                 @if (auth()->user()->isCompanyAdmin())

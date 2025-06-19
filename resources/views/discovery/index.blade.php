@@ -293,25 +293,20 @@
 
                             <!-- Priority Selection -->
                             <div>
-                                <label for="priority" class="block text-sm font-medium text-gray-700 mb-2">Öncelik
+                                <label for="priority_id" class="block text-sm font-medium text-gray-700 mb-2">Öncelik
                                     Seviyesi</label>
-                                <select name="priority" id="priority"
+                                <select name="priority_id" id="priority_id"
                                     class="bg-gray-100 mt-1 block w-full rounded-md border-2 border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 px-4 py-2">
-                                    @php
-                                        $turkishPriorityLabels = [
-                                            \App\Models\Discovery::PRIORITY_LOW => 'Yok',
-                                            \App\Models\Discovery::PRIORITY_MEDIUM => 'Var',
-                                            \App\Models\Discovery::PRIORITY_HIGH => 'Acil',
-                                        ];
-                                    @endphp
-                                    @foreach ($turkishPriorityLabels as $value => $label)
-                                        <option value="{{ $value }}"
-                                            {{ old('priority', \App\Models\Discovery::PRIORITY_LOW) == $value ? 'selected' : '' }}>
-                                            {{ $label }}
+                                    <option value="">Öncelik seçin (isteğe bağlı)</option>
+                                    @foreach ($priorities as $priority)
+                                        <option value="{{ $priority->id }}"
+                                            {{ old('priority_id') == $priority->id ? 'selected' : '' }}
+                                            style="color: {{ $priority->color }};">
+                                            {{ $priority->name }} (Seviye {{ $priority->level }})
                                         </option>
                                     @endforeach
                                 </select>
-                                @error('priority')
+                                @error('priority_id')
                                     <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
                                 @enderror
                             </div>

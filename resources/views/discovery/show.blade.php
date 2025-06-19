@@ -1061,50 +1061,20 @@
                         </div>
 
                         <!-- Priority Display -->
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-2">Öncelik Seviyesi</label>
-                            
-                            <!-- View Mode -->
-                            <div x-show="!editMode">
-                                @php
-                                    $turkishPriorityLabels = [
-                                        \App\Models\Discovery::PRIORITY_LOW => 'Yok',
-                                        \App\Models\Discovery::PRIORITY_MEDIUM => 'Var',
-                                        \App\Models\Discovery::PRIORITY_HIGH => 'Acil',
-                                    ];
-                                    $priorityLabel = $turkishPriorityLabels[$discovery->priority] ?? 'Yok';
-                                    $priorityColor =
-                                        $discovery->priority == \App\Models\Discovery::PRIORITY_HIGH
-                                            ? 'text-red-600 font-semibold'
-                                            : ($discovery->priority == \App\Models\Discovery::PRIORITY_MEDIUM
-                                                ? 'text-yellow-600 font-medium'
-                                                : 'text-gray-600');
-                                @endphp
-                                <div class="bg-gray-100 mt-1 block w-full rounded-md border-2 border-gray-300 px-4 py-2 {{ $priorityColor }}">
-                                    {{ $priorityLabel }}
+                        <div class="col-span-full">
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Öncelik</label>
+                            @if($discovery->priorityBadge)
+                                <div class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium text-white" 
+                                     style="{{ $discovery->priorityBadge->style }}">
+                                    {{ $discovery->priorityBadge->name }} 
+                                    <span class="ml-1 text-xs opacity-75">(Seviye {{ $discovery->priorityBadge->level }})</span>
                                 </div>
-                            </div>
-
-                            <!-- Edit Mode -->
-                            <select name="priority" x-show="editMode"
-                                class="bg-gray-100 mt-1 block w-full rounded-md border-2 border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 px-4 py-2">
-                                <option value="{{ \App\Models\Discovery::PRIORITY_LOW }}" 
-                                    {{ old('priority', $discovery->priority) == \App\Models\Discovery::PRIORITY_LOW ? 'selected' : '' }}>
-                                    Yok
-                                </option>
-                                <option value="{{ \App\Models\Discovery::PRIORITY_MEDIUM }}" 
-                                    {{ old('priority', $discovery->priority) == \App\Models\Discovery::PRIORITY_MEDIUM ? 'selected' : '' }}>
-                                    Var
-                                </option>
-                                <option value="{{ \App\Models\Discovery::PRIORITY_HIGH }}" 
-                                    {{ old('priority', $discovery->priority) == \App\Models\Discovery::PRIORITY_HIGH ? 'selected' : '' }}>
-                                    Acil
-                                </option>
-                            </select>
-                            
-                            @error('priority')
-                                <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
-                            @enderror
+                                @if($discovery->priorityBadge->description)
+                                    <p class="text-sm text-gray-500 mt-1">{{ $discovery->priorityBadge->description }}</p>
+                                @endif
+                            @else
+                                <span class="text-gray-500 text-sm">Öncelik atanmamış</span>
+                            @endif
                         </div>
 
                         <!-- Work Group Display -->
@@ -1652,7 +1622,7 @@
                                             x-show="editMode"
                                             class="absolute -top-2 -right-2 w-8 h-8 bg-red-500 hover:bg-red-600 text-white rounded-full flex items-center justify-center shadow-lg opacity-80 hover:opacity-100 transition-all duration-200 hover:scale-110 disabled:opacity-50 disabled:cursor-not-allowed">
                                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
                                             </svg>
                                         </button>
                                     </div>
@@ -1693,7 +1663,7 @@
                                                 @click.stop="closeImageModal()"
                                                 class="absolute -top-4 -right-4 z-10 w-10 h-10 bg-white hover:bg-gray-100 text-gray-800 rounded-full flex items-center justify-center shadow-lg transition-all duration-200 hover:scale-110">
                                             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
                                             </svg>
                                         </button>
                                         

@@ -31,6 +31,7 @@ class Discovery extends Model
         'company_id',
         'work_group_id',
         'property_id',
+        'priority_id',
         'customer_name',
         'customer_phone',
         'customer_email',
@@ -154,6 +155,11 @@ class Discovery extends Model
     public function paymentMethod(): BelongsTo
     {
         return $this->belongsTo(PaymentMethod::class);
+    }
+
+    public function priorityBadge(): BelongsTo
+    {
+        return $this->belongsTo(Priority::class, 'priority_id');
     }
 
     public function items(): BelongsToMany

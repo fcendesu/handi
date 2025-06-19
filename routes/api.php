@@ -4,7 +4,7 @@ use App\Http\Controllers\Auth\AuthenticationController;
 use App\Http\Controllers\DiscoveryController;
 use App\Http\Controllers\ItemController;
 use App\Http\Controllers\PaymentMethodController;
-use App\Http\Controllers\PostController;
+// use App\Http\Controllers\PostController;
 use App\Http\Controllers\WorkGroupController;
 use App\Http\Controllers\CompanyController;
 use Illuminate\Http\Request;
@@ -18,13 +18,13 @@ Route::get('/test', function () {
 
 });
 
-Route::get('/posts', [PostController::class, 'index'])->middleware('auth:sanctum');
+// Route::get('/posts', [PostController::class, 'index'])->middleware('auth:sanctum');
 
 Route::post('/register', [AuthenticationController::class, 'register']);
 Route::post('/login', [AuthenticationController::class, 'login']);
 Route::post('/logout', [AuthenticationController::class, 'logout'])->middleware('auth:sanctum');
 
-Route::post('/post/store', [PostController::class, 'store'])->middleware('auth:sanctum');
+// Route::post('/post/store', [PostController::class, 'store'])->middleware('auth:sanctum');
 
 Route::post('/item/store', [ItemController::class, 'store'])->middleware('auth:sanctum');
 Route::get('/item/index', [ItemController::class, 'index'])->middleware('auth:sanctum');
