@@ -163,8 +163,8 @@
                                     <p class="mt-2 text-sm text-red-600">{{ $message }}</p>
                                 @enderror
                             </div>
-                        </div>                        <!-- City and District -->
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        </div>                        <!-- City, District, and Neighborhood -->
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                             <div>
                                 <label for="city" class="block text-sm font-medium text-gray-700 mb-2">
                                     Şehir *
@@ -189,6 +189,7 @@
                                 <select name="district" 
                                         id="district" 
                                         x-model="selectedDistrict"
+                                        @change="updateNeighborhoods()"
                                         required
                                         class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 @error('district') border-red-500 @enderror">
                                     <option value="">Bir ilçe seçin</option>
@@ -197,6 +198,24 @@
                                     </template>
                                 </select>
                                 @error('district')
+                                    <p class="mt-2 text-sm text-red-600">{{ $message }}</p>
+                                @enderror
+                            </div>
+
+                            <div>
+                                <label for="neighborhood" class="block text-sm font-medium text-gray-700 mb-2">
+                                    Mahalle
+                                </label>
+                                <select name="neighborhood" 
+                                        id="neighborhood" 
+                                        x-model="selectedNeighborhood"
+                                        class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 @error('neighborhood') border-red-500 @enderror">
+                                    <option value="">Bir mahalle seçin</option>
+                                    <template x-for="neighborhood in neighborhoods" :key="neighborhood">
+                                        <option :value="neighborhood" x-text="neighborhood"></option>
+                                    </template>
+                                </select>
+                                @error('neighborhood')
                                     <p class="mt-2 text-sm text-red-600">{{ $message }}</p>
                                 @enderror
                             </div>
@@ -277,7 +296,9 @@
             return {
                 selectedCity: '{{ old('city') }}',
                 selectedDistrict: '{{ old('district') }}',
+                selectedNeighborhood: '{{ old('neighborhood') }}',
                 districts: [],
+                neighborhoods: [],
                 latitude: {{ old('latitude') ?? 'null' }},
                 longitude: {{ old('longitude') ?? 'null' }},
                 loadingLocation: false,
@@ -285,9 +306,11 @@
                 map: null,
                 marker: null,
                 cityDistricts: @json($districts),
+                cityNeighborhoods: @json($neighborhoods),
 
                 init() {
                     this.updateDistricts();
+                    this.updateNeighborhoods();
                     this.initMap();
                     
                     // Watch for manual changes to coordinates
@@ -299,6 +322,23 @@
                     this.districts = this.cityDistricts[this.selectedCity] || [];
                     if (!this.districts.includes(this.selectedDistrict)) {
                         this.selectedDistrict = '';
+                        this.selectedNeighborhood = '';
+                        this.neighborhoods = [];
+                    } else {
+                        this.updateNeighborhoods();
+                    }
+                },
+
+                updateNeighborhoods() {
+                    if (this.selectedCity && this.selectedDistrict) {
+                        this.neighborhoods = (this.cityNeighborhoods[this.selectedCity] && 
+                                            this.cityNeighborhoods[this.selectedCity][this.selectedDistrict]) || [];
+                        if (!this.neighborhoods.includes(this.selectedNeighborhood)) {
+                            this.selectedNeighborhood = '';
+                        }
+                    } else {
+                        this.neighborhoods = [];
+                        this.selectedNeighborhood = '';
                     }
                 },
 

@@ -228,7 +228,7 @@ class AddressData
                 'NEOTORİYOS',
                 'OMORFİTA',
                 'PALOURIOTISSA',
-                'SARAYKÖy',
+                'SARAYKÖY',
                 'SULTANÇİFTLİĞİ',
                 'TAKSIM',
                 'TARLABASi',

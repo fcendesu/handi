@@ -27,6 +27,7 @@ class Property extends Model
         'owner_phone',
         'city',
         'district',
+        'neighborhood',
         'site_name',
         'building_name',
         'street',
@@ -275,6 +276,11 @@ class Property extends Model
 
         $parts[] = $this->street;
         $parts[] = "No: {$this->door_apartment_no}";
+
+        if ($this->neighborhood) {
+            $parts[] = $this->neighborhood;
+        }
+
         $parts[] = $this->district;
         $parts[] = $this->city;
 

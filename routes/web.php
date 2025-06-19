@@ -126,6 +126,7 @@ Route::middleware(['auth', 'restrict.employee.dashboard'])->group(function () {
     Route::resource('properties', PropertyController::class);
     Route::get('/api/districts', [PropertyController::class, 'getDistricts'])->name('api.districts');
     Route::get('/api/neighborhoods', [PropertyController::class, 'getNeighborhoods'])->name('api.neighborhoods'); // Deprecated
+    Route::get('/api/neighborhoods-for-district', [PropertyController::class, 'getNeighborhoodsForDistrict'])->name('api.neighborhoods-for-district');
     Route::get('/api/company-properties', [PropertyController::class, 'getCompanyProperties'])->name('api.company-properties');
 
     // Payment Method Management Routes

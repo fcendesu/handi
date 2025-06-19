@@ -44,8 +44,9 @@ class PropertyController extends Controller
     {
         $cities = AddressData::getCities();
         $districts = AddressData::getAllDistricts();
+        $neighborhoods = AddressData::getAllNeighborhoods();
 
-        return view('property.create', compact('cities', 'districts'));
+        return view('property.create', compact('cities', 'districts', 'neighborhoods'));
     }
 
     /**
@@ -62,6 +63,7 @@ class PropertyController extends Controller
             'owner_phone' => 'nullable|string|max:20',
             'city' => ['required', 'string', Rule::in(AddressData::getCities())],
             'district' => 'required|string|max:255',
+            'neighborhood' => 'nullable|string|max:255',
             'site_name' => 'nullable|string|max:255',
             'building_name' => 'nullable|string|max:255',
             'street' => 'nullable|string|max:255',
@@ -110,8 +112,9 @@ class PropertyController extends Controller
 
         $cities = AddressData::getCities();
         $districts = AddressData::getAllDistricts();
+        $neighborhoods = AddressData::getAllNeighborhoods();
 
-        return view('property.edit', compact('property', 'cities', 'districts'));
+        return view('property.edit', compact('property', 'cities', 'districts', 'neighborhoods'));
     }
 
     /**
@@ -128,6 +131,7 @@ class PropertyController extends Controller
             'owner_phone' => 'nullable|string|max:20',
             'city' => ['required', 'string', Rule::in(AddressData::getCities())],
             'district' => 'required|string|max:255',
+            'neighborhood' => 'nullable|string|max:255',
             'site_name' => 'nullable|string|max:255',
             'building_name' => 'nullable|string|max:255',
             'street' => 'nullable|string|max:255',
@@ -172,6 +176,18 @@ class PropertyController extends Controller
         $districts = AddressData::getDistricts($city);
 
         return response()->json($districts);
+    }
+
+    /**
+     * Get neighborhoods for a specific city and district (AJAX endpoint)
+     */
+    public function getNeighborhoodsForDistrict(Request $request): JsonResponse
+    {
+        $city = $request->get('city');
+        $district = $request->get('district');
+        $neighborhoods = AddressData::getNeighborhoods($city, $district);
+
+        return response()->json($neighborhoods);
     }
 
     /**
