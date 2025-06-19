@@ -264,7 +264,10 @@ class DiscoveryController extends Controller
             $workGroups = $user->workGroups;
         }
 
-        return view('discovery.show', compact('discovery', 'workGroups'));
+        // Get available priorities for the user
+        $priorities = Priority::forUser($user)->orderedByLevel()->get();
+
+        return view('discovery.show', compact('discovery', 'workGroups', 'priorities'));
     }
 
     public function edit(Discovery $discovery)

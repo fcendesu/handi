@@ -80,13 +80,15 @@ Successfully implemented a comprehensive Priority management system for the Hand
 
 - ✅ **Updated Discovery Details** (`resources/views/discovery/show.blade.php`)
 
-  - Priority badge display with custom colors
-  - Shows priority name, level, and description
+  - **View Mode**: Priority badge display with custom colors, name, level, and description
+  - **Edit Mode**: Dropdown to select/change priority with color-coded options
+  - **Editable Priorities**: Users can change priority when editing discoveries
   - Graceful handling of discoveries without priorities
 
 - ✅ **Updated DiscoveryController**
-  - Added Priority model import
-  - Provides user-scoped priorities to views
+  - Added Priority model import and user-scoped priority filtering
+  - **Show Method**: Provides available priorities to view for editing
+  - **Index Method**: Provides priorities for discovery creation
   - Updated validation to use `priority_id` field
 
 ### 5. **Default Priorities**

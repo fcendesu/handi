@@ -1061,20 +1061,41 @@
                         </div>
 
                         <!-- Priority Display -->
-                        <div class="col-span-full">
+                        <div>
                             <label class="block text-sm font-medium text-gray-700 mb-2">Öncelik</label>
-                            @if($discovery->priorityBadge)
-                                <div class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium text-white" 
-                                     style="{{ $discovery->priorityBadge->style }}">
-                                    {{ $discovery->priorityBadge->name }} 
-                                    <span class="ml-1 text-xs opacity-75">(Seviye {{ $discovery->priorityBadge->level }})</span>
-                                </div>
-                                @if($discovery->priorityBadge->description)
-                                    <p class="text-sm text-gray-500 mt-1">{{ $discovery->priorityBadge->description }}</p>
+                            
+                            <!-- View Mode -->
+                            <div x-show="!editMode">
+                                @if($discovery->priorityBadge)
+                                    <div class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium text-white" 
+                                         style="{{ $discovery->priorityBadge->style }}">
+                                        {{ $discovery->priorityBadge->name }} 
+                                        <span class="ml-1 text-xs opacity-75">(Seviye {{ $discovery->priorityBadge->level }})</span>
+                                    </div>
+                                    @if($discovery->priorityBadge->description)
+                                        <p class="text-sm text-gray-500 mt-1">{{ $discovery->priorityBadge->description }}</p>
+                                    @endif
+                                @else
+                                    <span class="text-gray-500 text-sm">Öncelik atanmamış</span>
                                 @endif
-                            @else
-                                <span class="text-gray-500 text-sm">Öncelik atanmamış</span>
-                            @endif
+                            </div>
+
+                            <!-- Edit Mode -->
+                            <select name="priority_id" x-show="editMode"
+                                class="bg-gray-100 mt-1 block w-full rounded-md border-2 border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 px-4 py-2">
+                                <option value="">Öncelik seçin (isteğe bağlı)</option>
+                                @foreach($priorities as $priority)
+                                    <option value="{{ $priority->id }}" 
+                                        {{ old('priority_id', $discovery->priority_id) == $priority->id ? 'selected' : '' }}
+                                        style="color: {{ $priority->color }};">
+                                        {{ $priority->name }} (Seviye {{ $priority->level }})
+                                    </option>
+                                @endforeach
+                            </select>
+                            
+                            @error('priority_id')
+                                <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                            @enderror
                         </div>
 
                         <!-- Work Group Display -->
