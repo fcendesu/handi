@@ -113,7 +113,7 @@
                                             </dd>
                                         </div>                                        @if($property->district)
                                             <div>
-                                                <dt class="text-sm font-medium text-gray-500">İlçe</dt>
+                                                <dt class="text-sm font-medium text-gray-500">Bölge</dt>
                                                 <dd class="mt-1 text-sm text-gray-900">{{ $property->district }}</dd>
                                             </div>
                                         @endif
