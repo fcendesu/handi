@@ -203,7 +203,7 @@
                                             <!-- Neighborhood Selection -->
                                             <div>
                                                 <label for="neighborhood"
-                                                    class="block text-sm font-medium text-gray-700 mb-2">Mahalle</label>
+                                                    class="block text-sm font-medium text-gray-700 mb-2">Mahalle/Site</label>
                                                 <select name="neighborhood" id="neighborhood"
                                                     x-model="selectedNeighborhood"
                                                     class="bg-gray-100 mt-1 block w-full rounded-md border-2 border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 px-4 py-2">
@@ -1177,10 +1177,30 @@
 
                 updateNeighborhoods() {
                     if (this.selectedCity && this.selectedDistrict) {
-                        this.neighborhoods = this.cityNeighborhoods[this.selectedCity]?.[this.selectedDistrict] || [];
-                        if (!this.neighborhoods.includes(this.selectedNeighborhood)) {
-                            this.selectedNeighborhood = '';
-                        }
+                        // Fetch combined neighborhoods and sites from web API
+                        fetch(`/api/combined-neighborhoods?city=${encodeURIComponent(this.selectedCity)}&district=${encodeURIComponent(this.selectedDistrict)}`, {
+                            headers: {
+                                'Accept': 'application/json',
+                                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+                                'X-Requested-With': 'XMLHttpRequest'
+                            },
+                            credentials: 'same-origin'
+                        })
+                        .then(response => response.json())
+                        .then(data => {
+                            this.neighborhoods = Array.isArray(data) ? data : [];
+                            if (!this.neighborhoods.includes(this.selectedNeighborhood)) {
+                                this.selectedNeighborhood = '';
+                            }
+                        })
+                        .catch(error => {
+                            console.error('Error fetching neighborhoods:', error);
+                            // Fallback to static data
+                            this.neighborhoods = this.cityNeighborhoods[this.selectedCity]?.[this.selectedDistrict] || [];
+                            if (!this.neighborhoods.includes(this.selectedNeighborhood)) {
+                                this.selectedNeighborhood = '';
+                            }
+                        });
                     } else {
                         this.neighborhoods = [];
                         this.selectedNeighborhood = '';

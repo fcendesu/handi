@@ -456,12 +456,31 @@
 
                 updateNeighborhoods() {
                     if (this.selectedCity && this.selectedDistrict) {
-                        const cityNeighborhoods = @json(\App\Data\AddressData::getAllNeighborhoods());
-                        this.neighborhoods = cityNeighborhoods[this.selectedCity]?.[this.selectedDistrict] || [];
-                        
-                        if (!this.neighborhoods.includes(this.selectedNeighborhood)) {
-                            this.selectedNeighborhood = '';
-                        }
+                        // Fetch combined neighborhoods and sites from web API
+                        fetch(`/api/combined-neighborhoods?city=${encodeURIComponent(this.selectedCity)}&district=${encodeURIComponent(this.selectedDistrict)}`, {
+                            headers: {
+                                'Accept': 'application/json',
+                                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+                                'X-Requested-With': 'XMLHttpRequest'
+                            },
+                            credentials: 'same-origin'
+                        })
+                        .then(response => response.json())
+                        .then(data => {
+                            this.neighborhoods = Array.isArray(data) ? data : [];
+                            if (!this.neighborhoods.includes(this.selectedNeighborhood)) {
+                                this.selectedNeighborhood = '';
+                            }
+                        })
+                        .catch(error => {
+                            console.error('Error fetching neighborhoods:', error);
+                            // Fallback to static data
+                            const cityNeighborhoods = @json(\App\Data\AddressData::getAllNeighborhoods());
+                            this.neighborhoods = cityNeighborhoods[this.selectedCity]?.[this.selectedDistrict] || [];
+                            if (!this.neighborhoods.includes(this.selectedNeighborhood)) {
+                                this.selectedNeighborhood = '';
+                            }
+                        });
                     } else {
                         this.neighborhoods = [];
                         this.selectedNeighborhood = '';
@@ -1021,7 +1040,7 @@
 
                                                     <!-- Neighborhood Selection -->
                                                     <div>
-                                                        <label class="block text-sm font-medium text-gray-700 mb-2">Mahalle</label>
+                                                        <label class="block text-sm font-medium text-gray-700 mb-2">Mahalle/Site</label>
                                                         <select x-model="selectedNeighborhood"
                                                             class="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
                                                             <option value="">Önce şehir ve ilçe seçin</option>

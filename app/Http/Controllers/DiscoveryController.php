@@ -1429,21 +1429,4 @@ class DiscoveryController extends Controller
 
         return false;
     }
-
-    /**
-     * Get neighborhoods for a specific city and district
-     */
-    public function getNeighborhoods(Request $request): JsonResponse
-    {
-        $request->validate([
-            'city' => 'required|string',
-            'district' => 'required|string',
-        ]);
-
-        $neighborhoods = AddressData::getNeighborhoods($request->city, $request->district);
-
-        return response()->json([
-            'neighborhoods' => $neighborhoods
-        ]);
-    }
 }
