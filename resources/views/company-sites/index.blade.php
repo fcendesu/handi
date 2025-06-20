@@ -20,7 +20,7 @@
             <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
                 <div class="p-6">
                     <div class="flex justify-between items-center mb-6">
-                        <h1 class="text-3xl font-bold text-gray-900">Mahalle/Site Yönetimi</h1>
+                        <h1 class="text-3xl font-bold text-gray-900">Mahalle/Site Ekle</h1>
                         <a href="{{ route('properties.index') }}" 
                            class="bg-gray-600 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded-lg transition duration-200">
                             ← Mülklere Geri Dön
