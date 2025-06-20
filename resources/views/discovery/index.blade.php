@@ -185,7 +185,7 @@
                                             <!-- District Selection -->
                                             <div>
                                                 <label for="district"
-                                                    class="block text-sm font-medium text-gray-700 mb-2">İlçe</label>
+                                                    class="block text-sm font-medium text-gray-700 mb-2">Bölge</label>
                                                 <select name="district" id="district"
                                                     x-model="selectedDistrict"
                                                     @change="updateNeighborhoods()"

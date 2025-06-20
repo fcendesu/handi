@@ -1028,7 +1028,7 @@
 
                                                     <!-- District Selection -->
                                                     <div>
-                                                        <label class="block text-sm font-medium text-gray-700 mb-2">İlçe</label>
+                                                        <label class="block text-sm font-medium text-gray-700 mb-2">Bölge</label>
                                                         <select x-model="selectedDistrict" @change="updateNeighborhoods()"
                                                             class="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
                                                             <option value="">Bir ilçe seçin</option>
