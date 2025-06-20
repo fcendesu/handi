@@ -625,6 +625,7 @@
                             data.address = this.addressDetails || '';
                             data.city = this.selectedCity || '';
                             data.district = this.selectedDistrict || '';
+                            data.neighborhood = this.selectedNeighborhood || '';
                             data.latitude = this.latitude || '';
                             data.longitude = this.longitude || '';
                         }
@@ -655,6 +656,7 @@
                                 selectedProperty: this.selectedProperty,
                                 selectedCity: this.selectedCity,
                                 selectedDistrict: this.selectedDistrict,
+                                selectedNeighborhood: this.selectedNeighborhood,
                                 addressDetails: this.addressDetails,
                                 latitude: this.latitude,
                                 longitude: this.longitude,
