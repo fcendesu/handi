@@ -318,6 +318,7 @@
                 address: '{{ old('address', $discovery->address) }}',
                 city: '{{ old('city', $discovery->city) }}',
                 district: '{{ old('district', $discovery->district) }}',
+                neighborhood: '{{ old('neighborhood', $discovery->neighborhood) }}',
                 propertyId: '{{ old('property_id', $discovery->property_id) }}',
                 latitude: '{{ old('latitude', $discovery->latitude) }}',
                 longitude: '{{ old('longitude', $discovery->longitude) }}',
@@ -339,7 +340,7 @@
                 },
                 
                 getManualAddressDisplay() {
-                    const parts = [this.city, this.district, this.address].filter(part => part && part.trim());
+                    const parts = [this.city, this.district, this.neighborhood, this.address].filter(part => part && part.trim());
                     return parts.length > 0 ? parts.join(', ') : 'Adres belirtilmemiş';
                 },
                 
@@ -354,6 +355,7 @@
                         this.address = '';
                         this.city = '';
                         this.district = '';
+                        this.neighborhood = '';
                         this.latitude = savedData.latitude || data.selectedProperty.latitude || '';
                         this.longitude = savedData.longitude || data.selectedProperty.longitude || '';
                     } else if (data.modalAddressType === 'manual') {
@@ -363,6 +365,7 @@
                         this.address = savedData.address || data.addressDetails || '';
                         this.city = savedData.city || data.selectedCity || '';
                         this.district = savedData.district || data.selectedDistrict || '';
+                        this.neighborhood = savedData.neighborhood || data.selectedNeighborhood || '';
                         this.latitude = savedData.latitude || data.latitude || '';
                         this.longitude = savedData.longitude || data.longitude || '';
                     }
@@ -383,8 +386,10 @@
                 // Manual address fields - use separate city/district fields
                 selectedCity: @json($discovery->city ?? ''),
                 selectedDistrict: @json($discovery->district ?? ''),
+                selectedNeighborhood: @json($discovery->neighborhood ?? ''),
                 addressDetails: @json($discovery->address ?? ''),
                 districts: [],
+                neighborhoods: [],
                 latitude: @json($discovery->latitude ?? ''),
                 longitude: @json($discovery->longitude ?? ''),
                 loadingLocation: false,
@@ -402,6 +407,7 @@
                     if (this.selectedCity) {
                         setTimeout(() => {
                             this.updateDistricts();
+                            this.updateNeighborhoods();
                         }, 100);
                     }
                     
@@ -439,7 +445,26 @@
                             });
                         } else {
                             this.selectedDistrict = '';
+                            this.selectedNeighborhood = '';
+                            this.neighborhoods = [];
                         }
+                    } else {
+                        this.selectedNeighborhood = '';
+                        this.neighborhoods = [];
+                    }
+                },
+
+                updateNeighborhoods() {
+                    if (this.selectedCity && this.selectedDistrict) {
+                        const cityNeighborhoods = @json(\App\Data\AddressData::getAllNeighborhoods());
+                        this.neighborhoods = cityNeighborhoods[this.selectedCity]?.[this.selectedDistrict] || [];
+                        
+                        if (!this.neighborhoods.includes(this.selectedNeighborhood)) {
+                            this.selectedNeighborhood = '';
+                        }
+                    } else {
+                        this.neighborhoods = [];
+                        this.selectedNeighborhood = '';
                     }
                 },
 
@@ -901,6 +926,7 @@
                                     <input type="hidden" name="address" x-model="address">
                                     <input type="hidden" name="city" x-model="city">
                                     <input type="hidden" name="district" x-model="district">
+                                    <input type="hidden" name="neighborhood" x-model="neighborhood">
                                     <input type="hidden" name="property_id" x-model="propertyId">
                                     <input type="hidden" name="latitude" x-model="latitude">
                                     <input type="hidden" name="longitude" x-model="longitude">
@@ -982,13 +1008,27 @@
                                                     <!-- District Selection -->
                                                     <div>
                                                         <label class="block text-sm font-medium text-gray-700 mb-2">İlçe</label>
-                                                        <select x-model="selectedDistrict"
+                                                        <select x-model="selectedDistrict" @change="updateNeighborhoods()"
                                                             class="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
                                                             <option value="">Bir ilçe seçin</option>
                                                             <template x-for="district in districts" :key="`${selectedCity}-${district}`">
                                                                 <option :value="district" 
                                                                         x-text="district"
                                                                         :selected="district === selectedDistrict"></option>
+                                                            </template>
+                                                        </select>
+                                                    </div>
+
+                                                    <!-- Neighborhood Selection -->
+                                                    <div>
+                                                        <label class="block text-sm font-medium text-gray-700 mb-2">Mahalle</label>
+                                                        <select x-model="selectedNeighborhood"
+                                                            class="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
+                                                            <option value="">Önce şehir ve ilçe seçin</option>
+                                                            <template x-for="neighborhood in neighborhoods" :key="`${selectedCity}-${selectedDistrict}-${neighborhood}`">
+                                                                <option :value="neighborhood" 
+                                                                        x-text="neighborhood"
+                                                                        :selected="neighborhood === selectedNeighborhood"></option>
                                                             </template>
                                                         </select>
                                                     </div>

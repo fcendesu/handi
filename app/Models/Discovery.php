@@ -38,6 +38,7 @@ class Discovery extends Model
         'address',
         'city',
         'district',
+        'neighborhood',
         'latitude',
         'longitude',
         'discovery',

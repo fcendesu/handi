@@ -44,6 +44,7 @@ class DiscoveryController extends Controller
         // Get address data for manual address dropdowns
         $cities = AddressData::getCities();
         $districts = AddressData::getAllDistricts();
+        $neighborhoods = AddressData::getAllNeighborhoods();
 
         // Get available work groups for the user
         $workGroups = collect();
@@ -61,7 +62,7 @@ class DiscoveryController extends Controller
         // Get all priorities for the dropdown
         $priorities = Priority::forUser($user)->orderedByLevel()->get();
 
-        return view('discovery.index', compact('discoveries', 'cities', 'districts', 'workGroups', 'priorities'));
+        return view('discovery.index', compact('discoveries', 'cities', 'districts', 'neighborhoods', 'workGroups', 'priorities'));
     }
 
 
@@ -83,6 +84,7 @@ class DiscoveryController extends Controller
             'address' => 'nullable|string|max:1000',
             'city' => 'nullable|string|max:255',
             'district' => 'nullable|string|max:255',
+            'neighborhood' => 'nullable|string|max:255',
             'latitude' => 'nullable|numeric|between:-90,90',
             'longitude' => 'nullable|numeric|between:-180,180',
             'discovery' => 'required|string',
@@ -124,6 +126,13 @@ class DiscoveryController extends Controller
             if ($request->district && !in_array($request->district, AddressData::getDistricts($request->city))) {
                 return back()->withErrors(['district' => 'Selected district is not valid for the selected city.']);
             }
+
+            if ($request->neighborhood && $request->district) {
+                $neighborhoods = AddressData::getNeighborhoods($request->city, $request->district);
+                if (!in_array($request->neighborhood, $neighborhoods)) {
+                    return back()->withErrors(['neighborhood' => 'Selected neighborhood is not valid for the selected city and district.']);
+                }
+            }
         }
 
         // Additional validation - ensure manual address has at least some address information
@@ -154,10 +163,11 @@ class DiscoveryController extends Controller
         }
 
         try {
-            // Process manual address - store city, district, and address details separately
+            // Process manual address - store city, district, neighborhood, and address details separately
             if ($request->address_type === 'manual') {
                 $validated['city'] = $request->city;
                 $validated['district'] = $request->district;
+                $validated['neighborhood'] = $request->neighborhood;
                 $validated['address'] = $request->address;
 
                 // Set coordinates if provided
@@ -177,6 +187,7 @@ class DiscoveryController extends Controller
                 // Extract property's address components
                 $validated['city'] = $property->city ?? null;
                 $validated['district'] = $property->district ?? null;
+                $validated['neighborhood'] = $property->neighborhood ?? null;
                 $validated['address'] = $property->address ?? $property->full_address;
 
                 // Extract property's coordinates if available
@@ -284,6 +295,7 @@ class DiscoveryController extends Controller
             'address' => 'nullable|string|max:1000',
             'city' => 'nullable|string|max:255',
             'district' => 'nullable|string|max:255',
+            'neighborhood' => 'nullable|string|max:255',
             'property_id' => 'nullable|exists:properties,id',
             'latitude' => 'nullable|numeric',
             'longitude' => 'nullable|numeric',
@@ -1285,6 +1297,7 @@ class DiscoveryController extends Controller
                 'address' => 'nullable|string|max:1000',
                 'city' => 'nullable|string|max:255',
                 'district' => 'nullable|string|max:255',
+                'neighborhood' => 'nullable|string|max:255',
                 'latitude' => 'nullable|numeric|between:-90,90',
                 'longitude' => 'nullable|numeric|between:-180,180',
             ]);
@@ -1317,6 +1330,7 @@ class DiscoveryController extends Controller
                     'address' => null,
                     'city' => null,
                     'district' => null,
+                    'neighborhood' => null,
                     'latitude' => $property->latitude,
                     'longitude' => $property->longitude,
                 ];
@@ -1327,6 +1341,7 @@ class DiscoveryController extends Controller
                     'address' => $validated['address'] ?? null,
                     'city' => $validated['city'] ?? null,
                     'district' => $validated['district'] ?? null,
+                    'neighborhood' => $validated['neighborhood'] ?? null,
                     'latitude' => $validated['latitude'] ?? null,
                     'longitude' => $validated['longitude'] ?? null,
                 ];
@@ -1344,6 +1359,7 @@ class DiscoveryController extends Controller
                 'address' => $discovery->address,
                 'city' => $discovery->city,
                 'district' => $discovery->district,
+                'neighborhood' => $discovery->neighborhood,
                 'latitude' => $discovery->latitude,
                 'longitude' => $discovery->longitude,
             ];
@@ -1412,5 +1428,22 @@ class DiscoveryController extends Controller
         }
 
         return false;
+    }
+
+    /**
+     * Get neighborhoods for a specific city and district
+     */
+    public function getNeighborhoods(Request $request): JsonResponse
+    {
+        $request->validate([
+            'city' => 'required|string',
+            'district' => 'required|string',
+        ]);
+
+        $neighborhoods = AddressData::getNeighborhoods($request->city, $request->district);
+
+        return response()->json([
+            'neighborhoods' => $neighborhoods
+        ]);
     }
 }

@@ -46,6 +46,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/discoveries/{discovery}/assign', [DiscoveryController::class, 'assignToSelf']);
     Route::delete('/discoveries/{discovery}/assign', [DiscoveryController::class, 'unassignFromSelf']);
     Route::get('/discoveries/{discovery}/share', [DiscoveryController::class, 'apiGetShareUrl']);
+    Route::get('/discoveries/neighborhoods', [DiscoveryController::class, 'getNeighborhoods']);
 
     // Payment Methods API routes
     Route::get('/payment-methods/accessible', [PaymentMethodController::class, 'getAccessiblePaymentMethods']);
