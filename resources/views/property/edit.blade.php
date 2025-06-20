@@ -456,7 +456,12 @@
             function updateNeighborhoods() {
                 const selectedCity = citySelect.value;
                 const selectedDistrict = districtSelect.value;
-                neighborhoodSelect.innerHTML = '<option value="">@if(auth()->user() && auth()->user()->company_id)Bir mahalle/site seçin@elseBir mahalle seçin@endif</option>';
+                const defaultOption = @if(auth()->user() && auth()->user()->company_id)
+                    'Bir mahalle/site seçin'
+                @else
+                    'Bir mahalle seçin'
+                @endif;
+                neighborhoodSelect.innerHTML = `<option value="">${defaultOption}</option>`;
                 
                 if (selectedCity && selectedDistrict) {
                     @if(auth()->user() && auth()->user()->company_id)
