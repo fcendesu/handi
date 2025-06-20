@@ -203,7 +203,13 @@
                                             <!-- Neighborhood Selection -->
                                             <div>
                                                 <label for="neighborhood"
-                                                    class="block text-sm font-medium text-gray-700 mb-2">Mahalle/Site</label>
+                                                    class="block text-sm font-medium text-gray-700 mb-2">
+                                                    @if (auth()->user()->isSoloHandyman())
+                                                        Mahalle
+                                                    @else
+                                                        Mahalle/Site
+                                                    @endif
+                                                </label>
                                                 <select name="neighborhood" id="neighborhood"
                                                     x-model="selectedNeighborhood"
                                                     class="bg-gray-100 mt-1 block w-full rounded-md border-2 border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 px-4 py-2">

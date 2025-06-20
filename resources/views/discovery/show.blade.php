@@ -1040,7 +1040,13 @@
 
                                                     <!-- Neighborhood Selection -->
                                                     <div>
-                                                        <label class="block text-sm font-medium text-gray-700 mb-2">Mahalle/Site</label>
+                                                        <label class="block text-sm font-medium text-gray-700 mb-2">
+                                                            @if (auth()->user()->isSoloHandyman())
+                                                                Mahalle
+                                                            @else
+                                                                Mahalle/Site
+                                                            @endif
+                                                        </label>
                                                         <select x-model="selectedNeighborhood"
                                                             class="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
                                                             <option value="">Önce şehir ve ilçe seçin</option>
