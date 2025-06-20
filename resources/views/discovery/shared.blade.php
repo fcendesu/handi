@@ -215,9 +215,7 @@
                             @if($discovery->property_id)
                                 <!-- Property Address Display -->
                                 <div class="bg-blue-50 border border-blue-200 rounded-lg p-3">
-                                    <div class="font-medium text-blue-900">{{ $discovery->property->name }}</div>
                                     <div class="text-blue-700">{{ $discovery->property->full_address }}</div>
-                                    <div class="text-sm text-blue-600 mt-1">Kayıtlı Mülk</div>
                                     @if($discovery->property->latitude && $discovery->property->longitude)
                                         <div class="mt-2">
                                             <a href="https://www.google.com/maps?q={{ $discovery->property->latitude }},{{ $discovery->property->longitude }}" 
@@ -235,8 +233,16 @@
                             @else
                                 <!-- Manual Address Display -->
                                 <div class="bg-gray-50 border border-gray-200 rounded-lg p-3">
-                                    <div class="text-gray-900">{{ $discovery->address ?: 'Adres belirtilmemiş' }}</div>
-                                    <div class="text-sm text-gray-600 mt-1">Manuel Adres</div>
+                                    @php
+                                        $addressParts = array_filter([
+                                            $discovery->city,
+                                            $discovery->district,
+                                            $discovery->neighborhood,
+                                            $discovery->address
+                                        ]);
+                                        $fullAddress = implode(', ', $addressParts);
+                                    @endphp
+                                    <div class="text-gray-900">{{ $fullAddress ?: 'Adres belirtilmemiş' }}</div>
                                     @if($discovery->latitude && $discovery->longitude)
                                         <div class="mt-2">
                                             <a href="https://www.google.com/maps?q={{ $discovery->latitude }},{{ $discovery->longitude }}" 
@@ -249,9 +255,9 @@
                                                 Google Maps'te Görüntüle
                                             </a>
                                         </div>
-                                    @elseif($discovery->address)
+                                    @elseif($fullAddress)
                                         <div class="mt-2">
-                                            <a href="https://www.google.com/maps/search/{{ urlencode($discovery->address) }}" 
+                                            <a href="https://www.google.com/maps/search/{{ urlencode($fullAddress) }}" 
                                                target="_blank"
                                                class="inline-flex items-center bg-blue-600 hover:bg-blue-700 text-white px-3 py-1 rounded text-sm font-medium transition duration-200">
                                                 <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
