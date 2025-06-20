@@ -19,12 +19,20 @@
             <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
                 <div class="p-6">
                     <div class="flex justify-between items-center mb-6">                        <h1 class="text-3xl font-bold text-gray-900">Mülk Yönetimi</h1>
-                        @can('create', App\Models\Property::class)
-                            <a href="{{ route('properties.create') }}" 
-                               class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg transition duration-200">
-                                Yeni Mülk Ekle
-                            </a>
-                        @endcan
+                        <div class="flex space-x-3">
+                            @if(auth()->user() && auth()->user()->company_id)
+                                <a href="{{ route('company-sites.index') }}" 
+                                   class="bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-4 rounded-lg transition duration-200">
+                                    Mahalle/Site Yönetimi
+                                </a>
+                            @endif
+                            @can('create', App\Models\Property::class)
+                                <a href="{{ route('properties.create') }}" 
+                                   class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg transition duration-200">
+                                    Yeni Mülk Ekle
+                                </a>
+                            @endcan
+                        </div>
                     </div>
 
                     @if(session('success'))

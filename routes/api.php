@@ -4,6 +4,7 @@ use App\Http\Controllers\Auth\AuthenticationController;
 use App\Http\Controllers\DiscoveryController;
 use App\Http\Controllers\ItemController;
 use App\Http\Controllers\PaymentMethodController;
+use App\Http\Controllers\CompanySiteController;
 // use App\Http\Controllers\PostController;
 use App\Http\Controllers\WorkGroupController;
 use App\Http\Controllers\CompanyController;

@@ -204,13 +204,23 @@
 
                             <div>
                                 <label for="neighborhood" class="block text-sm font-medium text-gray-700 mb-2">
-                                    Mahalle
+                                    @if(auth()->user() && auth()->user()->company_id)
+                                        Mahalle/Site
+                                    @else
+                                        Mahalle
+                                    @endif
                                 </label>
                                 <select name="neighborhood" 
                                         id="neighborhood" 
                                         x-model="selectedNeighborhood"
                                         class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 @error('neighborhood') border-red-500 @enderror">
-                                    <option value="">Bir mahalle seçin</option>
+                                    <option value="">
+                                        @if(auth()->user() && auth()->user()->company_id)
+                                            Bir mahalle/site seçin
+                                        @else
+                                            Bir mahalle seçin
+                                        @endif
+                                    </option>
                                     <template x-for="neighborhood in neighborhoods" :key="neighborhood">
                                         <option :value="neighborhood" x-text="neighborhood"></option>
                                     </template>
@@ -331,11 +341,29 @@
 
                 updateNeighborhoods() {
                     if (this.selectedCity && this.selectedDistrict) {
-                        this.neighborhoods = (this.cityNeighborhoods[this.selectedCity] && 
-                                            this.cityNeighborhoods[this.selectedCity][this.selectedDistrict]) || [];
-                        if (!this.neighborhoods.includes(this.selectedNeighborhood)) {
-                            this.selectedNeighborhood = '';
-                        }
+                        @if(auth()->user() && auth()->user()->company_id)
+                            // For company users, fetch combined neighborhoods and company sites
+                            fetch(`/api/combined-neighborhoods?city=${encodeURIComponent(this.selectedCity)}&district=${encodeURIComponent(this.selectedDistrict)}`)
+                                .then(response => response.json())
+                                .then(data => {
+                                    this.neighborhoods = data;
+                                    if (!this.neighborhoods.includes(this.selectedNeighborhood)) {
+                                        this.selectedNeighborhood = '';
+                                    }
+                                })
+                                .catch(error => {
+                                    console.error('Error fetching neighborhoods:', error);
+                                    this.neighborhoods = [];
+                                    this.selectedNeighborhood = '';
+                                });
+                        @else
+                            // For solo handymen, use static data
+                            this.neighborhoods = (this.cityNeighborhoods[this.selectedCity] && 
+                                                this.cityNeighborhoods[this.selectedCity][this.selectedDistrict]) || [];
+                            if (!this.neighborhoods.includes(this.selectedNeighborhood)) {
+                                this.selectedNeighborhood = '';
+                            }
+                        @endif
                     } else {
                         this.neighborhoods = [];
                         this.selectedNeighborhood = '';

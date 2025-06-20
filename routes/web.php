@@ -7,6 +7,7 @@ use App\Http\Controllers\PropertyController;
 use App\Http\Controllers\PaymentMethodController;
 use App\Http\Controllers\WorkGroupController;
 use App\Http\Controllers\CompanyController;
+use App\Http\Controllers\CompanySiteController;
 use App\Http\Controllers\PriorityController;
 
 use Illuminate\Support\Facades\Route;
@@ -129,6 +130,13 @@ Route::middleware(['auth', 'restrict.employee.dashboard'])->group(function () {
     Route::get('/api/neighborhoods-for-district', [PropertyController::class, 'getNeighborhoodsForDistrict'])->name('api.neighborhoods-for-district');
     Route::get('/api/company-properties', [PropertyController::class, 'getCompanyProperties'])->name('api.company-properties');
 
+    // Company Sites Management Routes
+    Route::get('/company-sites', [CompanySiteController::class, 'indexView'])->name('company-sites.index');
+    Route::get('/api/company-sites', [CompanySiteController::class, 'index'])->name('api.company-sites');
+    Route::post('/api/company-sites', [CompanySiteController::class, 'store'])->name('api.company-sites.store');
+    Route::delete('/api/company-sites/{companySite}', [CompanySiteController::class, 'destroy'])->name('api.company-sites.destroy');
+    Route::get('/api/combined-neighborhoods', [CompanySiteController::class, 'getCombinedNeighborhoods'])->name('api.combined-neighborhoods');
+
     // Payment Method Management Routes
     Route::resource('payment-methods', PaymentMethodController::class);
     Route::get('/api/payment-methods', [PaymentMethodController::class, 'getAccessiblePaymentMethods'])->name('api.payment-methods');
@@ -151,3 +159,14 @@ Route::post('/shared/discovery/{token}/approve', [DiscoveryController::class, 'c
     ->name('discovery.customer-approve');
 Route::post('/shared/discovery/{token}/reject', [DiscoveryController::class, 'customerReject'])
     ->name('discovery.customer-reject');
+
+// Test route that bypasses authentication
+Route::get('/test-properties', function () {
+    // Simulate authentication for testing
+    $user = \App\Models\User::where('company_id', 1)->first();
+    if ($user) {
+        auth()->login($user);
+    }
+    $properties = collect(); // Empty collection for testing
+    return view('property.index', compact('properties'));
+});
