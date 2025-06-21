@@ -4,7 +4,7 @@
 # Run this script on your VPS to deploy the application
 
 APP_NAME="handi"
-APP_PATH="/var/www/html/$APP_NAME"
+APP_PATH="/var/www/laravel"
 REPO_URL="https://github.com/yourusername/yourrepo.git"  # Replace with your repo
 DOMAIN="yourdomain.com"  # Replace with your domain
 
@@ -12,17 +12,17 @@ echo "Starting deployment of $APP_NAME..."
 
 # Create application directory
 sudo mkdir -p $APP_PATH
-cd /var/www/html
+cd /var/www
 
 # Clone or update repository
-if [ -d "$APP_NAME/.git" ]; then
+if [ -d "laravel/.git" ]; then
     echo "Updating existing repository..."
-    cd $APP_NAME
+    cd laravel
     git pull origin main
 else
     echo "Cloning repository..."
-    sudo git clone $REPO_URL $APP_NAME
-    cd $APP_NAME
+    sudo git clone $REPO_URL laravel
+    cd laravel
 fi
 
 # Install PHP dependencies
@@ -39,6 +39,14 @@ if [ ! -f .env ]; then
     echo "Please edit .env file with your database and other credentials"
 fi
 
+# Fix SQLite database permissions if using SQLite
+if [ -f database/database.sqlite ]; then
+    echo "Setting SQLite database permissions..."
+    sudo touch database/database.sqlite
+    sudo chown www-data:www-data database/database.sqlite
+    sudo chmod 664 database/database.sqlite
+fi
+
 # Generate application key
 sudo php artisan key:generate
 
@@ -47,6 +55,7 @@ sudo chown -R www-data:www-data $APP_PATH
 sudo chmod -R 755 $APP_PATH
 sudo chmod -R 775 $APP_PATH/storage
 sudo chmod -R 775 $APP_PATH/bootstrap/cache
+sudo chmod -R 775 $APP_PATH/database
 
 # Create symbolic link for storage
 sudo php artisan storage:link
@@ -72,5 +81,7 @@ fi
 echo "Deployment completed!"
 echo "Next steps:"
 echo "1. Configure your .env file"
-echo "2. Set up database and run migrations"
-echo "3. Configure SSL with: sudo certbot --nginx -d $DOMAIN"
+echo "2. For SQLite: Run 'sudo touch database/database.sqlite && sudo chown www-data:www-data database/database.sqlite && sudo chmod 664 database/database.sqlite'"
+echo "3. For MySQL: Set up MySQL database and update DB_* variables in .env"
+echo "4. Run migrations: sudo php artisan migrate --force"
+echo "5. Configure SSL with: sudo certbot --nginx -d $DOMAIN"
