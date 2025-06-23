@@ -31,7 +31,8 @@ class DiscoveryController extends Controller
             // Company admin sees all company discoveries
             $query->where('company_id', $user->company_id);
         } elseif ($user->isCompanyEmployee()) {
-            // Employees see discoveries from their work groups or assigned to them
+            // Company employees cannot access web dashboard - this should never execute
+            // due to RestrictEmployeeDashboard middleware, but keeping original logic
             $workGroupIds = $user->workGroups->pluck('id');
             $query->where(function ($q) use ($user, $workGroupIds) {
                 $q->whereIn('work_group_id', $workGroupIds)
@@ -675,12 +676,8 @@ class DiscoveryController extends Controller
                 // Company admin sees all company discoveries
                 $query->where('company_id', $user->company_id);
             } elseif ($user->isCompanyEmployee()) {
-                // Employees see discoveries from their work groups or assigned to them
-                $workGroupIds = $user->workGroups->pluck('id');
-                $query->where(function ($q) use ($user, $workGroupIds) {
-                    $q->whereIn('work_group_id', $workGroupIds)
-                        ->orWhere('assignee_id', $user->id);
-                });
+                // Company employees see all discoveries created in their company
+                $query->where('company_id', $user->company_id);
             }
 
             $discoveries = $query->latest()
