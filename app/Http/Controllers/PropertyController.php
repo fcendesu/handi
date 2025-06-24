@@ -227,4 +227,324 @@ class PropertyController extends Controller
 
         return response()->json($properties);
     }
+
+    /**
+     * API Methods for Mobile App
+     */
+
+    /**
+     * Get all properties accessible by the user (API endpoint)
+     */
+    public function apiList(): JsonResponse
+    {
+        try {
+            $user = Auth::user();
+
+            $properties = Property::with(['company', 'user'])
+                ->accessibleBy($user)
+                ->active()
+                ->orderBy('name')
+                ->get()
+                ->map(function ($property) {
+                    return [
+                        'id' => $property->id,
+                        'name' => $property->name,
+                        'owner_name' => $property->owner_name,
+                        'owner_email' => $property->owner_email,
+                        'owner_phone' => $property->owner_phone,
+                        'city' => $property->city,
+                        'district' => $property->district,
+                        'neighborhood' => $property->neighborhood,
+                        'site_name' => $property->site_name,
+                        'building_name' => $property->building_name,
+                        'street' => $property->street,
+                        'door_apartment_no' => $property->door_apartment_no,
+                        'full_address' => $property->full_address,
+                        'latitude' => $property->latitude,
+                        'longitude' => $property->longitude,
+                        'has_map_location' => $property->hasMapLocation(),
+                        'notes' => $property->notes,
+                        'manager_name' => $property->manager_name,
+                        'is_company_property' => $property->isCompanyProperty(),
+                        'created_at' => $property->created_at,
+                        'updated_at' => $property->updated_at,
+                    ];
+                });
+
+            return response()->json([
+                'success' => true,
+                'data' => $properties,
+            ]);
+
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to fetch properties: ' . $e->getMessage(),
+            ], 500);
+        }
+    }
+
+    /**
+     * Store a new property via API
+     */
+    public function apiStore(Request $request): JsonResponse
+    {
+        try {
+            $user = Auth::user();
+
+            $validated = $request->validate([
+                'name' => 'required|string|max:255',
+                'owner_name' => 'nullable|string|max:255',
+                'owner_email' => 'nullable|email|max:255',
+                'owner_phone' => 'nullable|string|max:20',
+                'city' => ['required', 'string', Rule::in(AddressData::getCities())],
+                'district' => 'required|string|max:255',
+                'neighborhood' => 'nullable|string|max:255',
+                'site_name' => 'nullable|string|max:255',
+                'building_name' => 'nullable|string|max:255',
+                'street' => 'nullable|string|max:255',
+                'door_apartment_no' => 'nullable|string|max:100',
+                'latitude' => 'nullable|numeric|between:-90,90',
+                'longitude' => 'nullable|numeric|between:-180,180',
+                'notes' => 'nullable|string|max:1000',
+            ]);
+
+            // Set ownership based on user type
+            if ($user->isSoloHandyman()) {
+                $validated['user_id'] = $user->id;
+                $validated['company_id'] = null;
+            } else {
+                $validated['company_id'] = $user->company_id;
+                $validated['user_id'] = null;
+            }
+
+            $property = Property::create($validated);
+
+            // Log property creation
+            TransactionLogService::logPropertyCreated($property);
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Property created successfully',
+                'data' => [
+                    'id' => $property->id,
+                    'name' => $property->name,
+                    'full_address' => $property->full_address,
+                    'has_map_location' => $property->hasMapLocation(),
+                ],
+            ], 201);
+
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Validation failed',
+                'errors' => $e->errors(),
+            ], 422);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to create property: ' . $e->getMessage(),
+            ], 500);
+        }
+    }
+
+    /**
+     * Show a specific property via API
+     */
+    public function apiShow(Property $property): JsonResponse
+    {
+        try {
+            $this->authorize('view', $property);
+
+            $property->load('discoveries.creator');
+
+            return response()->json([
+                'success' => true,
+                'data' => [
+                    'id' => $property->id,
+                    'name' => $property->name,
+                    'owner_name' => $property->owner_name,
+                    'owner_email' => $property->owner_email,
+                    'owner_phone' => $property->owner_phone,
+                    'city' => $property->city,
+                    'district' => $property->district,
+                    'neighborhood' => $property->neighborhood,
+                    'site_name' => $property->site_name,
+                    'building_name' => $property->building_name,
+                    'street' => $property->street,
+                    'door_apartment_no' => $property->door_apartment_no,
+                    'full_address' => $property->full_address,
+                    'latitude' => $property->latitude,
+                    'longitude' => $property->longitude,
+                    'has_map_location' => $property->hasMapLocation(),
+                    'notes' => $property->notes,
+                    'manager_name' => $property->manager_name,
+                    'is_company_property' => $property->isCompanyProperty(),
+                    'discoveries_count' => $property->discoveries->count(),
+                    'recent_discoveries' => $property->discoveries->take(5)->map(function ($discovery) {
+                        return [
+                            'id' => $discovery->id,
+                            'customer_name' => $discovery->customer_name,
+                            'status' => $discovery->status,
+                            'created_at' => $discovery->created_at,
+                            'creator_name' => $discovery->creator->name,
+                        ];
+                    }),
+                    'created_at' => $property->created_at,
+                    'updated_at' => $property->updated_at,
+                ],
+            ]);
+
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to fetch property: ' . $e->getMessage(),
+            ], 500);
+        }
+    }
+
+    /**
+     * Update a property via API
+     */
+    public function apiUpdate(Request $request, Property $property): JsonResponse
+    {
+        try {
+            $this->authorize('update', $property);
+
+            $validated = $request->validate([
+                'name' => 'required|string|max:255',
+                'owner_name' => 'nullable|string|max:255',
+                'owner_email' => 'nullable|email|max:255',
+                'owner_phone' => 'nullable|string|max:20',
+                'city' => ['required', 'string', Rule::in(AddressData::getCities())],
+                'district' => 'required|string|max:255',
+                'neighborhood' => 'nullable|string|max:255',
+                'site_name' => 'nullable|string|max:255',
+                'building_name' => 'nullable|string|max:255',
+                'street' => 'nullable|string|max:255',
+                'door_apartment_no' => 'nullable|string|max:100',
+                'latitude' => 'nullable|numeric|between:-90,90',
+                'longitude' => 'nullable|numeric|between:-180,180',
+                'notes' => 'nullable|string|max:1000',
+            ]);
+
+            $property->update($validated);
+
+            // Log property update
+            TransactionLogService::logPropertyUpdated($property, $validated);
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Property updated successfully',
+                'data' => [
+                    'id' => $property->id,
+                    'name' => $property->name,
+                    'full_address' => $property->full_address,
+                    'has_map_location' => $property->hasMapLocation(),
+                ],
+            ]);
+
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Validation failed',
+                'errors' => $e->errors(),
+            ], 422);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to update property: ' . $e->getMessage(),
+            ], 500);
+        }
+    }
+
+    /**
+     * Delete (deactivate) a property via API
+     */
+    public function apiDestroy(Property $property): JsonResponse
+    {
+        try {
+            $this->authorize('delete', $property);
+
+            // Soft delete by marking as inactive
+            $property->update(['is_active' => false]);
+
+            // Log property deactivation
+            TransactionLogService::logPropertyDeactivated($property);
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Property deactivated successfully',
+            ]);
+
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to deactivate property: ' . $e->getMessage(),
+            ], 500);
+        }
+    }
+
+    /**
+     * Get all available cities via API
+     */
+    public function apiGetCities(): JsonResponse
+    {
+        try {
+            $cities = AddressData::getCities();
+
+            return response()->json([
+                'success' => true,
+                'data' => $cities,
+            ]);
+
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to fetch cities: ' . $e->getMessage(),
+            ], 500);
+        }
+    }
+
+    /**
+     * Get districts for a specific city via API
+     */
+    public function apiGetDistricts(string $city): JsonResponse
+    {
+        try {
+            $districts = AddressData::getDistricts($city);
+
+            return response()->json([
+                'success' => true,
+                'data' => $districts,
+            ]);
+
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to fetch districts: ' . $e->getMessage(),
+            ], 500);
+        }
+    }
+
+    /**
+     * Get neighborhoods for a specific city and district via API
+     */
+    public function apiGetNeighborhoods(string $city, string $district): JsonResponse
+    {
+        try {
+            $neighborhoods = AddressData::getNeighborhoods($city, $district);
+
+            return response()->json([
+                'success' => true,
+                'data' => $neighborhoods,
+            ]);
+
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to fetch neighborhoods: ' . $e->getMessage(),
+            ], 500);
+        }
+    }
 }

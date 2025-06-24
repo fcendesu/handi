@@ -8,6 +8,7 @@ use App\Http\Controllers\CompanySiteController;
 // use App\Http\Controllers\PostController;
 use App\Http\Controllers\WorkGroupController;
 use App\Http\Controllers\CompanyController;
+use App\Http\Controllers\PropertyController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -60,4 +61,14 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/company/employees', [CompanyController::class, 'apiCreateEmployee']);
     Route::patch('/company/employees/{employee}', [CompanyController::class, 'apiUpdateEmployee']);
     Route::delete('/company/employees/{employee}', [CompanyController::class, 'apiDeleteEmployee']);
+
+    // Property API routes
+    Route::get('/properties', [PropertyController::class, 'apiList']);
+    Route::post('/properties', [PropertyController::class, 'apiStore']);
+    Route::get('/properties/{property}', [PropertyController::class, 'apiShow']);
+    Route::put('/properties/{property}', [PropertyController::class, 'apiUpdate']);
+    Route::delete('/properties/{property}', [PropertyController::class, 'apiDestroy']);
+    Route::get('/properties/cities/list', [PropertyController::class, 'apiGetCities']);
+    Route::get('/properties/districts/{city}', [PropertyController::class, 'apiGetDistricts']);
+    Route::get('/properties/neighborhoods/{city}/{district}', [PropertyController::class, 'apiGetNeighborhoods']);
 });
