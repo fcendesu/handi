@@ -65,10 +65,18 @@ Route::middleware('auth:sanctum')->group(function () {
     // Property API routes
     Route::get('/properties', [PropertyController::class, 'apiList']);
     Route::post('/properties', [PropertyController::class, 'apiStore']);
-    Route::get('/properties/{property}', [PropertyController::class, 'apiShow']);
-    Route::put('/properties/{property}', [PropertyController::class, 'apiUpdate']);
-    Route::delete('/properties/{property}', [PropertyController::class, 'apiDestroy']);
+    
+    // Address data routes (specific routes must come BEFORE parameterized routes)
     Route::get('/properties/cities/list', [PropertyController::class, 'apiGetCities']);
     Route::get('/properties/districts/{city}', [PropertyController::class, 'apiGetDistricts']);
     Route::get('/properties/neighborhoods/{city}/{district}', [PropertyController::class, 'apiGetNeighborhoods']);
+    Route::get('/properties/combined-neighborhoods', [CompanySiteController::class, 'getCombinedNeighborhoods']);
+    
+    // Property CRUD routes with {property} parameter (these must come LAST)
+    Route::get('/properties/{property}', [PropertyController::class, 'apiShow']);
+    Route::put('/properties/{property}', [PropertyController::class, 'apiUpdate']);
+    Route::delete('/properties/{property}', [PropertyController::class, 'apiDestroy']);
+    
+    // Combined neighborhoods API route (alternative endpoint - moved above for compatibility)
+    Route::get('/combined-neighborhoods', [CompanySiteController::class, 'getCombinedNeighborhoods']);
 });
