@@ -12,7 +12,7 @@ class PriorityPolicy
      */
     public function viewAny(User $user): bool
     {
-        return $user->isSoloHandyman() || $user->isCompanyAdmin();
+        return $user->isSoloHandyman() || $user->isCompanyAdmin() || $user->isCompanyEmployee();
     }
 
     /**
@@ -25,8 +25,8 @@ class PriorityPolicy
             return $priority->user_id === $user->id;
         }
 
-        // Company admins can only view their company's priorities
-        if ($user->isCompanyAdmin()) {
+        // Company admins and employees can only view their company's priorities
+        if ($user->isCompanyAdmin() || $user->isCompanyEmployee()) {
             return $priority->company_id === $user->company_id;
         }
 
@@ -38,7 +38,7 @@ class PriorityPolicy
      */
     public function create(User $user): bool
     {
-        return $user->isSoloHandyman() || $user->isCompanyAdmin();
+        return $user->isSoloHandyman() || $user->isCompanyAdmin() || $user->isCompanyEmployee();
     }
 
     /**
@@ -51,8 +51,8 @@ class PriorityPolicy
             return $priority->user_id === $user->id;
         }
 
-        // Company admins can only update their company's priorities
-        if ($user->isCompanyAdmin()) {
+        // Company admins and employees can only update their company's priorities
+        if ($user->isCompanyAdmin() || $user->isCompanyEmployee()) {
             return $priority->company_id === $user->company_id;
         }
 
@@ -74,8 +74,8 @@ class PriorityPolicy
             return $priority->user_id === $user->id;
         }
 
-        // Company admins can only delete their company's priorities
-        if ($user->isCompanyAdmin()) {
+        // Company admins and employees can only delete their company's priorities
+        if ($user->isCompanyAdmin() || $user->isCompanyEmployee()) {
             return $priority->company_id === $user->company_id;
         }
 

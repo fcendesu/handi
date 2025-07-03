@@ -9,6 +9,7 @@ use App\Http\Controllers\CompanySiteController;
 use App\Http\Controllers\WorkGroupController;
 use App\Http\Controllers\CompanyController;
 use App\Http\Controllers\PropertyController;
+use App\Http\Controllers\PriorityController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -51,6 +52,13 @@ Route::middleware('auth:sanctum')->group(function () {
 
     // Payment Methods API routes
     Route::get('/payment-methods/accessible', [PaymentMethodController::class, 'getAccessiblePaymentMethods']);
+
+    // Priority API routes
+    Route::get('/priorities', [PriorityController::class, 'apiList']);
+    Route::post('/priorities', [PriorityController::class, 'apiStore']);
+    Route::get('/priorities/{priority}', [PriorityController::class, 'apiShow']);
+    Route::put('/priorities/{priority}', [PriorityController::class, 'apiUpdate']);
+    Route::delete('/priorities/{priority}', [PriorityController::class, 'apiDestroy']);
 
     // Work Group API routes
     Route::get('/work-groups', [WorkGroupController::class, 'apiList']);
