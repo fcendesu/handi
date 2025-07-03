@@ -209,7 +209,7 @@ class PriorityController extends Controller
         try {
             $user = Auth::user();
 
-            if (!$user->isSoloHandyman() && !$user->isCompanyAdmin()) {
+            if (!$user->isSoloHandyman() && !$user->isCompanyAdmin() && !$user->isCompanyEmployee()) {
                 return response()->json([
                     'success' => false,
                     'message' => 'Unauthorized access to priority management.',
