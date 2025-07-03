@@ -444,6 +444,37 @@ class DiscoveryController extends Controller
         return redirect()->route('discovery')->with('success', 'Discovery deleted successfully');
     }
 
+    public function apiDestroy(Discovery $discovery): JsonResponse
+    {
+        try {
+            $user = auth()->user();
+
+            // Check if user can delete this discovery
+            if (!$this->canUserUpdateDiscovery($user, $discovery)) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'You do not have permission to delete this discovery.'
+                ], 403);
+            }
+
+            // Log deletion before actually deleting
+            TransactionLogService::logDiscoveryDeleted($discovery);
+
+            $discovery->delete();
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Discovery deleted successfully'
+            ]);
+
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to delete discovery: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
     public function apiStore(Request $request): JsonResponse
     {
         try {
@@ -461,7 +492,12 @@ class DiscoveryController extends Controller
                 'customer_name' => 'required|string|max:255',
                 'customer_phone' => 'required|string|max:255',
                 'customer_email' => 'required|email|max:255',
-                'address' => 'nullable|string|max:1000',  // Add this line
+                'address' => 'nullable|string|max:1000',
+                'city' => 'nullable|string|max:255',
+                'district' => 'nullable|string|max:255',
+                'neighborhood' => 'nullable|string|max:255',
+                'latitude' => 'nullable|numeric|between:-90,90',
+                'longitude' => 'nullable|numeric|between:-180,180',
                 'discovery' => 'required|string',
                 'todo_list' => 'nullable|string',
                 'note_to_customer' => 'nullable|string',
@@ -795,6 +831,11 @@ class DiscoveryController extends Controller
                 'customer_phone' => 'sometimes|string|max:255',
                 'customer_email' => 'sometimes|email|max:255',
                 'address' => 'nullable|string|max:1000',
+                'city' => 'nullable|string|max:255',
+                'district' => 'nullable|string|max:255',
+                'neighborhood' => 'nullable|string|max:255',
+                'latitude' => 'nullable|numeric|between:-90,90',
+                'longitude' => 'nullable|numeric|between:-180,180',
                 'discovery' => 'sometimes|string',
                 'todo_list' => 'nullable|string',
                 'note_to_customer' => 'nullable|string',
