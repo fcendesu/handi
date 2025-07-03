@@ -64,6 +64,10 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/work-groups', [WorkGroupController::class, 'apiList']);
     Route::post('/work-groups', [WorkGroupController::class, 'apiStore']);
     Route::get('/work-groups/{workGroup}', [WorkGroupController::class, 'apiShow']);
+    Route::put('/work-groups/{workGroup}', [WorkGroupController::class, 'apiUpdate']);
+    Route::delete('/work-groups/{workGroup}', [WorkGroupController::class, 'apiDestroy']);
+    Route::post('/work-groups/{workGroup}/assign-user', [WorkGroupController::class, 'apiAssignUser']);
+    Route::delete('/work-groups/{workGroup}/remove-user', [WorkGroupController::class, 'apiRemoveUser']);
 
     // Company API routes
     Route::get('/company', [CompanyController::class, 'apiShow']);

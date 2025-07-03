@@ -320,4 +320,213 @@ class WorkGroupController extends Controller
             ], 500);
         }
     }
+
+    public function apiUpdate(Request $request, WorkGroup $workGroup): JsonResponse
+    {
+        try {
+            $this->authorize('update', $workGroup);
+
+            $validated = $request->validate([
+                'name' => [
+                    'required',
+                    'string',
+                    'max:255',
+                    Rule::unique('work_groups')->ignore($workGroup->id)->where(function ($query) use ($workGroup) {
+                        return $query->where('creator_id', $workGroup->creator_id);
+                    })
+                ],
+            ]);
+
+            $workGroup->update($validated);
+
+            // Log work group update
+            TransactionLogService::logWorkGroupUpdated($workGroup, $validated);
+
+            $workGroup->load(['creator', 'company', 'users']);
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Work group updated successfully',
+                'data' => [
+                    'id' => $workGroup->id,
+                    'name' => $workGroup->name,
+                    'creator' => [
+                        'id' => $workGroup->creator->id,
+                        'name' => $workGroup->creator->name,
+                        'email' => $workGroup->creator->email,
+                    ],
+                    'company' => $workGroup->company ? [
+                        'id' => $workGroup->company->id,
+                        'name' => $workGroup->company->name,
+                    ] : null,
+                    'users' => $workGroup->users->map(function ($user) {
+                        return [
+                            'id' => $user->id,
+                            'name' => $user->name,
+                            'email' => $user->email,
+                            'user_type' => $user->user_type,
+                        ];
+                    }),
+                    'discoveries_count' => $workGroup->discoveries()->count(),
+                    'created_at' => $workGroup->created_at,
+                    'updated_at' => $workGroup->updated_at,
+                ]
+            ]);
+
+        } catch (\Illuminate\Auth\Access\AuthorizationException $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Unauthorized to update this work group'
+            ], 403);
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Validation failed',
+                'errors' => $e->errors()
+            ], 422);
+        } catch (\Exception $e) {
+            \Log::error('API Work group update failed: ' . $e->getMessage());
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to update work group',
+                'error' => $e->getMessage()
+            ], 500);
+        }
+    }
+
+    public function apiDestroy(WorkGroup $workGroup): JsonResponse
+    {
+        try {
+            $this->authorize('delete', $workGroup);
+
+            // Log work group deletion before deleting
+            TransactionLogService::logWorkGroupDeleted($workGroup);
+
+            $workGroup->delete();
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Work group deleted successfully'
+            ]);
+
+        } catch (\Illuminate\Auth\Access\AuthorizationException $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Unauthorized to delete this work group'
+            ], 403);
+        } catch (\Exception $e) {
+            \Log::error('API Work group deletion failed: ' . $e->getMessage());
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to delete work group',
+                'error' => $e->getMessage()
+            ], 500);
+        }
+    }
+
+    public function apiAssignUser(Request $request, WorkGroup $workGroup): JsonResponse
+    {
+        try {
+            $this->authorize('update', $workGroup);
+
+            $validated = $request->validate([
+                'user_id' => 'required|exists:users,id'
+            ]);
+
+            $assignedUser = User::findOrFail($validated['user_id']);
+
+            // Validate user can be assigned to this work group
+            if ($workGroup->company_id && $assignedUser->company_id !== $workGroup->company_id) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'User must be from the same company as the work group'
+                ], 422);
+            }
+
+            if ($workGroup->users()->where('user_id', $assignedUser->id)->exists()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'User is already assigned to this work group'
+                ], 422);
+            }
+
+            $workGroup->users()->attach($assignedUser->id);
+
+            // Log user assignment to work group
+            TransactionLogService::logUserAssignedToWorkGroup($assignedUser, $workGroup, auth()->user());
+
+            return response()->json([
+                'success' => true,
+                'message' => $assignedUser->name . ' has been assigned to the work group',
+                'data' => [
+                    'user' => [
+                        'id' => $assignedUser->id,
+                        'name' => $assignedUser->name,
+                        'email' => $assignedUser->email,
+                        'user_type' => $assignedUser->user_type,
+                    ]
+                ]
+            ]);
+
+        } catch (\Illuminate\Auth\Access\AuthorizationException $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Unauthorized to assign users to this work group'
+            ], 403);
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Validation failed',
+                'errors' => $e->errors()
+            ], 422);
+        } catch (\Exception $e) {
+            \Log::error('API Work group user assignment failed: ' . $e->getMessage());
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to assign user to work group',
+                'error' => $e->getMessage()
+            ], 500);
+        }
+    }
+
+    public function apiRemoveUser(Request $request, WorkGroup $workGroup): JsonResponse
+    {
+        try {
+            $this->authorize('update', $workGroup);
+
+            $validated = $request->validate([
+                'user_id' => 'required|exists:users,id'
+            ]);
+
+            $removedUser = User::findOrFail($validated['user_id']);
+            $workGroup->users()->detach($removedUser->id);
+
+            // Log user removal from work group
+            TransactionLogService::logUserRemovedFromWorkGroup($removedUser, $workGroup, auth()->user());
+
+            return response()->json([
+                'success' => true,
+                'message' => $removedUser->name . ' has been removed from the work group'
+            ]);
+
+        } catch (\Illuminate\Auth\Access\AuthorizationException $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Unauthorized to remove users from this work group'
+            ], 403);
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Validation failed',
+                'errors' => $e->errors()
+            ], 422);
+        } catch (\Exception $e) {
+            \Log::error('API Work group user removal failed: ' . $e->getMessage());
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to remove user from work group',
+                'error' => $e->getMessage()
+            ], 500);
+        }
+    }
 }
