@@ -52,6 +52,11 @@ Route::middleware('auth:sanctum')->group(function () {
 
     // Payment Methods API routes
     Route::get('/payment-methods/accessible', [PaymentMethodController::class, 'getAccessiblePaymentMethods']);
+    Route::get('/payment-methods/list', [PaymentMethodController::class, 'apiList']);
+    Route::post('/payment-methods', [PaymentMethodController::class, 'apiStore']);
+    Route::get('/payment-methods/{paymentMethod}', [PaymentMethodController::class, 'apiShow']);
+    Route::put('/payment-methods/{paymentMethod}', [PaymentMethodController::class, 'apiUpdate']);
+    Route::delete('/payment-methods/{paymentMethod}', [PaymentMethodController::class, 'apiDestroy']);
 
     // Priority API routes
     Route::get('/priorities', [PriorityController::class, 'apiList']);
