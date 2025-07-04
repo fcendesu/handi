@@ -1040,7 +1040,19 @@
                 selectedPaymentMethodId: '{{ old('payment_method_id') }}',
                 async loadPaymentMethods() {
                     try {
-                        const response = await fetch('/api/payment-methods');
+                        const response = await fetch('/api/payment-methods', {
+                            method: 'GET',
+                            headers: {
+                                'Accept': 'application/json',
+                                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                            },
+                            credentials: 'same-origin'
+                        });
+                        
+                        if (!response.ok) {
+                            throw new Error(`HTTP error! status: ${response.status}`);
+                        }
+                        
                         const data = await response.json();
                         this.paymentMethods = data;
                     } catch (error) {

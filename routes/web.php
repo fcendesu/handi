@@ -139,6 +139,7 @@ Route::middleware(['auth', 'restrict.employee.dashboard'])->group(function () {
 
     // Payment Method Management Routes
     Route::resource('payment-methods', PaymentMethodController::class);
+    Route::get('/api/payment-methods', [PaymentMethodController::class, 'getAccessiblePaymentMethods'])->name('api.payment-methods');
 
     // Priority Management Routes
     Route::resource('priorities', PriorityController::class);
