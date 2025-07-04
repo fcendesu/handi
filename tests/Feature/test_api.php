@@ -1,45 +1,55 @@
 <?php
 
-require_once 'vendor/autoload.php';
+require_once 'app/Data/AddressData.php';
 
-// Bootstrap Laravel
-$app = require_once 'bootstrap/app.php';
-$app->make('Illuminate\Contracts\Console\Kernel')->bootstrap();
+use App\Data\AddressData;
 
-echo "=== API Testing for Payment Methods ===" . PHP_EOL;
+echo "=== Testing Neighborhoods API ===\n\n";
 
-// Get a test user
-$user = \App\Models\User::first();
-if (!$user) {
-    echo "No users found in database!" . PHP_EOL;
-    exit(1);
+// Test 1: Get neighborhoods for GİRNE / ALSANCAK
+echo "1. Testing AddressData::getNeighborhoods('GİRNE', 'ALSANCAK'):\n";
+$neighborhoods = AddressData::getNeighborhoods('GİRNE', 'ALSANCAK');
+echo json_encode($neighborhoods, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE) . "\n\n";
+
+// Test 2: Check if all necessary data exists
+echo "2. Summary of neighborhood data:\n";
+$allNeighborhoods = AddressData::getAllNeighborhoods();
+$totalCities = count($allNeighborhoods);
+$totalDistricts = 0;
+$totalNeighborhoods = 0;
+
+foreach ($allNeighborhoods as $city => $districts) {
+    $cityDistricts = count($districts);
+    $cityNeighborhoods = array_sum(array_map('count', $districts));
+    $totalDistricts += $cityDistricts;
+    $totalNeighborhoods += $cityNeighborhoods;
+    
+    echo "   {$city}: {$cityDistricts} districts, {$cityNeighborhoods} neighborhoods\n";
 }
 
-// Manually authenticate the user for testing
-\Illuminate\Support\Facades\Auth::login($user);
+echo "\nTotals: {$totalCities} cities, {$totalDistricts} districts, {$totalNeighborhoods} neighborhoods\n\n";
 
-echo "Authenticated as: " . $user->email . PHP_EOL;
+// Test 3: Test specific cases
+echo "3. Testing specific cases:\n";
+$testCases = [
+    ['GİRNE', 'ALSANCAK'],
+    ['LEFKOŞA', 'MERKEZ'],
+    ['MAĞUSA', 'AKDOĞAN'],
+    ['İSKELE', 'BÜYÜKKONUK'],
+    ['NONEXISTENT', 'DISTRICT']
+];
 
-// Test the API endpoint logic
-$controller = new \App\Http\Controllers\PaymentMethodController();
-
-// Create a mock request
-$request = new \Illuminate\Http\Request();
-
-try {
-    $response = $controller->getAccessiblePaymentMethods($request);
-    $paymentMethods = json_decode($response->getContent(), true);
-    
-    echo PHP_EOL . "API Response:" . PHP_EOL;
-    echo "Status: " . $response->getStatusCode() . PHP_EOL;
-    echo "Payment Methods Count: " . count($paymentMethods) . PHP_EOL;
-    
-    foreach ($paymentMethods as $pm) {
-        echo "  - ID: {$pm['id']}, Name: {$pm['name']}, Description: {$pm['description']}" . PHP_EOL;
+foreach ($testCases as $case) {
+    $city = $case[0];
+    $district = $case[1];
+    $neighborhoods = AddressData::getNeighborhoods($city, $district);
+    $count = count($neighborhoods);
+    echo "   {$city} / {$district}: {$count} neighborhoods\n";
+    if ($count > 0 && $count <= 5) {
+        echo "     - " . implode(', ', $neighborhoods) . "\n";
+    } elseif ($count > 5) {
+        echo "     - " . implode(', ', array_slice($neighborhoods, 0, 5)) . " (and " . ($count - 5) . " more)\n";
     }
-    
-} catch (Exception $e) {
-    echo "Error: " . $e->getMessage() . PHP_EOL;
 }
 
-echo PHP_EOL . "=== API Test completed ===" . PHP_EOL;
+echo "\n=== Test completed ===\n";
