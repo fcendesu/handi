@@ -7,6 +7,8 @@ use App\Models\Item;
 use App\Models\Property;
 use App\Models\User;
 use App\Models\Priority;
+use App\Models\PaymentMethod;
+use App\Models\WorkGroup;
 use App\Data\AddressData;
 use App\Services\TransactionLogService;
 use App\Services\DiscoveryImageService;
@@ -898,10 +900,20 @@ class DiscoveryController extends Controller
     {
         try {
             $user = auth()->user();
+
+            // Check if user has permission to update this discovery
+            if (!$this->canUserUpdateDiscovery($user, $discovery)) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Unauthorized to update this discovery'
+                ], 403);
+            }
+
             $validated = $request->validate([
                 'customer_name' => 'sometimes|string|max:255',
                 'customer_phone' => 'sometimes|string|max:255',
                 'customer_email' => 'sometimes|email|max:255',
+                'property_id' => 'nullable|exists:properties,id',
                 'address' => 'nullable|string|max:1000',
                 'city' => 'nullable|string|max:255',
                 'district' => 'nullable|string|max:255',
@@ -922,6 +934,7 @@ class DiscoveryController extends Controller
                 'discount_amount' => 'nullable|numeric|min:0',
                 'payment_method_id' => 'nullable|exists:payment_methods,id',
                 'priority_id' => 'nullable|exists:priorities,id',
+                'work_group_id' => 'nullable|exists:work_groups,id',
                 'status' => ['sometimes', 'string', Rule::in(Discovery::getStatuses())],
                 'items' => 'nullable|array',
                 'items.*.id' => 'required|exists:items,id',
@@ -932,6 +945,49 @@ class DiscoveryController extends Controller
                 'remove_images' => 'nullable|array',
                 'remove_images.*' => 'string'
             ]);
+
+            // Additional validation based on company access
+            if ($user->user_type === 'company_employee') {
+                // Check payment method belongs to the same company
+                if (isset($validated['payment_method_id'])) {
+                    $paymentMethod = PaymentMethod::find($validated['payment_method_id']);
+                    if ($paymentMethod && $paymentMethod->company_id !== $user->company_id) {
+                        return response()->json(['message' => 'Payment method not found or not accessible'], 404);
+                    }
+                }
+
+                // Check priority belongs to the same company
+                if (isset($validated['priority_id'])) {
+                    $priority = Priority::find($validated['priority_id']);
+                    if ($priority && $priority->company_id !== $user->company_id) {
+                        return response()->json(['message' => 'Priority not found or not accessible'], 404);
+                    }
+                }
+
+                // Check work group belongs to the same company
+                if (isset($validated['work_group_id'])) {
+                    $workGroup = WorkGroup::find($validated['work_group_id']);
+                    if ($workGroup && $workGroup->company_id !== $user->company_id) {
+                        return response()->json(['message' => 'Work group not found or not accessible'], 404);
+                    }
+                }
+            }
+
+            // Handle property switching logic
+            if (array_key_exists('property_id', $validated)) {
+                if ($validated['property_id']) {
+                    // Switching to registered property - clear manual address fields
+                    $validated['address'] = null;
+                    $validated['city'] = null;
+                    $validated['district'] = null;
+                    $validated['neighborhood'] = null;
+                    $validated['latitude'] = null;
+                    $validated['longitude'] = null;
+                } else {
+                    // Switching to manual address - clear property
+                    $validated['property_id'] = null;
+                }
+            }
 
             // Handle image removals
             $imagePaths = $discovery->images ?? [];
@@ -1047,6 +1103,16 @@ class DiscoveryController extends Controller
     public function apiUpdateStatus(Request $request, Discovery $discovery): JsonResponse
     {
         try {
+            $user = auth()->user();
+
+            // Check if user has permission to update this discovery
+            if (!$this->canUserUpdateDiscovery($user, $discovery)) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Unauthorized to update this discovery status'
+                ], 403);
+            }
+
             $validated = $request->validate([
                 'status' => ['required', 'string', Rule::in(Discovery::getStatuses())]
             ]);
