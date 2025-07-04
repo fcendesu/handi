@@ -1213,6 +1213,57 @@
                             @enderror
                         </div>
 
+                        <!-- Assignee Display (only for company users) -->
+                        @if (auth()->user()->isCompanyAdmin() || auth()->user()->isCompanyEmployee())
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Atanan Personel</label>
+                            
+                            <!-- View Mode -->
+                            <div x-show="!editMode" class="bg-gray-100 mt-1 block w-full rounded-md border-2 border-gray-300 px-4 py-2">
+                                @if ($discovery->assignee)
+                                    <div class="flex items-center">
+                                        <span class="font-medium text-gray-900">{{ $discovery->assignee->name }}</span>
+                                        <span class="ml-2 text-sm text-gray-600">({{ $discovery->assignee->email }})</span>
+                                        @if($discovery->assignee->workGroups && $discovery->assignee->workGroups->count() > 0)
+                                            <span class="ml-2 text-xs text-blue-600 bg-blue-100 px-2 py-1 rounded">
+                                                Gruplar: {{ $discovery->assignee->workGroups->pluck('name')->join(', ') }}
+                                            </span>
+                                        @else
+                                            <span class="ml-2 text-xs text-gray-500 bg-gray-100 px-2 py-1 rounded">
+                                                Grup ataması yok
+                                            </span>
+                                        @endif
+                                    </div>
+                                @else
+                                    <span class="text-gray-500 italic">Atanmış personel yok</span>
+                                @endif
+                            </div>
+
+                            <!-- Edit Mode (only for company admins) -->
+                            @if (auth()->user()->isCompanyAdmin() && $assignableEmployees && $assignableEmployees->count() > 0)
+                            <select name="assignee_id" x-show="editMode"
+                                class="bg-gray-100 mt-1 block w-full rounded-md border-2 border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 px-4 py-2">
+                                <option value="">Personel ataması yok</option>
+                                @foreach($assignableEmployees as $employee)
+                                    <option value="{{ $employee->id }}" 
+                                        {{ old('assignee_id', $discovery->assignee_id) == $employee->id ? 'selected' : '' }}>
+                                        {{ $employee->name }} ({{ $employee->email }})
+                                        @if($employee->workGroups && $employee->workGroups->count() > 0)
+                                            - Gruplar: {{ $employee->workGroups->pluck('name')->join(', ') }}
+                                        @else
+                                            - Grup ataması yok
+                                        @endif
+                                    </option>
+                                @endforeach
+                            </select>
+                            @endif
+                            
+                            @error('assignee_id')
+                                <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                            @enderror
+                        </div>
+                        @endif
+
                         <!-- Item Selection -->
                         <div x-data="itemSelector({{ json_encode($discovery->items) }})" class="space-y-4 pt-3">
                             <div class="flex justify-between items-center">
@@ -1531,7 +1582,7 @@
                             <div>
                                 <label class="block text-sm font-medium text-gray-700 mb-2">Servis Masrafı</label>
                                 <input type="number" name="service_cost"
-                                    value="{{ old('service_cost', $discovery->service_cost) }}"
+                                    value="{{ old('service_cost', (string)$discovery->service_cost) }}"
                                     :disabled="!editMode"
                                     class="bg-gray-100 mt-1 block w-full rounded-md border-2 border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 px-4 py-2"
                                     :class="{ 'bg-gray-50': !editMode }" min="0" step="0.01">
@@ -1541,7 +1592,7 @@
                             <div>
                                 <label class="block text-sm font-medium text-gray-700 mb-2">Ulaşım Masrafı</label>
                                 <input type="number" name="transportation_cost"
-                                    value="{{ old('transportation_cost', $discovery->transportation_cost) }}"
+                                    value="{{ old('transportation_cost', (string)$discovery->transportation_cost) }}"
                                     :disabled="!editMode"
                                     class="bg-gray-100 mt-1 block w-full rounded-md border-2 border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 px-4 py-2"
                                     :class="{ 'bg-gray-50': !editMode }" min="0" step="0.01">
@@ -1550,7 +1601,7 @@
                             <div>
                                 <label class="block text-sm font-medium text-gray-700 mb-2">İşçilik Masrafı</label>
                                 <input type="number" name="labor_cost"
-                                    value="{{ old('labor_cost', $discovery->labor_cost) }}" :disabled="!editMode"
+                                    value="{{ old('labor_cost', (string)$discovery->labor_cost) }}" :disabled="!editMode"
                                     class="bg-gray-100 mt-1 block w-full rounded-md border-2 border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 px-4 py-2"
                                     :class="{ 'bg-gray-50': !editMode }" min="0" step="0.01">
                             </div>
@@ -1558,7 +1609,7 @@
                             <div>
                                 <label class="block text-sm font-medium text-gray-700 mb-2">Ekstra Masraflar</label>
                                 <input type="number" name="extra_fee"
-                                    value="{{ old('extra_fee', $discovery->extra_fee) }}" :disabled="!editMode"
+                                    value="{{ old('extra_fee', (string)$discovery->extra_fee) }}" :disabled="!editMode"
                                     class="bg-gray-100 mt-1 block w-full rounded-md border-2 border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 px-4 py-2"
                                     :class="{ 'bg-gray-50': !editMode }" min="0" step="0.01">
                             </div>
@@ -1588,7 +1639,7 @@
                                     <label class="block text-sm font-medium text-gray-700 mb-2">İndirim Oranı
                                     %</label>
                                     <input type="number" name="discount_rate"
-                                        value="{{ old('discount_rate', $discovery->discount_rate) }}"
+                                        value="{{ old('discount_rate', (string)$discovery->discount_rate) }}"
                                         :disabled="!editMode" min="0" max="100" step="0.01"
                                         class="bg-gray-100 mt-1 block w-full rounded-md border-2 border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 px-4 py-2"
                                         :class="{ 'bg-gray-50': !editMode }">
@@ -1600,7 +1651,7 @@
                                 <div>
                                     <label class="block text-sm font-medium text-gray-700 mb-2">İndirim Miktarı</label>
                                     <input type="number" name="discount_amount"
-                                        value="{{ old('discount_amount', $discovery->discount_amount) }}"
+                                        value="{{ old('discount_amount', (string)$discovery->discount_amount) }}"
                                         :disabled="!editMode" min="0" step="0.01"
                                         class="bg-gray-100 mt-1 block w-full rounded-md border-2 border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 px-4 py-2"
                                         :class="{ 'bg-gray-50': !editMode }">

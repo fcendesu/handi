@@ -76,6 +76,7 @@ Route::middleware('auth:sanctum')->group(function () {
 
     // Company API routes
     Route::get('/company', [CompanyController::class, 'apiShow']);
+    Route::get('/company/assignable-employees', [CompanyController::class, 'getAssignableEmployees']);
     Route::post('/company/employees', [CompanyController::class, 'apiCreateEmployee']);
     Route::patch('/company/employees/{employee}', [CompanyController::class, 'apiUpdateEmployee']);
     Route::delete('/company/employees/{employee}', [CompanyController::class, 'apiDeleteEmployee']);

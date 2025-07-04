@@ -368,6 +368,34 @@
                                 </div>
                             @endif
 
+                            <!-- Assignee Selection (only for company admins) -->
+                            @if (auth()->user()->isCompanyAdmin() && $assignableEmployees && $assignableEmployees->count() > 0)
+                                <div>
+                                    <label for="assignee_id" class="block text-sm font-medium text-gray-700 mb-2">
+                                        Atanan Personel
+                                        <span class="text-gray-500">(İsteğe Bağlı)</span>
+                                    </label>
+                                    <select name="assignee_id" id="assignee_id"
+                                        class="bg-gray-100 mt-1 block w-full rounded-md border-2 border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 px-4 py-2">
+                                        <option value="">Personel ataması yok</option>
+                                        @foreach ($assignableEmployees as $employee)
+                                            <option value="{{ $employee->id }}"
+                                                {{ old('assignee_id') == $employee->id ? 'selected' : '' }}>
+                                                {{ $employee->name }} ({{ $employee->email }})
+                                                @if($employee->workGroups && $employee->workGroups->count() > 0)
+                                                    - Gruplar: {{ $employee->workGroups->pluck('name')->join(', ') }}
+                                                @else
+                                                    - Grup ataması yok
+                                                @endif
+                                            </option>
+                                        @endforeach
+                                    </select>
+                                    @error('assignee_id')
+                                        <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                                    @enderror
+                                </div>
+                            @endif
+
                             <!-- Item Selection -->
                             <div x-data="itemSelector()" class="space-y-4 pt-3">
                                 <div class="flex justify-between items-center">

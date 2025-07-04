@@ -56,4 +56,22 @@ class Company extends Model
     {
         return $this->hasMany(PaymentMethod::class);
     }
+
+    /**
+     * Get all company users (admins + employees)
+     */
+    public function allUsers(): HasMany
+    {
+        return $this->hasMany(User::class)->whereIn('user_type', [User::TYPE_COMPANY_ADMIN, User::TYPE_COMPANY_EMPLOYEE]);
+    }
+
+    /**
+     * Get assignable employees (only employees, not admins)
+     */
+    public function assignableEmployees(): HasMany
+    {
+        return $this->hasMany(User::class, 'company_id')
+            ->where('user_type', User::TYPE_COMPANY_EMPLOYEE)
+            ->orderBy('name');
+    }
 }

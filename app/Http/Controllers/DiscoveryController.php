@@ -65,7 +65,13 @@ class DiscoveryController extends Controller
         // Get all priorities for the dropdown
         $priorities = Priority::forUser($user)->orderedByLevel()->get();
 
-        return view('discovery.index', compact('discoveries', 'cities', 'districts', 'neighborhoods', 'workGroups', 'priorities'));
+        // Get assignable employees for company admins
+        $assignableEmployees = collect();
+        if ($user->isCompanyAdmin()) {
+            $assignableEmployees = $user->company->assignableEmployees()->with('workGroups')->get();
+        }
+
+        return view('discovery.index', compact('discoveries', 'cities', 'districts', 'neighborhoods', 'workGroups', 'priorities', 'assignableEmployees'));
     }
 
 
@@ -105,6 +111,7 @@ class DiscoveryController extends Controller
             'payment_method_id' => 'nullable|exists:payment_methods,id',
             'priority_id' => 'nullable|exists:priorities,id',
             'work_group_id' => 'nullable|exists:work_groups,id',
+            'assignee_id' => 'nullable|exists:users,id',
             'images.*' => 'nullable|image|mimes:jpeg,png,jpg|max:2048',
             'items' => 'nullable|array',
             'items.*.id' => 'required|exists:items,id',
@@ -162,6 +169,28 @@ class DiscoveryController extends Controller
 
             if (!$hasAccess) {
                 return back()->withErrors(['work_group_id' => 'Selected work group is not accessible to you.']);
+            }
+        }
+
+        // Additional validation for assignee - only company admins can assign
+        if ($request->assignee_id) {
+            // Only company admins can assign discoveries
+            if (!$user->isCompanyAdmin()) {
+                return back()->withErrors(['assignee_id' => 'Only company admins can assign discoveries.']);
+            }
+
+            // Check if assignee is a company employee of the same company
+            $assignee = User::find($request->assignee_id);
+            if (!$assignee || $assignee->company_id !== $user->company_id || !$assignee->isCompanyEmployee()) {
+                return back()->withErrors(['assignee_id' => 'Assignee must be a company employee from your company.']);
+            }
+
+            // If a work group is specified, check if assignee belongs to that work group
+            if ($request->work_group_id) {
+                $assigneeInWorkGroup = $assignee->workGroups()->where('work_groups.id', $request->work_group_id)->exists();
+                if (!$assigneeInWorkGroup) {
+                    return back()->withErrors(['assignee_id' => 'Selected employee must be a member of the selected work group.']);
+                }
             }
         }
 
@@ -261,7 +290,7 @@ class DiscoveryController extends Controller
 
     public function show(Discovery $discovery)
     {
-        $discovery->load('items', 'workGroup', 'paymentMethod');
+        $discovery->load('items', 'workGroup', 'paymentMethod', 'assignee.workGroups');
 
         $user = auth()->user();
 
@@ -281,7 +310,13 @@ class DiscoveryController extends Controller
         // Get available priorities for the user
         $priorities = Priority::forUser($user)->orderedByLevel()->get();
 
-        return view('discovery.show', compact('discovery', 'workGroups', 'priorities'));
+        // Get assignable employees for company admins
+        $assignableEmployees = collect();
+        if ($user->isCompanyAdmin()) {
+            $assignableEmployees = $user->company->assignableEmployees()->with('workGroups')->get();
+        }
+
+        return view('discovery.show', compact('discovery', 'workGroups', 'priorities', 'assignableEmployees'));
     }
 
     public function edit(Discovery $discovery)
@@ -317,6 +352,7 @@ class DiscoveryController extends Controller
             'payment_method_id' => 'nullable|exists:payment_methods,id',
             'priority_id' => 'nullable|exists:priorities,id',
             'work_group_id' => 'nullable|exists:work_groups,id',
+            'assignee_id' => 'nullable|exists:users,id',
             'images.*' => 'nullable|image|mimes:jpeg,png,jpg|max:2048',
             'remove_images' => 'nullable|array',
             'remove_images.*' => 'string',
@@ -346,6 +382,28 @@ class DiscoveryController extends Controller
 
             if (!$hasAccess) {
                 return back()->withErrors(['work_group_id' => 'You do not have access to the selected work group.']);
+            }
+        }        // Additional validation for assignee - only company admins can assign
+        if ($request->assignee_id) {
+            $user = auth()->user();
+
+            // Only company admins can assign discoveries
+            if (!$user->isCompanyAdmin()) {
+                return back()->withErrors(['assignee_id' => 'Only company admins can assign discoveries.']);
+            }
+
+            // Check if assignee is a company employee of the same company
+            $assignee = User::find($request->assignee_id);
+            if (!$assignee || $assignee->company_id !== $user->company_id || !$assignee->isCompanyEmployee()) {
+                return back()->withErrors(['assignee_id' => 'Assignee must be a company employee from your company.']);
+            }
+
+            // If a work group is specified, check if assignee belongs to that work group
+            if ($request->work_group_id) {
+                $assigneeInWorkGroup = $assignee->workGroups()->where('work_groups.id', $request->work_group_id)->exists();
+                if (!$assigneeInWorkGroup) {
+                    return back()->withErrors(['assignee_id' => 'Selected employee must be a member of the selected work group.']);
+                }
             }
         }
 
@@ -515,6 +573,7 @@ class DiscoveryController extends Controller
                 'payment_method_id' => 'nullable|exists:payment_methods,id',
                 'priority_id' => 'nullable|exists:priorities,id',
                 'work_group_id' => 'nullable|exists:work_groups,id',
+                'assignee_id' => 'nullable|exists:users,id',
                 'images' => 'nullable|array',
                 'images.*' => 'image|mimes:jpeg,png,jpg|max:2048',
                 'items' => 'nullable|array',
@@ -522,6 +581,37 @@ class DiscoveryController extends Controller
                 'items.*.quantity' => 'required|integer|min:1',
                 'items.*.custom_price' => 'nullable|numeric|min:0'
             ]);
+
+            // Additional validation for assignee - only company admins can assign
+            if ($request->assignee_id) {
+                // Only company admins can assign discoveries
+                if (!$user->isCompanyAdmin()) {
+                    return response()->json([
+                        'success' => false,
+                        'message' => 'Only company admins can assign discoveries.'
+                    ], 403);
+                }
+
+                // Check if assignee is a company employee of the same company
+                $assignee = User::find($request->assignee_id);
+                if (!$assignee || $assignee->company_id !== $user->company_id || !$assignee->isCompanyEmployee()) {
+                    return response()->json([
+                        'success' => false,
+                        'message' => 'Assignee must be a company employee from your company.'
+                    ], 422);
+                }
+
+                // If a work group is specified, check if assignee belongs to that work group
+                if ($request->work_group_id) {
+                    $assigneeInWorkGroup = $assignee->workGroups()->where('work_groups.id', $request->work_group_id)->exists();
+                    if (!$assigneeInWorkGroup) {
+                        return response()->json([
+                            'success' => false,
+                            'message' => 'Selected employee must be a member of the selected work group.'
+                        ], 422);
+                    }
+                }
+            }
 
             $user = auth()->user();
 
@@ -935,6 +1025,7 @@ class DiscoveryController extends Controller
                 'payment_method_id' => 'nullable|exists:payment_methods,id',
                 'priority_id' => 'nullable|exists:priorities,id',
                 'work_group_id' => 'nullable|exists:work_groups,id',
+                'assignee_id' => 'nullable|exists:users,id',
                 'status' => ['sometimes', 'string', Rule::in(Discovery::getStatuses())],
                 'items' => 'nullable|array',
                 'items.*.id' => 'required|exists:items,id',
@@ -969,6 +1060,40 @@ class DiscoveryController extends Controller
                     $workGroup = WorkGroup::find($validated['work_group_id']);
                     if ($workGroup && $workGroup->company_id !== $user->company_id) {
                         return response()->json(['message' => 'Work group not found or not accessible'], 404);
+                    }
+                }
+            }
+
+            // Additional validation for assignee - only company admins can assign
+            if (isset($validated['assignee_id'])) {
+                // Only company admins can assign discoveries
+                if (!$user->isCompanyAdmin()) {
+                    return response()->json([
+                        'success' => false,
+                        'message' => 'Only company admins can assign discoveries.'
+                    ], 403);
+                }
+
+                // Check if assignee is a company employee of the same company
+                if ($validated['assignee_id'] !== null) {
+                    $assignee = User::find($validated['assignee_id']);
+                    if (!$assignee || $assignee->company_id !== $user->company_id || !$assignee->isCompanyEmployee()) {
+                        return response()->json([
+                            'success' => false,
+                            'message' => 'Assignee must be a company employee from your company.'
+                        ], 422);
+                    }
+
+                    // If a work group is specified, check if assignee belongs to that work group
+                    $workGroupId = $validated['work_group_id'] ?? $discovery->work_group_id;
+                    if ($workGroupId) {
+                        $assigneeInWorkGroup = $assignee->workGroups()->where('work_groups.id', $workGroupId)->exists();
+                        if (!$assigneeInWorkGroup) {
+                            return response()->json([
+                                'success' => false,
+                                'message' => 'Selected employee must be a member of the selected work group.'
+                            ], 422);
+                        }
                     }
                 }
             }

@@ -116,6 +116,9 @@ Route::middleware(['auth', 'restrict.employee.dashboard'])->group(function () {
     Route::patch('/company/employees/{employee}', [CompanyController::class, 'updateEmployee'])->name('company.update-employee');
     Route::delete('/company/employees/{employee}', [CompanyController::class, 'deleteEmployee'])->name('company.delete-employee');
 
+    // Get assignable employees for company admin
+    Route::get('/api/company/assignable-employees', [CompanyController::class, 'getAssignableEmployees'])->name('api.company.assignable-employees');
+
 
     // Company Admin Management Routes
     Route::post('/company/admins', [CompanyController::class, 'createAdmin'])->name('company.create-admin');

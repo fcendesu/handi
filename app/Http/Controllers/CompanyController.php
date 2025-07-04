@@ -622,4 +622,52 @@ class CompanyController extends Controller
             return back()->withErrors(['error' => 'Failed to transfer primary admin role: ' . $e->getMessage()]);
         }
     }
+
+    /**
+     * Get assignable employees for a company admin
+     */
+    public function getAssignableEmployees(): JsonResponse
+    {
+        try {
+            $user = auth()->user();
+
+            // Only company admins can fetch assignable employees
+            if (!$user->isCompanyAdmin()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Only company admins can fetch assignable employees.'
+                ], 403);
+            }
+
+            $employees = $user->company->assignableEmployees()
+                ->with('workGroups:id,name')
+                ->select('id', 'name', 'email')
+                ->get()
+                ->map(function ($employee) {
+                    return [
+                        'id' => $employee->id,
+                        'name' => $employee->name,
+                        'email' => $employee->email,
+                        'work_groups' => $employee->workGroups->map(function ($workGroup) {
+                            return [
+                                'id' => $workGroup->id,
+                                'name' => $workGroup->name,
+                            ];
+                        }),
+                    ];
+                });
+
+            return response()->json([
+                'success' => true,
+                'data' => $employees
+            ]);
+
+        } catch (\Exception $e) {
+            \Log::error('Failed to fetch assignable employees: ' . $e->getMessage());
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to fetch assignable employees'
+            ], 500);
+        }
+    }
 }
