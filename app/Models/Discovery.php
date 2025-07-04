@@ -172,20 +172,26 @@ class Discovery extends Model
 
     public function getTotalCostAttribute(): float
     {
-        $baseCosts = (float) $this->service_cost +
+        // Non-labor costs (no discount applied)
+        $nonLaborCosts = (float) $this->service_cost +
             (float) $this->transportation_cost +
-            (float) $this->labor_cost +
             (float) $this->extra_fee;
 
+        // Labor cost with discount applied
+        $laborCost = (float) $this->labor_cost;
         if ((float) $this->discount_rate > 0) {
-            $baseCosts *= (1 - ((float) $this->discount_rate / 100));
+            $laborCost *= (1 - ((float) $this->discount_rate / 100));
         }
 
-        $itemsTotal = $this->items->sum(function ($item) {
-            return ((float) ($item->pivot->custom_price ?? $item->price)) * (int) $item->pivot->quantity;
-        });
+        // Material costs (no discount applied)
+        $itemsTotal = 0;
+        foreach ($this->items as $item) {
+            $price = (float) ($item->pivot->custom_price ?? $item->price);
+            $quantity = (int) $item->pivot->quantity;
+            $itemsTotal += $price * $quantity;
+        }
 
-        $total = $baseCosts + $itemsTotal;
+        $total = $nonLaborCosts + $laborCost + $itemsTotal;
         $total -= (float) $this->discount_amount;
 
         return max(0, round($total, 2));
@@ -193,12 +199,26 @@ class Discovery extends Model
 
     public function getDiscountRateAmountAttribute(): float
     {
-        $baseCosts = (float) $this->service_cost +
-            (float) $this->transportation_cost +
-            (float) $this->labor_cost +
-            (float) $this->extra_fee;
+        // Only calculate discount on labor cost
+        $laborCost = (float) $this->labor_cost;
 
-        return round($baseCosts * ((float) $this->discount_rate / 100), 2);
+        return round($laborCost * ((float) $this->discount_rate / 100), 2);
+    }
+
+    public function getNonLaborCostsAttribute(): float
+    {
+        return (float) $this->service_cost +
+            (float) $this->transportation_cost +
+            (float) $this->extra_fee;
+    }
+
+    public function getDiscountedLaborCostAttribute(): float
+    {
+        $laborCost = (float) $this->labor_cost;
+        if ((float) $this->discount_rate > 0) {
+            $laborCost *= (1 - ((float) $this->discount_rate / 100));
+        }
+        return round($laborCost, 2);
     }
 
     public function getShareUrlAttribute(): string

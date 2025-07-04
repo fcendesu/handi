@@ -1615,22 +1615,13 @@
                         <div class="mt-8 bg-gray-50 p-6 rounded-lg shadow-sm">
                             <h3 class="text-lg font-medium text-gray-900 mb-4">Masraflar Detayı</h3>
                             <div class="space-y-3">
-                                <!-- Base Costs -->
+                                <!-- Non-Labor Costs (Genel Masraflar) -->
                                 <div class="flex justify-between">
-                                    <span class="text-gray-600">Genel Masraflar:</span>
-                                    <span
-                                        class="font-medium">{{ number_format($discovery->service_cost + $discovery->transportation_cost + $discovery->labor_cost + $discovery->extra_fee, 2) }}</span>
+                                    <span class="text-gray-600">Genel Masraflar (Servis + Ulaşım + Ekstra):</span>
+                                    <span class="font-medium">{{ number_format($discovery->non_labor_costs, 2) }} TL</span>
                                 </div>
 
-                                <!-- Discount on Base Costs -->
-                                @if ($discovery->discount_rate > 0)
-                                    <div class="flex justify-between text-red-600">
-                                        <span>İndirim ({{ number_format($discovery->discount_rate, 2) }}%):</span>
-                                        <span>-{{ number_format($discovery->discount_rate_amount, 2) }}</span>
-                                    </div>
-                                @endif
-
-                                <!-- Items Total -->
+                                <!-- Items Total (Material Costs) - Now first -->
                                 <div class="flex justify-between">
                                     <span class="text-gray-600">Malzeme Masrafları:</span>
                                     <span class="font-medium">
@@ -1640,22 +1631,40 @@
                                                 $itemsTotal += ($item->pivot->custom_price ?? $item->price) * $item->pivot->quantity;
                                             }
                                         @endphp
-                                        {{ number_format($itemsTotal, 2) }}
+                                        {{ number_format($itemsTotal, 2) }} TL
                                     </span>
                                 </div>
+
+                                <!-- Labor Cost (İşçilik) - Now after materials -->
+                                <div class="flex justify-between">
+                                    <span class="text-gray-600">İşçilik Masrafı:</span>
+                                    <span class="font-medium">{{ number_format((float)$discovery->labor_cost, 2) }} TL</span>
+                                </div>
+
+                                <!-- Discount on Labor Cost Only -->
+                                @if ($discovery->discount_rate > 0)
+                                    <div class="flex justify-between text-red-600">
+                                        <span>İşçilik İndirimi ({{ number_format((float)$discovery->discount_rate, 2) }}%):</span>
+                                        <span>-{{ number_format($discovery->discount_rate_amount, 2) }} TL</span>
+                                    </div>
+                                    <div class="flex justify-between text-green-600">
+                                        <span>İndirimli İşçilik ({{ number_format((float)$discovery->labor_cost, 2) }} - {{ number_format($discovery->discount_rate_amount, 2) }}):</span>
+                                        <span>{{ number_format($discovery->discounted_labor_cost, 2) }} TL</span>
+                                    </div>
+                                @endif
 
                                 <!-- Fixed Discount Amount -->
                                 @if ($discovery->discount_amount > 0)
                                     <div class="flex justify-between text-red-600">
-                                        <span>İndirim:</span>
-                                        <span>-{{ number_format($discovery->discount_amount, 2) }}</span>
+                                        <span>Sabit İndirim:</span>
+                                        <span>-{{ number_format((float)$discovery->discount_amount, 2) }} TL</span>
                                     </div>
                                 @endif
 
                                 <!-- Final Total -->
                                 <div class="flex justify-between text-lg font-bold border-t border-gray-200 pt-3 mt-3">
                                     <span>Toplam:</span>
-                                    <span>{{ number_format($discovery->total_cost, 2) }}</span>
+                                    <span>{{ number_format($discovery->total_cost, 2) }} TL</span>
                                 </div>
                             </div>
                         </div>
