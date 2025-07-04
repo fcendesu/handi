@@ -48,7 +48,7 @@ Route::middleware(['auth', 'restrict.employee.dashboard'])->group(function () {
         }
 
         // Scope discoveries based on user type for dashboard
-        $query = Discovery::query()->with(['workGroup', 'priorityBadge']);
+        $query = Discovery::query()->with(['workGroup', 'priorityBadge', 'assignee']);
 
         if ($user->isSoloHandyman()) {
             $query->where('creator_id', $user->id);
