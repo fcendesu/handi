@@ -756,22 +756,42 @@ class DiscoveryController extends Controller
     public function apiShow(Discovery $discovery): JsonResponse
     {
         try {
-            // Load the items and paymentMethod relationships
-            $discovery->load('items', 'paymentMethod');
+            // Load all necessary relationships for mobile
+            $discovery->load([
+                'items',
+                'paymentMethod',
+                'workGroup',
+                'priorityBadge',
+                'creator',
+                'assignee',
+                'company',
+                'property'
+            ]);
 
             $detailedDiscovery = [
                 'id' => $discovery->id,
                 'customer_name' => $discovery->customer_name,
                 'customer_phone' => $discovery->customer_phone,
                 'customer_email' => $discovery->customer_email,
+
+                // Address information
                 'address' => $discovery->address,
+                'city' => $discovery->city,
+                'district' => $discovery->district,
+                'neighborhood' => $discovery->neighborhood,
+                'latitude' => $discovery->latitude ? (float) $discovery->latitude : null,
+                'longitude' => $discovery->longitude ? (float) $discovery->longitude : null,
+
+                // Main content
                 'discovery' => $discovery->discovery,
                 'status' => $discovery->status,
                 'todo_list' => $discovery->todo_list,
                 'note_to_customer' => $discovery->note_to_customer,
                 'note_to_handi' => $discovery->note_to_handi,
                 'completion_time' => $discovery->completion_time,
-                'offer_valid_until' => $discovery->offer_valid_until ? $discovery->offer_valid_until->toDateString() : null,
+                'offer_valid_until' => $discovery->offer_valid_until ? $discovery->offer_valid_until->format('Y-m-d') : null,
+
+                // Cost information
                 'costs' => [
                     'service_cost' => $discovery->service_cost,
                     'transportation_cost' => $discovery->transportation_cost,
@@ -784,12 +804,55 @@ class DiscoveryController extends Controller
                     'amount' => $discovery->discount_amount,
                     'rate_amount' => $discovery->discount_rate_amount,
                 ],
+
+                // Relationships
+                'work_group' => $discovery->workGroup ? [
+                    'id' => $discovery->workGroup->id,
+                    'name' => $discovery->workGroup->name,
+                ] : null,
+
+                'priority' => $discovery->priorityBadge ? [
+                    'id' => $discovery->priorityBadge->id,
+                    'name' => $discovery->priorityBadge->name,
+                    'color' => $discovery->priorityBadge->color,
+                    'level' => $discovery->priorityBadge->level,
+                    'description' => $discovery->priorityBadge->description,
+                ] : null,
+
+                'creator' => $discovery->creator ? [
+                    'id' => $discovery->creator->id,
+                    'name' => $discovery->creator->name,
+                    'email' => $discovery->creator->email,
+                    'user_type' => $discovery->creator->user_type,
+                ] : null,
+
+                'assignee' => $discovery->assignee ? [
+                    'id' => $discovery->assignee->id,
+                    'name' => $discovery->assignee->name,
+                    'email' => $discovery->assignee->email,
+                    'user_type' => $discovery->assignee->user_type,
+                ] : null,
+
+                'company' => $discovery->company ? [
+                    'id' => $discovery->company->id,
+                    'name' => $discovery->company->name,
+                ] : null,
+
+                'property' => $discovery->property ? [
+                    'id' => $discovery->property->id,
+                    'address' => $discovery->property->address,
+                    'city' => $discovery->property->city,
+                    'district' => $discovery->property->district,
+                    'neighborhood' => $discovery->property->neighborhood,
+                ] : null,
+
                 'payment_method' => $discovery->payment_method, // For backward compatibility
                 'payment_method_details' => $discovery->paymentMethod ? [
                     'id' => $discovery->paymentMethod->id,
                     'name' => $discovery->paymentMethod->name,
                     'description' => $discovery->paymentMethod->description
                 ] : null,
+
                 'items' => $discovery->items->map(function ($item) {
                     return [
                         'id' => $item->id,
@@ -801,9 +864,18 @@ class DiscoveryController extends Controller
                         'total' => $item->pivot->quantity * ($item->pivot->custom_price ?? $item->price),
                     ];
                 }),
+
+                // Images and sharing
                 'image_urls' => array_map(function ($path) {
                     return asset('storage/' . $path);
                 }, $discovery->images ?? []),
+                'share_url' => $discovery->share_url,
+
+                // Status helpers
+                'can_customer_act' => $discovery->canCustomerAct(),
+                'is_offer_expired' => $discovery->isOfferExpired(),
+                'days_until_expiry' => $discovery->getDaysUntilExpiry(),
+
                 'created_at' => $discovery->created_at,
                 'updated_at' => $discovery->updated_at,
             ];
@@ -1061,7 +1133,7 @@ class DiscoveryController extends Controller
 
                 return redirect()
                     ->route('discovery.shared', $token)
-                    ->with('error', 'Bu teklif süresi dolmuş (' . $discovery->offer_valid_until->format('d.m.Y') . '). Keşif otomatik olarak iptal edilmiştir.');
+                    ->with('error', 'Bu teklif süresi dolmuş (' . \Carbon\Carbon::parse($discovery->offer_valid_until)->format('d.m.Y') . '). Keşif otomatik olarak iptal edilmiştir.');
             }
 
             // Only allow approval if discovery is pending

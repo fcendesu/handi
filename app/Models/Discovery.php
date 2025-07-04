@@ -63,7 +63,7 @@ class Discovery extends Model
     protected $casts = [
         'images' => 'array',
         'completion_time' => 'integer',
-        'offer_valid_until' => 'date',
+        'offer_valid_until' => 'datetime',
         'service_cost' => 'decimal:2',
         'transportation_cost' => 'decimal:2',
         'labor_cost' => 'decimal:2',
