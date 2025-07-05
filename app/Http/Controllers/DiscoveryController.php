@@ -552,6 +552,7 @@ class DiscoveryController extends Controller
                 'customer_name' => 'required|string|max:255',
                 'customer_phone' => 'required|string|max:255',
                 'customer_email' => 'required|email|max:255',
+                'property_id' => 'nullable|exists:properties,id',
                 'address' => 'nullable|string|max:1000',
                 'city' => 'nullable|string|max:255',
                 'district' => 'nullable|string|max:255',
@@ -582,27 +583,10 @@ class DiscoveryController extends Controller
                 'items.*.custom_price' => 'nullable|numeric|min:0'
             ]);
 
-            // Additional validation for assignee - only company admins can assign
-            if ($request->assignee_id) {
-                // Only company admins can assign discoveries
-                if (!$user->isCompanyAdmin()) {
-                    return response()->json([
-                        'success' => false,
-                        'message' => 'Only company admins can assign discoveries.'
-                    ], 403);
-                }
-
-                // Check if assignee is a company employee of the same company
+            // Additional validation for assignee - work group membership check only
+            if ($request->assignee_id && $request->work_group_id) {
                 $assignee = User::find($request->assignee_id);
-                if (!$assignee || $assignee->company_id !== $user->company_id || !$assignee->isCompanyEmployee()) {
-                    return response()->json([
-                        'success' => false,
-                        'message' => 'Assignee must be a company employee from your company.'
-                    ], 422);
-                }
-
-                // If a work group is specified, check if assignee belongs to that work group
-                if ($request->work_group_id) {
+                if ($assignee) {
                     $assigneeInWorkGroup = $assignee->workGroups()->where('work_groups.id', $request->work_group_id)->exists();
                     if (!$assigneeInWorkGroup) {
                         return response()->json([
@@ -624,6 +608,22 @@ class DiscoveryController extends Controller
                 }
             }
             $validated['images'] = $imagePaths;
+
+            // Handle property switching logic
+            if (array_key_exists('property_id', $validated)) {
+                if ($validated['property_id']) {
+                    // Switching to registered property - clear manual address fields
+                    $validated['address'] = null;
+                    $validated['city'] = null;
+                    $validated['district'] = null;
+                    $validated['neighborhood'] = null;
+                    $validated['latitude'] = null;
+                    $validated['longitude'] = null;
+                } else {
+                    // Switching to manual address - clear property
+                    $validated['property_id'] = null;
+                }
+            }
 
             // Set default values for numeric fields
             $validated['service_cost'] = $validated['service_cost'] ?? 0;
