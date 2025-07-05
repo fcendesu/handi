@@ -1064,26 +1064,10 @@ class DiscoveryController extends Controller
                 }
             }
 
-            // Additional validation for assignee - only company admins can assign
-            if (isset($validated['assignee_id'])) {
-                // Only company admins can assign discoveries
-                if (!$user->isCompanyAdmin()) {
-                    return response()->json([
-                        'success' => false,
-                        'message' => 'Only company admins can assign discoveries.'
-                    ], 403);
-                }
-
-                // Check if assignee is a company employee of the same company
-                if ($validated['assignee_id'] !== null) {
-                    $assignee = User::find($validated['assignee_id']);
-                    if (!$assignee || $assignee->company_id !== $user->company_id || !$assignee->isCompanyEmployee()) {
-                        return response()->json([
-                            'success' => false,
-                            'message' => 'Assignee must be a company employee from your company.'
-                        ], 422);
-                    }
-
+            // Additional validation for assignee - work group membership check only
+            if (isset($validated['assignee_id']) && $validated['assignee_id'] !== null) {
+                $assignee = User::find($validated['assignee_id']);
+                if ($assignee) {
                     // If a work group is specified, check if assignee belongs to that work group
                     $workGroupId = $validated['work_group_id'] ?? $discovery->work_group_id;
                     if ($workGroupId) {
