@@ -795,7 +795,7 @@ class DiscoveryController extends Controller
             $user = auth()->user();
 
             // Scope discoveries based on user type
-            $query = Discovery::with('items');
+            $query = Discovery::with(['items', 'priorityBadge', 'workGroup', 'property']);
 
             if ($user->isSoloHandyman()) {
                 // Solo handyman sees only their own discoveries
@@ -811,17 +811,42 @@ class DiscoveryController extends Controller
             $discoveries = $query->latest()
                 ->get()
                 ->map(function ($discovery) {
+                    // Build full address as plain text
+                    $addressParts = array_filter([
+                        $discovery->address,
+                        $discovery->neighborhood,
+                        $discovery->district,
+                        $discovery->city
+                    ]);
+                    $fullAddress = implode(', ', $addressParts);
+
+                    // If using property address, get from property
+                    if ($discovery->property && empty($fullAddress)) {
+                        $propertyParts = array_filter([
+                            $discovery->property->address,
+                            $discovery->property->neighborhood,
+                            $discovery->property->district,
+                            $discovery->property->city
+                        ]);
+                        $fullAddress = implode(', ', $propertyParts);
+                    }
+
                     return [
                         'id' => $discovery->id,
                         'customer_name' => $discovery->customer_name,
                         'customer_phone' => $discovery->customer_phone,
                         'customer_email' => $discovery->customer_email,
                         'address' => $discovery->address,
+                        'full_address' => $fullAddress,
                         'status' => $discovery->status,
                         'discovery' => $discovery->discovery,
                         'total_cost' => $discovery->total_cost,
                         'assignee_id' => $discovery->assignee_id,
                         'work_group_id' => $discovery->work_group_id,
+                        'work_group_name' => $discovery->workGroup ? $discovery->workGroup->name : null,
+                        'priority_level' => $discovery->priorityBadge ? $discovery->priorityBadge->level : null,
+                        'priority_name' => $discovery->priorityBadge ? $discovery->priorityBadge->name : null,
+                        'priority_color' => $discovery->priorityBadge ? $discovery->priorityBadge->color : null,
                         'created_at' => $discovery->created_at,
                         'updated_at' => $discovery->updated_at,
                         'image_urls' => array_map(function ($path) {
@@ -1140,21 +1165,21 @@ class DiscoveryController extends Controller
             // Log discovery update
             TransactionLogService::logDiscoveryUpdate($discovery, $validated);
 
-            // Always update items (even if empty array or not present)
-            // Log detachment of existing items before removing them
-            foreach ($discovery->items as $existingItem) {
-                $pivotData = [
-                    'quantity' => $existingItem->pivot->quantity,
-                    'custom_price' => $existingItem->pivot->custom_price
-                ];
-                TransactionLogService::logItemDetachedFromDiscovery($existingItem, $discovery, $pivotData);
-            }
+            // Update items if present
+            if (isset($validated['items'])) {
+                // Log detachment of existing items before removing them
+                foreach ($discovery->items as $existingItem) {
+                    $pivotData = [
+                        'quantity' => $existingItem->pivot->quantity,
+                        'custom_price' => $existingItem->pivot->custom_price
+                    ];
+                    TransactionLogService::logItemDetachedFromDiscovery($existingItem, $discovery, $pivotData);
+                }
 
-            // Remove existing items
-            $discovery->items()->detach();
+                // Remove existing items
+                $discovery->items()->detach();
 
-            // Attach new items if any are provided
-            if (!empty($validated['items'])) {
+                // Attach new items
                 foreach ($validated['items'] as $item) {
                     $itemModel = Item::accessibleBy($user)->findOrFail($item['id']);
                     $basePrice = $itemModel->price;
