@@ -5,7 +5,7 @@
 
 APP_NAME="handi"
 APP_PATH="/var/www/html/$APP_NAME"
-REPO_URL="https://github.com/yourusername/yourrepo.git"  # Replace with your repo
+REPO_URL="https://github.com/fcendesu/handi.git"  # Replace with your repo
 DOMAIN="yourdomain.com"  # Replace with your domain
 
 echo "Starting deployment of $APP_NAME..."
