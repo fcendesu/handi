@@ -253,6 +253,14 @@ class DiscoveryController extends Controller
                 $validated['company_id'] = $user->company_id;
             }
 
+            // Set default priority if not provided (lowest priority level)
+            if (empty($validated['priority_id'])) {
+                $lowestPriority = Priority::forUser($user)->orderBy('level', 'asc')->first();
+                if ($lowestPriority) {
+                    $validated['priority_id'] = $lowestPriority->id;
+                }
+            }
+
             // Status will be set to 'pending' by the model boot method
             $discovery = Discovery::create($validated);
 
@@ -637,6 +645,14 @@ class DiscoveryController extends Controller
             $validated['creator_id'] = $user->id;
             if ($user->isCompanyAdmin()) {
                 $validated['company_id'] = $user->company_id;
+            }
+
+            // Set default priority if not provided (lowest priority level)
+            if (empty($validated['priority_id'])) {
+                $lowestPriority = Priority::forUser($user)->orderBy('level', 'asc')->first();
+                if ($lowestPriority) {
+                    $validated['priority_id'] = $lowestPriority->id;
+                }
             }
 
             // Create discovery record
