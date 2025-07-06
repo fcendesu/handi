@@ -453,21 +453,21 @@ class DiscoveryController extends Controller
             // Log discovery update
             TransactionLogService::logDiscoveryUpdate($discovery, $validated);
 
-            // Update items if present
-            if (isset($validated['items'])) {
-                // Log detachment of existing items before removing them
-                foreach ($discovery->items as $existingItem) {
-                    $pivotData = [
-                        'quantity' => $existingItem->pivot->quantity,
-                        'custom_price' => $existingItem->pivot->custom_price
-                    ];
-                    TransactionLogService::logItemDetachedFromDiscovery($existingItem, $discovery, $pivotData);
-                }
+            // Always update items (even if empty array or not present)
+            // Log detachment of existing items before removing them
+            foreach ($discovery->items as $existingItem) {
+                $pivotData = [
+                    'quantity' => $existingItem->pivot->quantity,
+                    'custom_price' => $existingItem->pivot->custom_price
+                ];
+                TransactionLogService::logItemDetachedFromDiscovery($existingItem, $discovery, $pivotData);
+            }
 
-                // Remove existing items
-                $discovery->items()->detach();
+            // Remove existing items
+            $discovery->items()->detach();
 
-                // Attach new items
+            // Attach new items if any are provided
+            if (!empty($validated['items'])) {
                 foreach ($validated['items'] as $item) {
                     $itemModel = Item::accessibleBy($user)->findOrFail($item['id']);
                     $basePrice = $itemModel->price;
@@ -1140,21 +1140,21 @@ class DiscoveryController extends Controller
             // Log discovery update
             TransactionLogService::logDiscoveryUpdate($discovery, $validated);
 
-            // Update items if present
-            if (isset($validated['items'])) {
-                // Log detachment of existing items before removing them
-                foreach ($discovery->items as $existingItem) {
-                    $pivotData = [
-                        'quantity' => $existingItem->pivot->quantity,
-                        'custom_price' => $existingItem->pivot->custom_price
-                    ];
-                    TransactionLogService::logItemDetachedFromDiscovery($existingItem, $discovery, $pivotData);
-                }
+            // Always update items (even if empty array or not present)
+            // Log detachment of existing items before removing them
+            foreach ($discovery->items as $existingItem) {
+                $pivotData = [
+                    'quantity' => $existingItem->pivot->quantity,
+                    'custom_price' => $existingItem->pivot->custom_price
+                ];
+                TransactionLogService::logItemDetachedFromDiscovery($existingItem, $discovery, $pivotData);
+            }
 
-                // Remove existing items
-                $discovery->items()->detach();
+            // Remove existing items
+            $discovery->items()->detach();
 
-                // Attach new items
+            // Attach new items if any are provided
+            if (!empty($validated['items'])) {
                 foreach ($validated['items'] as $item) {
                     $itemModel = Item::accessibleBy($user)->findOrFail($item['id']);
                     $basePrice = $itemModel->price;
