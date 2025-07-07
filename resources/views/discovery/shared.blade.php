@@ -381,7 +381,7 @@
                             <!-- Add Items Total at the top -->
                             @if ($discovery->items->isNotEmpty())
                                 <div class="flex justify-between border-b border-gray-200 pb-3">
-                                    <span class="text-gray-600">Malzeme Toplamı:</span>
+                                    <span class="text-gray-600">Toplam Malzeme:</span>
                                     <span>{{ number_format(
                                         $discovery->items->sum(function ($item) {
                                             return ($item->pivot->custom_price ?? $item->price) * $item->pivot->quantity;
