@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Auth;
 use App\Http\Controllers\Controller;
 use App\Models\User;
 use App\Models\Company;
+use App\Models\Priority;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
@@ -64,6 +65,9 @@ class AuthenticationController extends Controller
             if ($validated['user_type'] === 'company_admin' && $company) {
                 $company->update(['admin_id' => $user->id]);
             }
+
+            // Create default priorities for the new user
+            Priority::createDefaultPrioritiesForUser($user);
 
             DB::commit();
 
@@ -225,6 +229,9 @@ class AuthenticationController extends Controller
             if ($validated['user_type'] === 'company_admin' && $company) {
                 $company->update(['admin_id' => $user->id]);
             }
+
+            // Create default priorities for the new user
+            Priority::createDefaultPrioritiesForUser($user);
 
             DB::commit();
 

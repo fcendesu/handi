@@ -280,7 +280,7 @@
                                     Detayı</label>
                                 <textarea name="discovery" id="discovery" rows="4"
                                     class="bg-gray-100 mt-1 block w-full rounded-md border-2 border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 px-4 py-2"
-                                    required>{{ old('discovery') }}</textarea>
+                                    >{{ old('discovery') }}</textarea>
                                 @error('discovery')
                                     <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
                                 @enderror
