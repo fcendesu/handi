@@ -238,30 +238,11 @@
 
                                             <!-- Map Location Picker -->
                                             <div class="space-y-3">
-                                                <div class="flex items-center justify-between">
-                                                    <h4 class="text-sm font-medium text-gray-700">Konum Seçici (İsteğe
-                                                        Bağlı)</h4>
-                                                    <button type="button" @click="getCurrentLocation()"
-                                                        :disabled="loadingLocation"
-                                                        class="bg-green-600 hover:bg-green-700 disabled:bg-gray-400 text-white px-3 py-1 rounded text-sm transition duration-200">
-                                                        <span x-show="!loadingLocation">Mevcut Konumu Al</span>
-                                                        <span x-show="loadingLocation">Konum Alınıyor...</span>
-                                                    </button>
+                                                <div>
+                                                    <h4 class="text-sm font-medium text-gray-700">Konum Seç</h4>
                                                 </div>
 
-                                                <!-- Coordinate Display -->
-                                                <div class="grid grid-cols-2 gap-3" x-show="latitude && longitude">
-                                                    <div class="bg-blue-50 border border-blue-200 rounded p-2">
-                                                        <div class="text-xs font-medium text-blue-700">Enlem</div>
-                                                        <div class="text-sm font-mono text-blue-900"
-                                                            x-text="latitude"></div>
-                                                    </div>
-                                                    <div class="bg-blue-50 border border-blue-200 rounded p-2">
-                                                        <div class="text-xs font-medium text-blue-700">Boylam</div>
-                                                        <div class="text-sm font-mono text-blue-900"
-                                                            x-text="longitude"></div>
-                                                    </div>
-                                                </div>
+                                               
 
                                                 <!-- Error Display -->
                                                 <div x-show="locationError" class="text-sm text-red-600"
