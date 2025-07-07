@@ -393,19 +393,19 @@
                             @endif
 
                             <div class="flex justify-between">
-                                <span class="text-gray-600">Servis Masrafı:</span>
+                                <span class="text-gray-600">Hizmet:</span>
                                 <span>{{ number_format($discovery->service_cost, 2) }} TL</span>
                             </div>
                             <div class="flex justify-between">
-                                <span class="text-gray-600">Ulaşım Masrafı:</span>
+                                <span class="text-gray-600">Ulaşım:</span>
                                 <span>{{ number_format($discovery->transportation_cost, 2) }} TL</span>
                             </div>
                             <div class="flex justify-between">
-                                <span class="text-gray-600">İşçilik Masrafı:</span>
+                                <span class="text-gray-600">İşçilik:</span>
                                 <span>{{ number_format($discovery->labor_cost, 2) }} TL</span>
                             </div>
                             <div class="flex justify-between">
-                                <span class="text-gray-600">Ekstra Masraflar:</span>
+                                <span class="text-gray-600">Görünmeyen Masraflar:</span>
                                 <span>{{ number_format($discovery->extra_fee, 2) }} TL</span>
                             </div>
 

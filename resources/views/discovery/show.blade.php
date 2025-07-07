@@ -1580,7 +1580,7 @@
                             </div>
 
                             <div>
-                                <label class="block text-sm font-medium text-gray-700 mb-2">Servis Masrafı</label>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Hizmet</label>
                                 <input type="number" name="service_cost"
                                     value="{{ old('service_cost', (string)$discovery->service_cost) }}"
                                     :disabled="!editMode"
@@ -1590,7 +1590,7 @@
 
                             <!-- Add these in the Cost Information section -->
                             <div>
-                                <label class="block text-sm font-medium text-gray-700 mb-2">Ulaşım Masrafı</label>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Ulaşım</label>
                                 <input type="number" name="transportation_cost"
                                     value="{{ old('transportation_cost', (string)$discovery->transportation_cost) }}"
                                     :disabled="!editMode"
@@ -1599,7 +1599,7 @@
                             </div>
 
                             <div>
-                                <label class="block text-sm font-medium text-gray-700 mb-2">İşçilik Masrafı</label>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">İşçilik</label>
                                 <input type="number" name="labor_cost"
                                     value="{{ old('labor_cost', (string)$discovery->labor_cost) }}" :disabled="!editMode"
                                     class="bg-gray-100 mt-1 block w-full rounded-md border-2 border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 px-4 py-2"
@@ -1607,7 +1607,7 @@
                             </div>
 
                             <div>
-                                <label class="block text-sm font-medium text-gray-700 mb-2">Ekstra Masraflar</label>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Görünmeyen Giderler</label>
                                 <input type="number" name="extra_fee"
                                     value="{{ old('extra_fee', (string)$discovery->extra_fee) }}" :disabled="!editMode"
                                     class="bg-gray-100 mt-1 block w-full rounded-md border-2 border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 px-4 py-2"
@@ -1668,13 +1668,13 @@
                             <div class="space-y-3">
                                 <!-- Non-Labor Costs (Genel Masraflar) -->
                                 <div class="flex justify-between">
-                                    <span class="text-gray-600">Genel Masraflar (Servis + Ulaşım + Ekstra):</span>
+                                    <span class="text-gray-600">Diğer Masraflar (Servis + Ulaşım + Ekstra):</span>
                                     <span class="font-medium">{{ number_format($discovery->non_labor_costs, 2) }} TL</span>
                                 </div>
 
                                 <!-- Items Total (Material Costs) - Now first -->
                                 <div class="flex justify-between">
-                                    <span class="text-gray-600">Malzeme Masrafları:</span>
+                                    <span class="text-gray-600">Toplam Malzeme:</span>
                                     <span class="font-medium">
                                         @php
                                             $itemsTotal = 0;
@@ -1688,7 +1688,7 @@
 
                                 <!-- Labor Cost (İşçilik) - Now after materials -->
                                 <div class="flex justify-between">
-                                    <span class="text-gray-600">İşçilik Masrafı:</span>
+                                    <span class="text-gray-600">İşçilik:</span>
                                     <span class="font-medium">{{ number_format((float)$discovery->labor_cost, 2) }} TL</span>
                                 </div>
 
